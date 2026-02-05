@@ -15,6 +15,32 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
             min-height: 100vh;
+            padding: 0;
+        }
+
+        .site-header {
+            background: white;
+            padding: 30px 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .site-header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #2d3748;
+            text-align: center;
+        }
+
+        .site-header p {
+            font-size: 1.1rem;
+            color: #718096;
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+
+        .main-content {
             padding: 20px;
         }
 
@@ -27,6 +53,7 @@
             text-align: center;
             color: white;
             margin-bottom: 50px;
+            display: none;
         }
 
         .header h1 {
@@ -41,9 +68,12 @@
 
         .cards {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            grid-template-columns: repeat(2, 1fr);
             gap: 30px;
             margin-bottom: 50px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .card {
@@ -72,7 +102,9 @@
 
         .btn {
             display: block;
-            width: 100%;
+            width: 50%;
+            margin-left: auto;
+            margin-right: auto;
             padding: 15px;
             border: none;
             border-radius: 10px;
@@ -133,7 +165,7 @@
 
         .feature-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(4, 1fr);
             gap: 20px;
         }
 
@@ -201,13 +233,16 @@
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <h1>🔧 PlumberMatch</h1>
-            <p>Connect Qualified Plumbers with Customers Who Need Help</p>
-        </div>
+    <!-- White Header Section -->
+    <div class="site-header">
+        <h1>🔧 PlumberMatch</h1>
+        <p>Connect Qualified Plumbers with Customers Who Need Help</p>
+    </div>
 
-        <!-- Live Stats -->
+    <!-- Main Blue Background Content -->
+    <div class="main-content">
+        <div class="container">
+            <!-- Live Stats -->
         <div class="stats">
             <div class="stat">
                 <div class="stat-number" id="plumberCount">0</div>
@@ -230,10 +265,10 @@
                 <h2>👷 For Plumbers</h2>
                 <p>Get qualified leads in your area. Only pay when you accept a lead. Average earnings: £100-300 per job.</p>
                 <button class="btn btn-primary" onclick="location.href='plumber-register.html'">
-                    Register as Plumber
+                    Register
                 </button>
                 <button class="btn btn-secondary" onclick="location.href='plumber-login.html'">
-                    Login
+                    Sign In
                 </button>
             </div>
 
@@ -275,7 +310,9 @@
                 </div>
             </div>
         </div>
+        </div>
     </div>
+</div>
 
     <script>
         // Animate stats on page load
