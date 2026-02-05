@@ -1,0 +1,1074 @@
+{
+  "900c3f4e569f": {
+    "plumber_id": "900c3f4e569f",
+    "name": "ABC Plumbing & Heating Ltd",
+    "trading_name": "ABC Plumbing",
+    "email": "info@abcplumbing.co.uk",
+    "phone": "02081234567",
+    "website": "https://abcplumbing.co.uk",
+    "address": "123 High Street, SW19",
+    "postcode": "SW19",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "WaterSafe Approved",
+      "WIAPS Member"
+    ],
+    "services": [
+      "General plumbing",
+      "Bathroom installation",
+      "Emergency repairs"
+    ],
+    "skills": [
+      "bathroom_fitting",
+      "burst_pipe"
+    ],
+    "source_registry": "WaterSafe",
+    "registered_date": "2020-01-15",
+    "last_verified": "2024-01-10",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "061548ebff2b": {
+    "plumber_id": "061548ebff2b",
+    "name": "John Smith Plumbing",
+    "trading_name": "JS Plumbing",
+    "email": "john@jsplumbing.co.uk",
+    "phone": "07700900123",
+    "website": null,
+    "address": "45 Market Road, SW19",
+    "postcode": "SW19",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "CIPHE Member",
+      "City & Guilds Level 3"
+    ],
+    "services": [
+      "Heating systems",
+      "Boiler installation",
+      "Bathroom fitting"
+    ],
+    "skills": [
+      "boiler_repair",
+      "bathroom_fitting"
+    ],
+    "source_registry": "CIPHE",
+    "registered_date": "2018-06-20",
+    "last_verified": "2023-12-15",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "d3ed7e6ac758": {
+    "plumber_id": "d3ed7e6ac758",
+    "name": "Premier Heating Solutions Ltd",
+    "trading_name": "Premier Heating",
+    "email": "contact@premierheating.com",
+    "phone": "02081235678",
+    "website": "https://premierheating.com",
+    "address": "78 Station Road, SW19",
+    "postcode": "SW19",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "APHC Member",
+      "Worcester Bosch Accredited"
+    ],
+    "services": [
+      "Gas boilers",
+      "Central heating",
+      "Power flushing"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "APHC",
+    "registered_date": "2019-03-10",
+    "last_verified": "2024-02-01",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "d5c3de472569": {
+    "plumber_id": "d5c3de472569",
+    "name": "Safe Gas Services",
+    "trading_name": "Safe Gas",
+    "email": "info@safegas.co.uk",
+    "phone": "07700900456",
+    "website": null,
+    "address": "12 Park Lane, SW19",
+    "postcode": "SW19",
+    "gas_safe_certified": true,
+    "gas_safe_number": "123456",
+    "qualifications": [
+      "Gas Safe Registered",
+      "ACS Qualified"
+    ],
+    "services": [
+      "Gas boiler repair",
+      "Gas appliance installation",
+      "Gas safety checks"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "Gas Safe Register",
+    "registered_date": "2017-09-05",
+    "last_verified": "2024-01-20",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "04a9c6f12c03": {
+    "plumber_id": "04a9c6f12c03",
+    "name": "ABC Plumbing & Heating Ltd",
+    "trading_name": "ABC Plumbing",
+    "email": "info@abcplumbing.co.uk",
+    "phone": "02081234567",
+    "website": "https://abcplumbing.co.uk",
+    "address": "123 High Street, SW18",
+    "postcode": "SW18",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "WaterSafe Approved",
+      "WIAPS Member"
+    ],
+    "services": [
+      "General plumbing",
+      "Bathroom installation",
+      "Emergency repairs"
+    ],
+    "skills": [
+      "bathroom_fitting",
+      "burst_pipe"
+    ],
+    "source_registry": "WaterSafe",
+    "registered_date": "2020-01-15",
+    "last_verified": "2024-01-10",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "27919b3fff1c": {
+    "plumber_id": "27919b3fff1c",
+    "name": "John Smith Plumbing",
+    "trading_name": "JS Plumbing",
+    "email": "john@jsplumbing.co.uk",
+    "phone": "07700900123",
+    "website": null,
+    "address": "45 Market Road, SW18",
+    "postcode": "SW18",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "CIPHE Member",
+      "City & Guilds Level 3"
+    ],
+    "services": [
+      "Heating systems",
+      "Boiler installation",
+      "Bathroom fitting"
+    ],
+    "skills": [
+      "boiler_repair",
+      "bathroom_fitting"
+    ],
+    "source_registry": "CIPHE",
+    "registered_date": "2018-06-20",
+    "last_verified": "2023-12-15",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "1f06d47dfdf1": {
+    "plumber_id": "1f06d47dfdf1",
+    "name": "Premier Heating Solutions Ltd",
+    "trading_name": "Premier Heating",
+    "email": "contact@premierheating.com",
+    "phone": "02081235678",
+    "website": "https://premierheating.com",
+    "address": "78 Station Road, SW18",
+    "postcode": "SW18",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "APHC Member",
+      "Worcester Bosch Accredited"
+    ],
+    "services": [
+      "Gas boilers",
+      "Central heating",
+      "Power flushing"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "APHC",
+    "registered_date": "2019-03-10",
+    "last_verified": "2024-02-01",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "36ff2de57a6e": {
+    "plumber_id": "36ff2de57a6e",
+    "name": "Safe Gas Services",
+    "trading_name": "Safe Gas",
+    "email": "info@safegas.co.uk",
+    "phone": "07700900456",
+    "website": null,
+    "address": "12 Park Lane, SW18",
+    "postcode": "SW18",
+    "gas_safe_certified": true,
+    "gas_safe_number": "123456",
+    "qualifications": [
+      "Gas Safe Registered",
+      "ACS Qualified"
+    ],
+    "services": [
+      "Gas boiler repair",
+      "Gas appliance installation",
+      "Gas safety checks"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "Gas Safe Register",
+    "registered_date": "2017-09-05",
+    "last_verified": "2024-01-20",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "c0b718194cac": {
+    "plumber_id": "c0b718194cac",
+    "name": "ABC Plumbing & Heating Ltd",
+    "trading_name": "ABC Plumbing",
+    "email": "info@abcplumbing.co.uk",
+    "phone": "02081234567",
+    "website": "https://abcplumbing.co.uk",
+    "address": "123 High Street, SW17",
+    "postcode": "SW17",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "WaterSafe Approved",
+      "WIAPS Member"
+    ],
+    "services": [
+      "General plumbing",
+      "Bathroom installation",
+      "Emergency repairs"
+    ],
+    "skills": [
+      "bathroom_fitting",
+      "burst_pipe"
+    ],
+    "source_registry": "WaterSafe",
+    "registered_date": "2020-01-15",
+    "last_verified": "2024-01-10",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "19111fba3800": {
+    "plumber_id": "19111fba3800",
+    "name": "John Smith Plumbing",
+    "trading_name": "JS Plumbing",
+    "email": "john@jsplumbing.co.uk",
+    "phone": "07700900123",
+    "website": null,
+    "address": "45 Market Road, SW17",
+    "postcode": "SW17",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "CIPHE Member",
+      "City & Guilds Level 3"
+    ],
+    "services": [
+      "Heating systems",
+      "Boiler installation",
+      "Bathroom fitting"
+    ],
+    "skills": [
+      "boiler_repair",
+      "bathroom_fitting"
+    ],
+    "source_registry": "CIPHE",
+    "registered_date": "2018-06-20",
+    "last_verified": "2023-12-15",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "06d9e3eb3fe1": {
+    "plumber_id": "06d9e3eb3fe1",
+    "name": "Premier Heating Solutions Ltd",
+    "trading_name": "Premier Heating",
+    "email": "contact@premierheating.com",
+    "phone": "02081235678",
+    "website": "https://premierheating.com",
+    "address": "78 Station Road, SW17",
+    "postcode": "SW17",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "APHC Member",
+      "Worcester Bosch Accredited"
+    ],
+    "services": [
+      "Gas boilers",
+      "Central heating",
+      "Power flushing"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "APHC",
+    "registered_date": "2019-03-10",
+    "last_verified": "2024-02-01",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "0bbde40bd11f": {
+    "plumber_id": "0bbde40bd11f",
+    "name": "Safe Gas Services",
+    "trading_name": "Safe Gas",
+    "email": "info@safegas.co.uk",
+    "phone": "07700900456",
+    "website": null,
+    "address": "12 Park Lane, SW17",
+    "postcode": "SW17",
+    "gas_safe_certified": true,
+    "gas_safe_number": "123456",
+    "qualifications": [
+      "Gas Safe Registered",
+      "ACS Qualified"
+    ],
+    "services": [
+      "Gas boiler repair",
+      "Gas appliance installation",
+      "Gas safety checks"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "Gas Safe Register",
+    "registered_date": "2017-09-05",
+    "last_verified": "2024-01-20",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "bf3722e6f501": {
+    "plumber_id": "bf3722e6f501",
+    "name": "ABC Plumbing & Heating Ltd",
+    "trading_name": "ABC Plumbing",
+    "email": "info@abcplumbing.co.uk",
+    "phone": "02081234567",
+    "website": "https://abcplumbing.co.uk",
+    "address": "123 High Street, SE1",
+    "postcode": "SE1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "WaterSafe Approved",
+      "WIAPS Member"
+    ],
+    "services": [
+      "General plumbing",
+      "Bathroom installation",
+      "Emergency repairs"
+    ],
+    "skills": [
+      "bathroom_fitting",
+      "burst_pipe"
+    ],
+    "source_registry": "WaterSafe",
+    "registered_date": "2020-01-15",
+    "last_verified": "2024-01-10",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "2cc03237d55a": {
+    "plumber_id": "2cc03237d55a",
+    "name": "John Smith Plumbing",
+    "trading_name": "JS Plumbing",
+    "email": "john@jsplumbing.co.uk",
+    "phone": "07700900123",
+    "website": null,
+    "address": "45 Market Road, SE1",
+    "postcode": "SE1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "CIPHE Member",
+      "City & Guilds Level 3"
+    ],
+    "services": [
+      "Heating systems",
+      "Boiler installation",
+      "Bathroom fitting"
+    ],
+    "skills": [
+      "boiler_repair",
+      "bathroom_fitting"
+    ],
+    "source_registry": "CIPHE",
+    "registered_date": "2018-06-20",
+    "last_verified": "2023-12-15",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "38222804053a": {
+    "plumber_id": "38222804053a",
+    "name": "Premier Heating Solutions Ltd",
+    "trading_name": "Premier Heating",
+    "email": "contact@premierheating.com",
+    "phone": "02081235678",
+    "website": "https://premierheating.com",
+    "address": "78 Station Road, SE1",
+    "postcode": "SE1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "APHC Member",
+      "Worcester Bosch Accredited"
+    ],
+    "services": [
+      "Gas boilers",
+      "Central heating",
+      "Power flushing"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "APHC",
+    "registered_date": "2019-03-10",
+    "last_verified": "2024-02-01",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "3dcd16a0be50": {
+    "plumber_id": "3dcd16a0be50",
+    "name": "Safe Gas Services",
+    "trading_name": "Safe Gas",
+    "email": "info@safegas.co.uk",
+    "phone": "07700900456",
+    "website": null,
+    "address": "12 Park Lane, SE1",
+    "postcode": "SE1",
+    "gas_safe_certified": true,
+    "gas_safe_number": "123456",
+    "qualifications": [
+      "Gas Safe Registered",
+      "ACS Qualified"
+    ],
+    "services": [
+      "Gas boiler repair",
+      "Gas appliance installation",
+      "Gas safety checks"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "Gas Safe Register",
+    "registered_date": "2017-09-05",
+    "last_verified": "2024-01-20",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "6c14a1e92df8": {
+    "plumber_id": "6c14a1e92df8",
+    "name": "ABC Plumbing & Heating Ltd",
+    "trading_name": "ABC Plumbing",
+    "email": "info@abcplumbing.co.uk",
+    "phone": "02081234567",
+    "website": "https://abcplumbing.co.uk",
+    "address": "123 High Street, E1",
+    "postcode": "E1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "WaterSafe Approved",
+      "WIAPS Member"
+    ],
+    "services": [
+      "General plumbing",
+      "Bathroom installation",
+      "Emergency repairs"
+    ],
+    "skills": [
+      "bathroom_fitting",
+      "burst_pipe"
+    ],
+    "source_registry": "WaterSafe",
+    "registered_date": "2020-01-15",
+    "last_verified": "2024-01-10",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "72d9b8962160": {
+    "plumber_id": "72d9b8962160",
+    "name": "John Smith Plumbing",
+    "trading_name": "JS Plumbing",
+    "email": "john@jsplumbing.co.uk",
+    "phone": "07700900123",
+    "website": null,
+    "address": "45 Market Road, E1",
+    "postcode": "E1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "CIPHE Member",
+      "City & Guilds Level 3"
+    ],
+    "services": [
+      "Heating systems",
+      "Boiler installation",
+      "Bathroom fitting"
+    ],
+    "skills": [
+      "boiler_repair",
+      "bathroom_fitting"
+    ],
+    "source_registry": "CIPHE",
+    "registered_date": "2018-06-20",
+    "last_verified": "2023-12-15",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "c6b742427bc4": {
+    "plumber_id": "c6b742427bc4",
+    "name": "Premier Heating Solutions Ltd",
+    "trading_name": "Premier Heating",
+    "email": "contact@premierheating.com",
+    "phone": "02081235678",
+    "website": "https://premierheating.com",
+    "address": "78 Station Road, E1",
+    "postcode": "E1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "APHC Member",
+      "Worcester Bosch Accredited"
+    ],
+    "services": [
+      "Gas boilers",
+      "Central heating",
+      "Power flushing"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "APHC",
+    "registered_date": "2019-03-10",
+    "last_verified": "2024-02-01",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "11ff832043e6": {
+    "plumber_id": "11ff832043e6",
+    "name": "Safe Gas Services",
+    "trading_name": "Safe Gas",
+    "email": "info@safegas.co.uk",
+    "phone": "07700900456",
+    "website": null,
+    "address": "12 Park Lane, E1",
+    "postcode": "E1",
+    "gas_safe_certified": true,
+    "gas_safe_number": "123456",
+    "qualifications": [
+      "Gas Safe Registered",
+      "ACS Qualified"
+    ],
+    "services": [
+      "Gas boiler repair",
+      "Gas appliance installation",
+      "Gas safety checks"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "Gas Safe Register",
+    "registered_date": "2017-09-05",
+    "last_verified": "2024-01-20",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "cef017f3e650": {
+    "plumber_id": "cef017f3e650",
+    "name": "ABC Plumbing & Heating Ltd",
+    "trading_name": "ABC Plumbing",
+    "email": "info@abcplumbing.co.uk",
+    "phone": "02081234567",
+    "website": "https://abcplumbing.co.uk",
+    "address": "123 High Street, W1",
+    "postcode": "W1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "WaterSafe Approved",
+      "WIAPS Member"
+    ],
+    "services": [
+      "General plumbing",
+      "Bathroom installation",
+      "Emergency repairs"
+    ],
+    "skills": [
+      "bathroom_fitting",
+      "burst_pipe"
+    ],
+    "source_registry": "WaterSafe",
+    "registered_date": "2020-01-15",
+    "last_verified": "2024-01-10",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "0a0b6f948301": {
+    "plumber_id": "0a0b6f948301",
+    "name": "John Smith Plumbing",
+    "trading_name": "JS Plumbing",
+    "email": "john@jsplumbing.co.uk",
+    "phone": "07700900123",
+    "website": null,
+    "address": "45 Market Road, W1",
+    "postcode": "W1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "CIPHE Member",
+      "City & Guilds Level 3"
+    ],
+    "services": [
+      "Heating systems",
+      "Boiler installation",
+      "Bathroom fitting"
+    ],
+    "skills": [
+      "boiler_repair",
+      "bathroom_fitting"
+    ],
+    "source_registry": "CIPHE",
+    "registered_date": "2018-06-20",
+    "last_verified": "2023-12-15",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "ab57b118dc3c": {
+    "plumber_id": "ab57b118dc3c",
+    "name": "Premier Heating Solutions Ltd",
+    "trading_name": "Premier Heating",
+    "email": "contact@premierheating.com",
+    "phone": "02081235678",
+    "website": "https://premierheating.com",
+    "address": "78 Station Road, W1",
+    "postcode": "W1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "APHC Member",
+      "Worcester Bosch Accredited"
+    ],
+    "services": [
+      "Gas boilers",
+      "Central heating",
+      "Power flushing"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "APHC",
+    "registered_date": "2019-03-10",
+    "last_verified": "2024-02-01",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "e8a195be1872": {
+    "plumber_id": "e8a195be1872",
+    "name": "Safe Gas Services",
+    "trading_name": "Safe Gas",
+    "email": "info@safegas.co.uk",
+    "phone": "07700900456",
+    "website": null,
+    "address": "12 Park Lane, W1",
+    "postcode": "W1",
+    "gas_safe_certified": true,
+    "gas_safe_number": "123456",
+    "qualifications": [
+      "Gas Safe Registered",
+      "ACS Qualified"
+    ],
+    "services": [
+      "Gas boiler repair",
+      "Gas appliance installation",
+      "Gas safety checks"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "Gas Safe Register",
+    "registered_date": "2017-09-05",
+    "last_verified": "2024-01-20",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "ba6050dc1f51": {
+    "plumber_id": "ba6050dc1f51",
+    "name": "ABC Plumbing & Heating Ltd",
+    "trading_name": "ABC Plumbing",
+    "email": "info@abcplumbing.co.uk",
+    "phone": "02081234567",
+    "website": "https://abcplumbing.co.uk",
+    "address": "123 High Street, N1",
+    "postcode": "N1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "WaterSafe Approved",
+      "WIAPS Member"
+    ],
+    "services": [
+      "General plumbing",
+      "Bathroom installation",
+      "Emergency repairs"
+    ],
+    "skills": [
+      "bathroom_fitting",
+      "burst_pipe"
+    ],
+    "source_registry": "WaterSafe",
+    "registered_date": "2020-01-15",
+    "last_verified": "2024-01-10",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "4a2f16914781": {
+    "plumber_id": "4a2f16914781",
+    "name": "John Smith Plumbing",
+    "trading_name": "JS Plumbing",
+    "email": "john@jsplumbing.co.uk",
+    "phone": "07700900123",
+    "website": null,
+    "address": "45 Market Road, N1",
+    "postcode": "N1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "CIPHE Member",
+      "City & Guilds Level 3"
+    ],
+    "services": [
+      "Heating systems",
+      "Boiler installation",
+      "Bathroom fitting"
+    ],
+    "skills": [
+      "boiler_repair",
+      "bathroom_fitting"
+    ],
+    "source_registry": "CIPHE",
+    "registered_date": "2018-06-20",
+    "last_verified": "2023-12-15",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "c326327a9b0f": {
+    "plumber_id": "c326327a9b0f",
+    "name": "Premier Heating Solutions Ltd",
+    "trading_name": "Premier Heating",
+    "email": "contact@premierheating.com",
+    "phone": "02081235678",
+    "website": "https://premierheating.com",
+    "address": "78 Station Road, N1",
+    "postcode": "N1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "APHC Member",
+      "Worcester Bosch Accredited"
+    ],
+    "services": [
+      "Gas boilers",
+      "Central heating",
+      "Power flushing"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "APHC",
+    "registered_date": "2019-03-10",
+    "last_verified": "2024-02-01",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "96e0b216db79": {
+    "plumber_id": "96e0b216db79",
+    "name": "Safe Gas Services",
+    "trading_name": "Safe Gas",
+    "email": "info@safegas.co.uk",
+    "phone": "07700900456",
+    "website": null,
+    "address": "12 Park Lane, N1",
+    "postcode": "N1",
+    "gas_safe_certified": true,
+    "gas_safe_number": "123456",
+    "qualifications": [
+      "Gas Safe Registered",
+      "ACS Qualified"
+    ],
+    "services": [
+      "Gas boiler repair",
+      "Gas appliance installation",
+      "Gas safety checks"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "Gas Safe Register",
+    "registered_date": "2017-09-05",
+    "last_verified": "2024-01-20",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "1f610805aeaa": {
+    "plumber_id": "1f610805aeaa",
+    "name": "ABC Plumbing & Heating Ltd",
+    "trading_name": "ABC Plumbing",
+    "email": "info@abcplumbing.co.uk",
+    "phone": "02081234567",
+    "website": "https://abcplumbing.co.uk",
+    "address": "123 High Street, NW1",
+    "postcode": "NW1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "WaterSafe Approved",
+      "WIAPS Member"
+    ],
+    "services": [
+      "General plumbing",
+      "Bathroom installation",
+      "Emergency repairs"
+    ],
+    "skills": [
+      "bathroom_fitting",
+      "burst_pipe"
+    ],
+    "source_registry": "WaterSafe",
+    "registered_date": "2020-01-15",
+    "last_verified": "2024-01-10",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "247eaff73391": {
+    "plumber_id": "247eaff73391",
+    "name": "John Smith Plumbing",
+    "trading_name": "JS Plumbing",
+    "email": "john@jsplumbing.co.uk",
+    "phone": "07700900123",
+    "website": null,
+    "address": "45 Market Road, NW1",
+    "postcode": "NW1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "CIPHE Member",
+      "City & Guilds Level 3"
+    ],
+    "services": [
+      "Heating systems",
+      "Boiler installation",
+      "Bathroom fitting"
+    ],
+    "skills": [
+      "boiler_repair",
+      "bathroom_fitting"
+    ],
+    "source_registry": "CIPHE",
+    "registered_date": "2018-06-20",
+    "last_verified": "2023-12-15",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "c3a87ab48ee8": {
+    "plumber_id": "c3a87ab48ee8",
+    "name": "Premier Heating Solutions Ltd",
+    "trading_name": "Premier Heating",
+    "email": "contact@premierheating.com",
+    "phone": "02081235678",
+    "website": "https://premierheating.com",
+    "address": "78 Station Road, NW1",
+    "postcode": "NW1",
+    "gas_safe_certified": false,
+    "gas_safe_number": null,
+    "qualifications": [
+      "APHC Member",
+      "Worcester Bosch Accredited"
+    ],
+    "services": [
+      "Gas boilers",
+      "Central heating",
+      "Power flushing"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "APHC",
+    "registered_date": "2019-03-10",
+    "last_verified": "2024-02-01",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  },
+  "dfc3fd6f8cd4": {
+    "plumber_id": "dfc3fd6f8cd4",
+    "name": "Safe Gas Services",
+    "trading_name": "Safe Gas",
+    "email": "info@safegas.co.uk",
+    "phone": "07700900456",
+    "website": null,
+    "address": "12 Park Lane, NW1",
+    "postcode": "NW1",
+    "gas_safe_certified": true,
+    "gas_safe_number": "123456",
+    "qualifications": [
+      "Gas Safe Registered",
+      "ACS Qualified"
+    ],
+    "services": [
+      "Gas boiler repair",
+      "Gas appliance installation",
+      "Gas safety checks"
+    ],
+    "skills": [
+      "boiler_repair"
+    ],
+    "source_registry": "Gas Safe Register",
+    "registered_date": "2017-09-05",
+    "last_verified": "2024-01-20",
+    "added_to_db": "2026-02-03 16:35:10",
+    "status": "pending_contact",
+    "contact_attempts": 0,
+    "last_contacted": null,
+    "credit_balance": 0.0,
+    "jobs_completed": 0
+  }
+}

@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Plumber Dashboard - Lead Management</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+            color: #2d3748;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 1.5rem 2rem;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .credit-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+        }
+
+        .credit-amount {
+            font-size: 1.3rem;
+            font-weight: bold;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            color: #2d3748;
+        }
+
+        .stat-change {
+            font-size: 0.875rem;
+            color: #48bb78;
+            margin-top: 0.25rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .filter-tab {
+            padding: 0.5rem 1rem;
+            border: none;
+            background: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .filter-tab.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .leads-container {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .lead-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .lead-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+        }
+
+        .lead-card.urgent {
+            border-left: 4px solid #f56565;
+        }
+
+        .lead-card.today {
+            border-left: 4px solid #ed8936;
+        }
+
+        .lead-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .lead-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .lead-meta {
+            display: flex;
+            gap: 1rem;
+            color: #718096;
+            font-size: 0.875rem;
+            margin-bottom: 1rem;
+        }
+
+        .meta-item {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+        }
+
+        .urgency-badge {
+            padding: 0.25rem 0.75rem;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .urgency-emergency {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .urgency-today {
+            background: #feebc8;
+            color: #c05621;
+        }
+
+        .urgency-this_week {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .lead-pricing {
+            background: #f7fafc;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+        }
+
+        .pricing-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+        }
+
+        .pricing-row:last-child {
+            margin-bottom: 0;
+            padding-top: 0.5rem;
+            border-top: 1px solid #e2e8f0;
+            font-weight: 600;
+        }
+
+        .earnings-highlight {
+            font-size: 1.5rem;
+            color: #48bb78;
+            font-weight: bold;
+        }
+
+        .lead-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex: 1;
+        }
+
+        .btn-accept {
+            background: #48bb78;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #38a169;
+        }
+
+        .btn-decline {
+            background: #e2e8f0;
+            color: #4a5568;
+        }
+
+        .btn-decline:hover {
+            background: #cbd5e0;
+        }
+
+        .timer {
+            background: #fff5f5;
+            color: #c53030;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #a0aec0;
+        }
+
+        .empty-state-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        @keyframes pulse {
+            0%, 100% {
+                opacity: 1;
+            }
+            50% {
+                opacity: 0.5;
+            }
+        }
+
+        .new-lead-indicator {
+            animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+            background: #48bb78;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div>
+                <h1>Lead Dashboard</h1>
+                <p>Welcome back, John Smith</p>
+            </div>
+            <div class="credit-badge">
+                <div>Credit Balance</div>
+                <div class="credit-amount">£<span id="creditBalance">250.00</span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats Overview -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Pending Leads</div>
+                <div class="stat-value" id="pendingCount">3</div>
+                <div class="stat-change">↑ 2 new today</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Active Jobs</div>
+                <div class="stat-value">5</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">This Week Earnings</div>
+                <div class="stat-value">£1,240</div>
+                <div class="stat-change">↑ 18% vs last week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Acceptance Rate</div>
+                <div class="stat-value">92%</div>
+                <div class="stat-change">✓ Excellent</div>
+            </div>
+        </div>
+
+        <!-- Leads Section -->
+        <div class="section-header">
+            <h2 class="section-title">Available Leads</h2>
+            <div class="filter-tabs">
+                <button class="filter-tab active" onclick="filterLeads('all')">All</button>
+                <button class="filter-tab" onclick="filterLeads('urgent')">Urgent</button>
+                <button class="filter-tab" onclick="filterLeads('nearby')">Nearby</button>
+            </div>
+        </div>
+
+        <div class="leads-container" id="leadsContainer">
+            <!-- Lead cards will be inserted here by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        // Sample lead data
+        const leads = [
+            {
+                id: 12345,
+                title: "Emergency - Kitchen tap won't stop running",
+                description: "Tap running constantly, can't turn it off properly. Water everywhere!",
+                postcode: "SW19 2AB",
+                urgency: "emergency",
+                distance: 2.1,
+                travelTime: 15,
+                workTime: 1.0,
+                customerPays: 146.00,
+                plumberEarns: 131.00,
+                leadFee: 15.00,
+                expiresIn: 540, // seconds
+                postedAgo: "5 mins ago"
+            },
+            {
+                id: 12346,
+                title: "Toilet flush not working properly",
+                description: "Cistern fills but flush button doesn't work. Need fix today if possible.",
+                postcode: "SW18 3QR",
+                urgency: "today",
+                distance: 1.8,
+                travelTime: 12,
+                workTime: 1.5,
+                customerPays: 195.00,
+                plumberEarns: 170.00,
+                leadFee: 25.00,
+                expiresIn: 420,
+                postedAgo: "12 mins ago"
+            },
+            {
+                id: 12347,
+                title: "Radiator cold at bottom, hot at top",
+                description: "One radiator in bedroom not heating properly. Cold at bottom, hot at top. Not urgent.",
+                postcode: "SW17 9NH",
+                urgency: "this_week",
+                distance: 4.5,
+                travelTime: 25,
+                workTime: 1.5,
+                customerPays: 225.00,
+                plumberEarns: 200.00,
+                leadFee: 25.00,
+                expiresIn: 600,
+                postedAgo: "1 hour ago"
+            }
+        ];
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function getUrgencyClass(urgency) {
+            return `urgency-${urgency.toLowerCase().replace(' ', '_')}`;
+        }
+
+        function getUrgencyEmoji(urgency) {
+            const emojis = {
+                'emergency': '🚨',
+                'today': '⚡',
+                'this_week': '📅',
+                'flexible': '🔧'
+            };
+            return emojis[urgency] || '🔧';
+        }
+
+        function renderLeads() {
+            const container = document.getElementById('leadsContainer');
+            
+            if (leads.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <h3>No leads available</h3>
+                        <p>New leads will appear here automatically</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = leads.map(lead => `
+                <div class="lead-card ${lead.urgency}" data-lead-id="${lead.id}">
+                    <div class="lead-header">
+                        <div>
+                            <div class="lead-title">
+                                ${getUrgencyEmoji(lead.urgency)} ${lead.title}
+                            </div>
+                            <div class="lead-meta">
+                                <div class="meta-item">📍 ${lead.postcode}</div>
+                                <div class="meta-item">🚗 ${lead.distance}km (${lead.travelTime} mins)</div>
+                                <div class="meta-item">⏰ ~${lead.workTime}hr work</div>
+                            </div>
+                        </div>
+                        <span class="urgency-badge ${getUrgencyClass(lead.urgency)}">
+                            ${lead.urgency.replace('_', ' ')}
+                        </span>
+                    </div>
+
+                    <p style="color: #4a5568; margin-bottom: 1rem;">${lead.description}</p>
+
+                    <div class="lead-pricing">
+                        <div class="pricing-row">
+                            <span>Customer pays:</span>
+                            <span>£${lead.customerPays.toFixed(2)}</span>
+                        </div>
+                        <div class="pricing-row">
+                            <span>Lead fee:</span>
+                            <span>-£${lead.leadFee.toFixed(2)}</span>
+                        </div>
+                        <div class="pricing-row">
+                            <span>Your earnings:</span>
+                            <span class="earnings-highlight">£${lead.plumberEarns.toFixed(2)}</span>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem;">
+                        <span style="color: #718096; font-size: 0.875rem;">
+                            Posted ${lead.postedAgo}
+                        </span>
+                        <div class="timer" id="timer-${lead.id}">
+                            ⏱️ Expires in ${formatTime(lead.expiresIn)}
+                        </div>
+                    </div>
+
+                    <div class="lead-actions">
+                        <button class="btn btn-accept" onclick="acceptLead(${lead.id})">
+                            Accept Lead
+                        </button>
+                        <button class="btn btn-decline" onclick="declineLead(${lead.id})">
+                            Pass
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+
+            // Start timers
+            leads.forEach(lead => {
+                startTimer(lead.id, lead.expiresIn);
+            });
+        }
+
+        function startTimer(leadId, seconds) {
+            let remaining = seconds;
+            
+            const timerInterval = setInterval(() => {
+                remaining--;
+                
+                const timerEl = document.getElementById(`timer-${leadId}`);
+                if (timerEl) {
+                    timerEl.innerHTML = `⏱️ Expires in ${formatTime(remaining)}`;
+                    
+                    if (remaining <= 60) {
+                        timerEl.style.background = '#fed7d7';
+                        timerEl.style.color = '#c53030';
+                    }
+                }
+                
+                if (remaining <= 0) {
+                    clearInterval(timerInterval);
+                    expireLead(leadId);
+                }
+            }, 1000);
+        }
+
+        function acceptLead(leadId) {
+            const lead = leads.find(l => l.id === leadId);
+            
+            if (confirm(`Accept this lead for £${lead.leadFee.toFixed(2)}?\n\nYou will earn £${lead.plumberEarns.toFixed(2)} for this job.`)) {
+                // In production: Call API to accept lead
+                // fetch('/api/leads/accept', { method: 'POST', body: JSON.stringify({ leadId }) })
+                
+                // Simulate success
+                alert(`✓ Lead accepted!\n\nCustomer: ${lead.postcode}\nYour earnings: £${lead.plumberEarns.toFixed(2)}\n\nCustomer will be notified. They'll contact you shortly.`);
+                
+                // Update credit balance
+                const currentBalance = parseFloat(document.getElementById('creditBalance').textContent);
+                const newBalance = currentBalance - lead.leadFee;
+                document.getElementById('creditBalance').textContent = newBalance.toFixed(2);
+                
+                // Remove lead from list
+                const index = leads.findIndex(l => l.id === leadId);
+                if (index > -1) {
+                    leads.splice(index, 1);
+                    renderLeads();
+                }
+                
+                // Update pending count
+                document.getElementById('pendingCount').textContent = leads.length;
+            }
+        }
+
+        function declineLead(leadId) {
+            const lead = leads.find(l => l.id === leadId);
+            
+            if (confirm('Pass on this lead?\n\nIt will be offered to the next available plumber.')) {
+                // In production: Call API to decline lead
+                
+                // Remove lead from list
+                const index = leads.findIndex(l => l.id === leadId);
+                if (index > -1) {
+                    leads.splice(index, 1);
+                    renderLeads();
+                }
+                
+                // Update pending count
+                document.getElementById('pendingCount').textContent = leads.length;
+            }
+        }
+
+        function expireLead(leadId) {
+            alert(`Lead #${leadId} has expired and was offered to another plumber.`);
+            
+            const index = leads.findIndex(l => l.id === leadId);
+            if (index > -1) {
+                leads.splice(index, 1);
+                renderLeads();
+            }
+            
+            document.getElementById('pendingCount').textContent = leads.length;
+        }
+
+        function filterLeads(filter) {
+            // Update active tab
+            document.querySelectorAll('.filter-tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // In production: Filter leads based on criteria
+            renderLeads();
+        }
+
+        // Initialize
+        renderLeads();
+
+        // Simulate new lead arrival
+        function simulateNewLead() {
+            const newLead = {
+                id: Math.floor(Math.random() * 100000),
+                title: "New job - Shower not draining properly",
+                description: "Shower tray filling up with water, very slow drainage. Need plumber this week.",
+                postcode: "SW19 1AA",
+                urgency: "this_week",
+                distance: 3.2,
+                travelTime: 18,
+                workTime: 1.5,
+                customerPays: 185.00,
+                plumberEarns: 160.00,
+                leadFee: 25.00,
+                expiresIn: 600,
+                postedAgo: "Just now"
+            };
+            
+            leads.unshift(newLead);
+            renderLeads();
+            document.getElementById('pendingCount').textContent = leads.length;
+            
+            // Show notification
+            if ('Notification' in window && Notification.permission === 'granted') {
+                new Notification('🔔 New Lead Available', {
+                    body: `${newLead.title} - £${newLead.plumberEarns} earnings`,
+                    icon: '🔧'
+                });
+            }
+        }
+
+        // Simulate new lead every 30 seconds (for demo)
+        // setTimeout(simulateNewLead, 30000);
+
+        // Request notification permission
+        if ('Notification' in window && Notification.permission === 'default') {
+            Notification.requestPermission();
+        }
+    </script>
+</body>
+</html>
