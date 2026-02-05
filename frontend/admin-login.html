@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - PlumberMatch</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: #f5f7fa;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        .nav {
+            display: flex;
+            gap: 20px;
+        }
+
+        .nav a {
+            color: white;
+            text-decoration: none;
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 6px;
+        }
+
+        .nav a:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .stat-value {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .stat-change {
+            color: #48bb78;
+            font-size: 0.85rem;
+            margin-top: 5px;
+        }
+
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: 20px;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .section-title {
+            font-size: 1.5rem;
+            color: #2d3748;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #e2e8f0;
+        }
+
+        .tab {
+            padding: 12px 24px;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: #718096;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab.active {
+            color: #667eea;
+            border-bottom-color: #667eea;
+        }
+
+        .filters {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 8px 16px;
+            border: 2px solid #e2e8f0;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .filter-btn.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+
+        .ad-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 15px;
+        }
+
+        .ad-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 10px;
+        }
+
+        .ad-title {
+            font-weight: 600;
+            color: #2d3748;
+            flex: 1;
+        }
+
+        .badge {
+            padding: 4px 10px;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .badge-gumtree {
+            background: #fef5e7;
+            color: #e67e22;
+        }
+
+        .badge-facebook {
+            background: #eaf2fe;
+            color: #3b5998;
+        }
+
+        .badge-customer {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-yell {
+            background: #fff3e0;
+            color: #f57c00;
+        }
+
+        .badge-pending {
+            background: #feebc8;
+            color: #c05621;
+        }
+
+        .badge-matched {
+            background: #c6f6d5;
+            color: #22543d;
+        }
+
+        .ad-meta {
+            display: flex;
+            gap: 15px;
+            color: #718096;
+            font-size: 0.9rem;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+
+        .ad-description {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+
+        .ad-actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-secondary {
+            background: #e2e8f0;
+            color: #2d3748;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #a0aec0;
+        }
+
+        .search-box {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            margin-bottom: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .nav {
+                width: 100%;
+                overflow-x: auto;
+            }
+
+            .ad-meta {
+                flex-direction: column;
+                gap: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">⚙️ Admin Panel</div>
+            <div class="nav">
+                <a href="index.html">← Home</a>
+                <a href="#" onclick="logout()">Logout</a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Stats Dashboard -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-value" id="totalAds">247</div>
+                <div class="stat-label">Total Ads Scraped</div>
+                <div class="stat-change">↑ 34 today</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value" id="scrapedAds">189</div>
+                <div class="stat-label">From Scraping</div>
+                <div class="stat-change">Gumtree, Facebook, Yell</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value" id="customerAds">58</div>
+                <div class="stat-label">Customer Posted</div>
+                <div class="stat-change">↑ 8 today</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value" id="matchedAds">201</div>
+                <div class="stat-label">Successfully Matched</div>
+                <div class="stat-change">82% match rate</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value">£3,780</div>
+                <div class="stat-label">Revenue This Week</div>
+                <div class="stat-change">↑ 18% vs last week</div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-value">152</div>
+                <div class="stat-label">Active Plumbers</div>
+                <div class="stat-change">12 new signups</div>
+            </div>
+        </div>
+
+        <!-- Main Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('scraped')">Scraped Ads</button>
+            <button class="tab" onclick="switchTab('customer')">Customer Jobs</button>
+            <button class="tab" onclick="switchTab('all')">All Ads</button>
+            <button class="tab" onclick="switchTab('plumbers')">Plumbers</button>
+        </div>
+
+        <!-- Scraped Ads Tab -->
+        <div id="scrapedTab" class="tab-content active">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Scraped Job Ads</h2>
+                </div>
+
+                <input type="text" class="search-box" id="scrapedSearch" placeholder="🔍 Search ads..." onkeyup="filterAds('scraped')">
+
+                <div class="filters">
+                    <button class="filter-btn active" onclick="filterByStatus('scraped', 'all')">All</button>
+                    <button class="filter-btn" onclick="filterByStatus('scraped', 'pending')">Pending</button>
+                    <button class="filter-btn" onclick="filterByStatus('scraped', 'matched')">Matched</button>
+                    <button class="filter-btn" onclick="filterBySource('gumtree')">Gumtree</button>
+                    <button class="filter-btn" onclick="filterBySource('facebook')">Facebook</button>
+                    <button class="filter-btn" onclick="filterBySource('yell')">Yell.com</button>
+                </div>
+
+                <div id="scrapedAdsList"></div>
+            </div>
+        </div>
+
+        <!-- Customer Jobs Tab -->
+        <div id="customerTab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Customer-Posted Jobs</h2>
+                </div>
+
+                <input type="text" class="search-box" id="customerSearch" placeholder="🔍 Search customer jobs..." onkeyup="filterAds('customer')">
+
+                <div class="filters">
+                    <button class="filter-btn active" onclick="filterByStatus('customer', 'all')">All</button>
+                    <button class="filter-btn" onclick="filterByStatus('customer', 'pending')">Pending</button>
+                    <button class="filter-btn" onclick="filterByStatus('customer', 'matched')">Matched</button>
+                </div>
+
+                <div id="customerAdsList"></div>
+            </div>
+        </div>
+
+        <!-- All Ads Tab -->
+        <div id="allTab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">All Ads (Scraped + Customer)</h2>
+                </div>
+
+                <input type="text" class="search-box" id="allSearch" placeholder="🔍 Search all ads..." onkeyup="filterAds('all')">
+
+                <div id="allAdsList"></div>
+            </div>
+        </div>
+
+        <!-- Plumbers Tab -->
+        <div id="plumbersTab" class="tab-content">
+            <div class="section">
+                <div class="section-header">
+                    <h2 class="section-title">Registered Plumbers</h2>
+                </div>
+                <div id="plumbersList"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Sample scraped ads
+        const scrapedAds = [
+            {
+                id: 1,
+                source: 'gumtree',
+                title: 'Urgent - Kitchen tap leaking badly',
+                description: 'Tap in kitchen running constantly, can\'t turn it off properly. Need someone today if possible.',
+                postcode: 'SW19 2AB',
+                phone: '07700900123',
+                posted: '15 mins ago',
+                status: 'matched',
+                plumber: 'John Smith Plumbing',
+                fee: 15
+            },
+            {
+                id: 2,
+                source: 'facebook',
+                title: 'Toilet not flushing properly',
+                description: 'Cistern fills but flush button doesn\'t work properly. Water keeps running.',
+                postcode: 'SW18 3QR',
+                phone: '07700900456',
+                posted: '1 hour ago',
+                status: 'pending'
+            },
+            {
+                id: 3,
+                source: 'gumtree',
+                title: 'Emergency - Burst pipe in bathroom',
+                description: 'URGENT! Pipe burst behind toilet, water everywhere. Need emergency plumber NOW.',
+                postcode: 'SE1 9AB',
+                phone: '07700900789',
+                posted: '3 hours ago',
+                status: 'matched',
+                plumber: 'Safe Gas Services',
+                fee: 25
+            },
+            {
+                id: 4,
+                source: 'yell',
+                title: 'Boiler not heating water',
+                description: 'Gas boiler stopped working, no hot water for 2 days. Need Gas Safe engineer.',
+                postcode: 'W1 1AA',
+                phone: '02081234567',
+                posted: '5 hours ago',
+                status: 'matched',
+                plumber: 'Premier Heating',
+                fee: 25
+            },
+            {
+                id: 5,
+                source: 'facebook',
+                title: 'Shower leaking through ceiling',
+                description: 'Water leaking through kitchen ceiling from shower above. Getting worse.',
+                postcode: 'E1 6AN',
+                phone: '07700900321',
+                posted: '6 hours ago',
+                status: 'pending'
+            }
+        ];
+
+        // Load customer jobs
+        const customerJobs = JSON.parse(localStorage.getItem('customerJobs') || '[]');
+
+        // Combine all ads
+        const allAds = [...scrapedAds, ...customerJobs.map(j => ({...j, source: 'customer'}))];
+
+        function renderAd(ad) {
+            const sourceClass = `badge-${ad.source}`;
+            const statusClass = `badge-${ad.status}`;
+
+            return `
+                <div class="ad-card">
+                    <div class="ad-header">
+                        <div class="ad-title">${ad.title}</div>
+                        <span class="badge ${sourceClass}">${ad.source}</span>
+                        <span class="badge ${statusClass}">${ad.status || 'pending'}</span>
+                    </div>
+                    <div class="ad-meta">
+                        <span>📍 ${ad.postcode}</span>
+                        <span>📞 ${ad.phone || ad.customerPhone || 'No phone'}</span>
+                        <span>⏰ ${ad.posted || ad.postedAgo}</span>
+                    </div>
+                    <div class="ad-description">${ad.description}</div>
+                    ${ad.plumber ? `
+                        <div style="background: #f0f4ff; padding: 10px; border-radius: 6px; margin-bottom: 10px;">
+                            ✓ Matched to: <strong>${ad.plumber}</strong> • Fee charged: £${ad.fee}
+                        </div>
+                    ` : ''}
+                    <div class="ad-actions">
+                        ${!ad.plumber ? '<button class="btn-small btn-primary" onclick="matchAd(' + ad.id + ')">Match to Plumber</button>' : ''}
+                        <button class="btn-small btn-secondary" onclick="viewDetails(' + ad.id + ')">View Details</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderScrapedAds() {
+            const container = document.getElementById('scrapedAdsList');
+            container.innerHTML = scrapedAds.map(ad => renderAd(ad)).join('');
+        }
+
+        function renderCustomerAds() {
+            const container = document.getElementById('customerAdsList');
+            if (customerJobs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div style="font-size: 4rem; margin-bottom: 20px;">📭</div>
+                        <h3>No customer-posted jobs yet</h3>
+                        <p>Jobs posted by customers will appear here</p>
+                    </div>
+                `;
+                return;
+            }
+            container.innerHTML = customerJobs.map(job => renderAd(job)).join('');
+        }
+
+        function renderAllAds() {
+            const container = document.getElementById('allAdsList');
+            container.innerHTML = allAds.map(ad => renderAd(ad)).join('');
+        }
+
+        function renderPlumbers() {
+            const container = document.getElementById('plumbersList');
+            const plumbers = [
+                { name: 'John Smith Plumbing', postcode: 'SW18', rating: 4.8, jobs: 89, earnings: 1234 },
+                { name: 'ABC Heating Ltd', postcode: 'SW19', rating: 4.6, jobs: 142, earnings: 2156 },
+                { name: 'Safe Gas Services', postcode: 'SE1', rating: 4.9, jobs: 203, earnings: 3420 }
+            ];
+
+            container.innerHTML = plumbers.map(p => `
+                <div class="ad-card">
+                    <div class="ad-header">
+                        <div class="ad-title">${p.name}</div>
+                        <span>⭐ ${p.rating}/5.0</span>
+                    </div>
+                    <div class="ad-meta">
+                        <span>📍 ${p.postcode}</span>
+                        <span>✓ ${p.jobs} jobs completed</span>
+                        <span>💷 £${p.earnings} earned</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function switchTab(tab) {
+            // Update tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+
+            if (tab === 'scraped') {
+                document.querySelectorAll('.tab')[0].classList.add('active');
+                document.getElementById('scrapedTab').classList.add('active');
+                renderScrapedAds();
+            } else if (tab === 'customer') {
+                document.querySelectorAll('.tab')[1].classList.add('active');
+                document.getElementById('customerTab').classList.add('active');
+                renderCustomerAds();
+            } else if (tab === 'all') {
+                document.querySelectorAll('.tab')[2].classList.add('active');
+                document.getElementById('allTab').classList.add('active');
+                renderAllAds();
+            } else if (tab === 'plumbers') {
+                document.querySelectorAll('.tab')[3].classList.add('active');
+                document.getElementById('plumbersTab').classList.add('active');
+                renderPlumbers();
+            }
+        }
+
+        function filterByStatus(tab, status) {
+            // Update active filter button
+            event.target.parentElement.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Filter logic would go here
+        }
+
+        function filterBySource(source) {
+            event.target.parentElement.querySelectorAll('.filter-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        function filterAds(type) {
+            const searchTerm = document.getElementById(type + 'Search').value.toLowerCase();
+            // Search logic would go here
+        }
+
+        function matchAd(id) {
+            alert('Opening matching interface for ad #' + id);
+        }
+
+        function viewDetails(id) {
+            alert('Viewing full details for ad #' + id);
+        }
+
+        function logout() {
+            if (confirm('Logout from admin panel?')) {
+                window.location.href = 'index.html';
+            }
+        }
+
+        // Initialize
+        renderScrapedAds();
+
+        // Update stats periodically
+        setInterval(() => {
+            const el = document.getElementById('totalAds');
+            el.textContent = parseInt(el.textContent) + 1;
+        }, 30000);
+    </script>
+</body>
+</html>
