@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlumberMatch - Connect Plumbers with Customers</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 50px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+            transition: transform 0.3s;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            font-size: 1.8rem;
+            margin-bottom: 15px;
+            color: #2d3748;
+        }
+
+        .card p {
+            color: #718096;
+            margin-bottom: 25px;
+            line-height: 1.6;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            text-decoration: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(37, 99, 235, 0.5);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 85, 104, 0.15);
+        }
+
+        .btn-secondary:active {
+            transform: translateY(0);
+            box-shadow: 0 3px 10px rgba(74, 85, 104, 0.1);
+        }
+
+        .features {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            margin-bottom: 30px;
+        }
+
+        .features h3 {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #2d3748;
+        }
+
+        .feature-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .feature {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 10px;
+        }
+
+        .feature h4 {
+            font-size: 1.1rem;
+            margin-bottom: 8px;
+            color: #2d3748;
+        }
+
+        .feature p {
+            color: #718096;
+            font-size: 0.9rem;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            background: rgba(255,255,255,0.1);
+            padding: 30px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat {
+            text-align: center;
+            color: white;
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            opacity: 0.9;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .feature-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 PlumberMatch</h1>
+            <p>Connect Qualified Plumbers with Customers Who Need Help</p>
+        </div>
+
+        <!-- Live Stats -->
+        <div class="stats">
+            <div class="stat">
+                <div class="stat-number" id="plumberCount">0</div>
+                <div class="stat-label">Active Plumbers</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="jobCount">0</div>
+                <div class="stat-label">Jobs Today</div>
+            </div>
+            <div class="stat">
+                <div class="stat-number" id="matchRate">0%</div>
+                <div class="stat-label">Match Rate</div>
+            </div>
+        </div>
+
+        <!-- Main Action Cards -->
+        <div class="cards">
+            <!-- Plumber Card -->
+            <div class="card">
+                <h2>👷 For Plumbers</h2>
+                <p>Get qualified leads in your area. Only pay when you accept a lead. Average earnings: £100-300 per job.</p>
+                <button class="btn btn-primary" onclick="location.href='plumber-register.html'">
+                    Register as Plumber
+                </button>
+                <button class="btn btn-secondary" onclick="location.href='plumber-login.html'">
+                    Login
+                </button>
+            </div>
+
+            <!-- Customer Card -->
+            <div class="card">
+                <h2>🏠 Need a Plumber?</h2>
+                <p>Post your job and get matched with qualified plumbers in your area within minutes.</p>
+                <button class="btn btn-primary" onclick="location.href='customer-post-job.html'">
+                    Post a Job
+                </button>
+                <button class="btn btn-secondary" onclick="location.href='customer-jobs.html'">
+                    View My Jobs
+                </button>
+            </div>
+
+        <!-- Features Section -->
+        <div class="features">
+            <h3>How It Works</h3>
+            <div class="feature-grid">
+                <div class="feature">
+                    <div class="feature-icon">🔍</div>
+                    <h4>We Find Jobs</h4>
+                    <p>Our powerful AI tools allowing instant response to customer needs</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">🎯</div>
+                    <h4>Smart Matching</h4>
+                    <p>AI matches jobs to best available plumber</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">📱</div>
+                    <h4>Instant Alerts</h4>
+                    <p>SMS, email, and app notifications</p>
+                </div>
+                <div class="feature">
+                    <div class="feature-icon">💳</div>
+                    <h4>Easy Payment</h4>
+                    <p>Fully integrated & seamless secure payment</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Animate stats on page load
+        function animateValue(id, start, end, duration, suffix = '') {
+            const obj = document.getElementById(id);
+            const range = end - start;
+            const increment = end > start ? 1 : -1;
+            const stepTime = Math.abs(Math.floor(duration / range));
+            let current = start;
+            
+            const timer = setInterval(() => {
+                current += increment;
+                obj.textContent = current + suffix;
+                if (current === end) {
+                    clearInterval(timer);
+                }
+            }, stepTime);
+        }
+
+        // Simulate live stats
+        window.addEventListener('load', () => {
+            animateValue('plumberCount', 0, 247, 2000);
+            animateValue('jobCount', 0, 34, 1500);
+            animateValue('matchRate', 0, 94, 2000, '%');
+        });
+    </script>
+</body>
+</html>
