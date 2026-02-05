@@ -59,6 +59,24 @@ class PlumberRegistration(BaseModel):
 async def health_check():
     return {"status": "healthy", "service": "PlumbFlow"}
 
+# Debug endpoint to see directory structure
+@app.get("/debug/files")
+async def debug_files():
+    """Debug endpoint to see what files are available"""
+    current_dir = Path(__file__).parent
+    frontend_dir = current_dir / "frontend"
+    
+    return {
+        "current_dir": str(current_dir),
+        "current_dir_exists": current_dir.exists(),
+        "current_dir_contents": [str(p) for p in current_dir.iterdir()] if current_dir.exists() else [],
+        "frontend_dir": str(frontend_dir),
+        "frontend_dir_exists": frontend_dir.exists(),
+        "frontend_contents": [str(p) for p in frontend_dir.iterdir()] if frontend_dir.exists() else [],
+        "cwd": os.getcwd(),
+        "env_port": os.getenv("PORT", "not set")
+    }
+
 # API endpoints
 @app.post("/api/jobs/submit")
 async def submit_job(job: CustomerJob):
@@ -134,27 +152,54 @@ async def get_jobs():
 
 # Mount static files (frontend)
 frontend_dir = Path(__file__).parent / "frontend"
+logger.info(f"Looking for frontend at: {frontend_dir}")
+logger.info(f"Frontend exists: {frontend_dir.exists()}")
+
 if frontend_dir.exists():
-    app.mount("/static", StaticFiles(directory=frontend_dir), name="static")
+    logger.info(f"Frontend files: {list(frontend_dir.iterdir())}")
+    app.mount("/static", StaticFiles(directory=str(frontend_dir)), name="static")
     
     @app.get("/")
     async def serve_frontend():
-        return FileResponse(frontend_dir / "index.html")
+        index_path = frontend_dir / "index.html"
+        logger.info(f"Serving index.html from: {index_path}")
+        if not index_path.exists():
+            raise HTTPException(status_code=404, detail=f"index.html not found at {index_path}")
+        return FileResponse(index_path)
     
     @app.get("/{path:path}")
     async def serve_frontend_paths(path: str):
+        # Skip API paths
+        if path.startswith("api/") or path.startswith("debug/"):
+            raise HTTPException(status_code=404)
+            
         file_path = frontend_dir / path
+        logger.info(f"Request for: {path}, checking: {file_path}")
+        
         if file_path.exists() and file_path.is_file():
             return FileResponse(file_path)
-        # If file doesn't exist, serve index.html (SPA)
-        return FileResponse(frontend_dir / "index.html")
+        
+        # For SPA routing, serve index.html
+        index_path = frontend_dir / "index.html"
+        if index_path.exists():
+            return FileResponse(index_path)
+        
+        raise HTTPException(status_code=404, detail=f"File not found: {path}")
 else:
+    logger.error(f"Frontend directory not found at: {frontend_dir}")
+    logger.error(f"Current directory: {Path(__file__).parent}")
+    logger.error(f"Directory contents: {list(Path(__file__).parent.iterdir())}")
+    
     @app.get("/")
     async def root():
+        current_dir = Path(__file__).parent
         return {
             "message": "PlumbFlow API is running",
             "status": "frontend files not found",
-            "note": "Upload frontend folder to enable web interface"
+            "note": "Upload frontend folder to enable web interface",
+            "looking_for": str(frontend_dir),
+            "current_dir": str(current_dir),
+            "contents": [str(p.name) for p in current_dir.iterdir()]
         }
 
 # Run with: uvicorn main:app --reload
