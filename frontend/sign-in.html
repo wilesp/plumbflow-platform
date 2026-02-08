@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign In - PlumberFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            width: 100%;
+            max-width: 450px;
+            padding: 3rem;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 2rem;
+        }
+
+        .logo h1 {
+            color: #1e3a5f;
+            font-size: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .logo p {
+            color: #64748b;
+            font-size: 0.9rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #334155;
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .sign-in-btn {
+            width: 100%;
+            padding: 1rem;
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .sign-in-btn:hover {
+            background: #2c5282;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(30, 58, 95, 0.3);
+        }
+
+        .sign-in-btn:active {
+            transform: translateY(0);
+        }
+
+        .divider {
+            text-align: center;
+            margin: 2rem 0;
+            color: #94a3b8;
+            font-size: 0.9rem;
+        }
+
+        .register-links {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .register-link {
+            flex: 1;
+            padding: 0.75rem;
+            text-align: center;
+            border: 2px solid #e2e8f0;
+            border-radius: 5px;
+            text-decoration: none;
+            color: #334155;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .register-link:hover {
+            border-color: #667eea;
+            color: #667eea;
+            background: #f8fafc;
+        }
+
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            display: none;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+            color: #64748b;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 2rem;
+        }
+
+        .back-link a {
+            color: #64748b;
+            text-decoration: none;
+            font-size: 0.9rem;
+        }
+
+        .back-link a:hover {
+            color: #334155;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="logo">
+            <h1>PlumberFlow</h1>
+            <p>Sign in to your account</p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <form id="signInForm">
+            <div class="form-group">
+                <label for="email">Email Address</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    name="email" 
+                    required 
+                    placeholder="your@email.com"
+                >
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    name="password" 
+                    required 
+                    placeholder="••••••••"
+                >
+            </div>
+
+            <button type="submit" class="sign-in-btn">Sign In</button>
+        </form>
+
+        <div id="loading" class="loading">
+            Signing you in...
+        </div>
+
+        <div class="divider">Don't have an account?</div>
+
+        <div class="register-links">
+            <a href="customer-post-job.html" class="register-link">I'm a Customer</a>
+            <a href="plumber-register.html" class="register-link">I'm a Plumber</a>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html">← Back to Home</a>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('signInForm');
+        const errorMsg = document.getElementById('errorMessage');
+        const successMsg = document.getElementById('successMessage');
+        const loading = document.getElementById('loading');
+
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Hide previous messages
+            errorMsg.style.display = 'none';
+            successMsg.style.display = 'none';
+            loading.style.display = 'block';
+
+            try {
+                // In production: Call your API
+                // const response = await fetch('/api/auth/login', {
+                //     method: 'POST',
+                //     headers: { 'Content-Type': 'application/json' },
+                //     body: JSON.stringify({ email, password })
+                // });
+                // const data = await response.json();
+
+                // DEMO MODE: Check localStorage for user type
+                const plumberData = localStorage.getItem('plumberData');
+                const customerData = localStorage.getItem('customerData');
+
+                let userFound = false;
+                let userType = null;
+
+                // Check if plumber
+                if (plumberData) {
+                    const plumber = JSON.parse(plumberData);
+                    if (plumber.email === email) {
+                        userFound = true;
+                        userType = 'plumber';
+                    }
+                }
+
+                // Check if customer
+                if (!userFound && customerData) {
+                    const customer = JSON.parse(customerData);
+                    if (customer.email === email) {
+                        userFound = true;
+                        userType = 'customer';
+                    }
+                }
+
+                loading.style.display = 'none';
+
+                if (userFound) {
+                    // Success!
+                    successMsg.textContent = `Welcome back! Redirecting to your dashboard...`;
+                    successMsg.style.display = 'block';
+
+                    // Store login session
+                    localStorage.setItem('currentUser', JSON.stringify({
+                        email: email,
+                        userType: userType,
+                        loggedIn: true
+                    }));
+
+                    // Redirect based on user type
+                    setTimeout(() => {
+                        if (userType === 'plumber') {
+                            window.location.href = 'plumber-dashboard.html';
+                        } else {
+                            window.location.href = 'customer-dashboard.html';
+                        }
+                    }, 1500);
+
+                } else {
+                    // User not found
+                    errorMsg.textContent = 'Invalid email or password. Please try again.';
+                    errorMsg.style.display = 'block';
+                }
+
+            } catch (error) {
+                loading.style.display = 'none';
+                errorMsg.textContent = 'An error occurred. Please try again.';
+                errorMsg.style.display = 'block';
+                console.error('Login error:', error);
+            }
+        });
+
+        // Check if already logged in
+        window.addEventListener('load', function() {
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                if (user.loggedIn) {
+                    // Already logged in, redirect
+                    if (user.userType === 'plumber') {
+                        window.location.href = 'plumber-dashboard.html';
+                    } else {
+                        window.location.href = 'customer-dashboard.html';
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
