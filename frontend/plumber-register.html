@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register as Plumber - PlumberFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 0;
+        }
+
+        .top-header {
+            background: #fff !important;
+            background-color: #fff !important;
+            color: #1e3a5f;
+            padding: 1rem 0;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .top-header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .top-logo {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e3a5f;
+        }
+
+        .home-link {
+            color: #1e3a5f;
+            text-decoration: none;
+            font-weight: 500;
+            padding: 0.6rem 1.5rem;
+            border: 2px solid #1e3a5f;
+            border-radius: 5px;
+            transition: all 0.3s;
+        }
+
+        .home-link:hover {
+            background: #1e3a5f;
+            color: white;
+        }
+
+        .form-container {
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 80px);
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            opacity: 0.9;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            padding: 10px;
+            position: relative;
+        }
+
+        .step::after {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 50%;
+            width: 100%;
+            height: 2px;
+            background: #e2e8f0;
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .step.active {
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .step.active::after {
+            background: #667eea;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2d3748;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+            margin: 0;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            margin-bottom: 10px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #f7fafc;
+            color: #4a5568;
+            border: 2px solid #e2e8f0;
+        }
+
+        .btn-secondary:hover {
+            background: #edf2f7;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .success-message {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .success-message h2 {
+            color: #22c55e;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .success-message p {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.5rem;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="top-header">
+        <div class="top-header-content">
+            <div class="top-logo">PlumberFlow</div>
+            <a href="index.html" class="home-link">Home</a>
+        </div>
+    </div>
+    
+    <div class="form-container">
+        <div class="container">
+            <div class="header">
+                <h1>Register as a Plumber</h1>
+                <p>Join PlumberFlow and start receiving quality leads</p>
+            </div>
+
+        <div class="content">
+            <div class="step-indicator">
+                <div class="step active" id="step1Indicator">1. Your Details</div>
+                <div class="step" id="step2Indicator">2. Skills</div>
+            </div>
+
+            <!-- Step 1: Basic Details -->
+            <form id="step1" onsubmit="return goToStep2(event)">
+                <div class="form-group">
+                    <label>Business Name *</label>
+                    <input type="text" id="businessName" placeholder="ABC Plumbing Ltd" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Your Name *</label>
+                    <input type="text" id="fullName" placeholder="John Smith" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Email Address *</label>
+                    <input type="email" id="email" placeholder="you@example.com" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Mobile Phone *</label>
+                    <input type="tel" id="phone" placeholder="07700 900 123" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Base Postcode *</label>
+                    <input type="text" id="postcode" placeholder="SW19 2AB" required>
+                </div>
+
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="password" placeholder="Create a password" required minlength="6">
+                </div>
+
+                <button type="submit" class="btn btn-primary">Continue →</button>
+                <button type="button" class="btn btn-secondary" onclick="location.href='index.html'">Back to Home</button>
+            </form>
+
+            <!-- Step 2: Skills & Certifications -->
+            <form id="step2" class="hidden" onsubmit="return completeRegistration(event)">
+                <h3 style="margin-bottom: 20px; color: #2d3748;">Skills & Certifications</h3>
+
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="gasSafe" value="gas_safe">
+                    <label for="gasSafe">I am Gas Safe Registered</label>
+                </div>
+
+                <div class="form-group">
+                    <label>Gas Safe Number (if applicable)</label>
+                    <input type="text" id="gasSafeNumber" placeholder="123456">
+                </div>
+
+                <div class="form-group">
+                    <label>Skills (select all that apply) *</label>
+                    <div style="display: grid; gap: 10px;">
+                        <label class="checkbox-group">
+                            <input type="checkbox" name="skills" value="leaking_tap"> Tap repairs & leaks
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" name="skills" value="toilet"> Toilet repairs & installation
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" name="skills" value="boiler"> Boiler repairs
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" name="skills" value="bathroom"> Bathroom installation
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" name="skills" value="emergency"> Emergency plumbing
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" name="skills" value="drainage"> Drainage & unblocking
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" name="skills" value="radiator"> Radiator repairs
+                        </label>
+                        <label class="checkbox-group">
+                            <input type="checkbox" name="skills" value="kitchen"> Kitchen fitting
+                        </label>
+                    </div>
+                </div>
+
+                <div style="background: #f0fdf4; border: 2px solid #86efac; border-radius: 8px; padding: 15px; margin-bottom: 20px;">
+                    <strong style="color: #166534;">💰 How You Get Paid:</strong>
+                    <p style="color: #166534; margin-top: 10px; line-height: 1.6;">
+                        • You'll see each job with full pricing upfront<br>
+                        • Accept only the jobs you want<br>
+                        • We auto-calculate your earnings based on the job<br>
+                        • Only pay a small lead fee (£10-25) when you accept<br>
+                        • Average job value: £150-300
+                    </p>
+                </div>
+
+                <button type="submit" class="btn btn-primary">Complete Registration →</button>
+                <button type="button" class="btn btn-secondary" onclick="backToStep1()">← Back</button>
+            </form>
+
+            <!-- Success Message -->
+            <div id="successMessage" class="hidden">
+                <div class="success-message">
+                    <h2>✅ Registration Complete!</h2>
+                    <p>Welcome to PlumberFlow! Your account has been created successfully.</p>
+                    <p>You can now start receiving and accepting leads from customers in your area.</p>
+                    <button class="btn btn-primary" onclick="location.href='plumber-dashboard.html'">Go to Dashboard</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        function goToStep2(e) {
+            e.preventDefault();
+            
+            // Validate step 1
+            const form = document.getElementById('step1');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return false;
+            }
+            
+            // Hide step 1
+            document.getElementById('step1').classList.add('hidden');
+            
+            // Show step 2
+            document.getElementById('step2').classList.remove('hidden');
+            
+            // Update indicators
+            document.getElementById('step2Indicator').classList.add('active');
+            
+            return false;
+        }
+
+        function backToStep1() {
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('step1').classList.remove('hidden');
+            document.getElementById('step2Indicator').classList.remove('active');
+        }
+
+        function completeRegistration(e) {
+            e.preventDefault();
+            
+            // Check at least one skill is selected
+            const skills = Array.from(document.querySelectorAll('input[name="skills"]:checked'));
+            if (skills.length === 0) {
+                alert('Please select at least one skill');
+                return false;
+            }
+            
+            // Collect all form data
+            const plumberData = {
+                businessName: document.getElementById('businessName').value,
+                fullName: document.getElementById('fullName').value,
+                email: document.getElementById('email').value,
+                phone: document.getElementById('phone').value,
+                postcode: document.getElementById('postcode').value,
+                password: document.getElementById('password').value,
+                gasSafe: document.getElementById('gasSafe').checked,
+                gasSafeNumber: document.getElementById('gasSafeNumber').value,
+                skills: skills.map(cb => cb.value),
+                registeredAt: new Date().toISOString()
+            };
+
+            // In production: Send to API
+            console.log('Registering plumber:', plumberData);
+
+            // Save to localStorage for demo
+            localStorage.setItem('plumberData', JSON.stringify(plumberData));
+            
+            // Set user session
+            localStorage.setItem('currentUser', JSON.stringify({
+                email: plumberData.email,
+                userType: 'plumber',
+                loggedIn: true
+            }));
+
+            // Hide form, show success
+            document.getElementById('step2').classList.add('hidden');
+            document.getElementById('successMessage').classList.remove('hidden');
+            document.querySelector('.step-indicator').style.display = 'none';
+            
+            return false;
+        }
+    </script>
+</body>
+</html>
