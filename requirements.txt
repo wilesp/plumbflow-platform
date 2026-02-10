@@ -1,0 +1,34 @@
+# ============================================================================
+# PLUMBERFLOW - Production Requirements (Minimal)
+# ============================================================================
+
+# Core Database
+psycopg2-binary==2.9.9
+
+# API Framework
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+pydantic==2.5.0
+python-multipart==0.0.6
+
+# Payment Processing
+stripe==7.4.0
+
+# Notifications
+twilio==8.10.0
+sendgrid==6.11.0
+
+# Authentication & Tokens
+PyJWT==2.8.0
+
+# AI / Pricing
+openai==1.10.0
+
+# Utilities
+python-dateutil==2.8.2
+pytz==2023.3
+phonenumbers==8.13.26
+requests==2.31.0
+
+# Environment Variables
+python-dotenv==1.0.0
