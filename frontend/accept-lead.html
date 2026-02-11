@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Accept Lead - PlumberFlow</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+
+        .header .emoji {
+            font-size: 48px;
+            margin-bottom: 10px;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .job-details {
+            background: #f8f9fa;
+            border-left: 4px solid #1e3a5f;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+
+        .job-details h3 {
+            color: #1e3a5f;
+            margin-bottom: 15px;
+            font-size: 18px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 600;
+            color: #666;
+        }
+
+        .detail-value {
+            color: #333;
+            text-align: right;
+        }
+
+        .price-estimate {
+            background: #e8f5e9;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px solid #4caf50;
+        }
+
+        .price-range {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            font-weight: bold;
+            color: #2e7d32;
+        }
+
+        .lead-fee {
+            background: #fff3cd;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #ffc107;
+        }
+
+        .lead-fee strong {
+            color: #856404;
+            font-size: 18px;
+        }
+
+        .description {
+            background: white;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .description h4 {
+            margin-bottom: 10px;
+            color: #1e3a5f;
+        }
+
+        .timer {
+            background: #fee;
+            border: 2px solid #f44336;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .timer strong {
+            color: #d32f2f;
+            font-size: 24px;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-accept {
+            background: #4caf50;
+            color: white;
+        }
+
+        .btn-accept:hover {
+            background: #45a049;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+        }
+
+        .btn-decline {
+            background: #f44336;
+            color: white;
+        }
+
+        .btn-decline:hover {
+            background: #da190b;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #1e3a5f;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .success-message {
+            display: none;
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            padding: 30px;
+            border-radius: 8px;
+            text-align: center;
+        }
+
+        .success-message h2 {
+            color: #2e7d32;
+            margin-bottom: 15px;
+        }
+
+        .customer-details {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            text-align: left;
+        }
+
+        .customer-details h3 {
+            color: #1e3a5f;
+            margin-bottom: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="emoji">🔔</div>
+            <h1>New Lead Available</h1>
+            <p>PlumberFlow</p>
+        </div>
+
+        <div class="content" id="leadContent">
+            <div class="timer" id="timer">
+                <p>This lead expires in:</p>
+                <strong id="timeRemaining">Loading...</strong>
+            </div>
+
+            <div class="job-details">
+                <h3 id="jobTitle">Loading job details...</h3>
+                
+                <div class="detail-row">
+                    <span class="detail-label">📍 Location:</span>
+                    <span class="detail-value" id="postcode">-</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">⏰ Urgency:</span>
+                    <span class="detail-value" id="urgency">-</span>
+                </div>
+                
+                <div class="detail-row">
+                    <span class="detail-label">📏 Distance:</span>
+                    <span class="detail-value" id="distance">-</span>
+                </div>
+            </div>
+
+            <div class="price-estimate">
+                <div class="price-range">
+                    <span>£<span id="priceLow">-</span></span>
+                    <span>→</span>
+                    <span>£<span id="priceHigh">-</span></span>
+                </div>
+                <p style="text-align: center; margin-top: 5px; color: #666; font-size: 14px;">Estimated Job Value</p>
+            </div>
+
+            <div class="description">
+                <h4>Job Description:</h4>
+                <p id="description">Loading...</p>
+            </div>
+
+            <div class="lead-fee">
+                💳 <strong>Lead Fee: £<span id="leadFee">-</span></strong>
+                <p style="margin-top: 5px; color: #856404; font-size: 14px;">Charged to your card if you accept</p>
+            </div>
+
+            <div class="buttons">
+                <button class="btn btn-decline" onclick="declineLead()">Decline</button>
+                <button class="btn btn-accept" onclick="acceptLead()" id="acceptBtn">
+                    ✅ Accept Lead
+                </button>
+            </div>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p>Processing...</p>
+        </div>
+
+        <div class="success-message" id="successMessage">
+            <h2>✅ Lead Accepted!</h2>
+            <p>Your card has been charged £<span id="chargedAmount">-</span></p>
+            
+            <div class="customer-details">
+                <h3>Customer Details:</h3>
+                <div class="detail-row">
+                    <span class="detail-label">👤 Name:</span>
+                    <span class="detail-value" id="customerName">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">📞 Phone:</span>
+                    <span class="detail-value" id="customerPhone">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">📧 Email:</span>
+                    <span class="detail-value" id="customerEmail">-</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">📍 Address:</span>
+                    <span class="detail-value" id="customerAddress">-</span>
+                </div>
+            </div>
+
+            <p style="margin-top: 20px; font-weight: bold; color: #2e7d32;">
+                📞 Call the customer NOW to book the appointment!
+            </p>
+
+            <p style="margin-top: 15px; font-size: 14px; color: #666;">
+                A confirmation SMS has been sent to your phone.
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Get token from URL
+        const pathParts = window.location.pathname.split('/');
+        const token = pathParts[pathParts.length - 1];
+
+        let jobData = null;
+        let timerInterval = null;
+
+        // Load job details on page load
+        window.onload = async function() {
+            await loadJobDetails();
+            startTimer();
+        };
+
+        async function loadJobDetails() {
+            try {
+                // Decode token to get job ID
+                const response = await fetch('/api/leads/accept', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({token: token, action: 'preview'})
+                });
+
+                // For now, show mock data
+                // TODO: Replace with actual API call
+                jobData = {
+                    job_id: 'JOB-12345',
+                    job_type: 'Leaking Tap',
+                    description: 'Kitchen mixer tap dripping constantly. Tap is 8+ years old. Customer has turned off water supply.',
+                    postcode: 'SW19 2AB',
+                    urgency: 'Today',
+                    price_low: 161,
+                    price_high: 218,
+                    lead_fee: 18,
+                    distance_miles: 1.2,
+                    expires_at: new Date(Date.now() + 120 * 60 * 1000).toISOString() // 2 hours from now
+                };
+
+                displayJobDetails(jobData);
+                
+            } catch (error) {
+                console.error('Error loading job:', error);
+                alert('Failed to load job details. Please try again.');
+            }
+        }
+
+        function displayJobDetails(job) {
+            document.getElementById('jobTitle').textContent = job.job_type;
+            document.getElementById('postcode').textContent = job.postcode;
+            document.getElementById('urgency').textContent = job.urgency;
+            document.getElementById('distance').textContent = job.distance_miles + ' miles';
+            document.getElementById('priceLow').textContent = job.price_low;
+            document.getElementById('priceHigh').textContent = job.price_high;
+            document.getElementById('description').textContent = job.description;
+            document.getElementById('leadFee').textContent = job.lead_fee;
+        }
+
+        function startTimer() {
+            if (!jobData) return;
+
+            timerInterval = setInterval(() => {
+                const now = new Date();
+                const expires = new Date(jobData.expires_at);
+                const diff = expires - now;
+
+                if (diff <= 0) {
+                    clearInterval(timerInterval);
+                    document.getElementById('timeRemaining').textContent = 'EXPIRED';
+                    document.getElementById('acceptBtn').disabled = true;
+                    return;
+                }
+
+                const minutes = Math.floor(diff / 60000);
+                const seconds = Math.floor((diff % 60000) / 1000);
+
+                document.getElementById('timeRemaining').textContent = 
+                    `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            }, 1000);
+        }
+
+        async function acceptLead() {
+            // Confirm
+            if (!confirm(`Accept this lead for £${jobData.lead_fee}?\n\nYour card will be charged immediately.`)) {
+                return;
+            }
+
+            // Show loading
+            document.getElementById('leadContent').style.display = 'none';
+            document.getElementById('loading').style.display = 'block';
+
+            try {
+                const response = await fetch('/api/leads/accept', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({token: token})
+                });
+
+                const result = await response.json();
+
+                if (!result.success) {
+                    throw new Error(result.message || 'Failed to accept lead');
+                }
+
+                // Show success with customer details
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('successMessage').style.display = 'block';
+
+                document.getElementById('chargedAmount').textContent = result.lead_fee;
+                document.getElementById('customerName').textContent = result.customer_details.name;
+                document.getElementById('customerPhone').textContent = result.customer_details.phone;
+                document.getElementById('customerEmail').textContent = result.customer_details.email || 'Not provided';
+                document.getElementById('customerAddress').textContent = 
+                    result.customer_details.address || result.customer_details.postcode;
+
+                // Clear timer
+                if (timerInterval) {
+                    clearInterval(timerInterval);
+                }
+
+            } catch (error) {
+                console.error('Error accepting lead:', error);
+                alert('Error: ' + error.message);
+                
+                // Show content again
+                document.getElementById('loading').style.display = 'none';
+                document.getElementById('leadContent').style.display = 'block';
+            }
+        }
+
+        function declineLead() {
+            if (confirm('Are you sure you want to decline this lead? It will be offered to other plumbers.')) {
+                // Show declining message
+                document.getElementById('leadContent').innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px;">
+                        <div style="font-size: 48px; margin-bottom: 20px;">👍</div>
+                        <h2 style="color: #0c4a6e; margin-bottom: 15px;">Lead Declined</h2>
+                        <p style="color: #64748b; font-size: 16px; margin-bottom: 30px;">
+                            No problem! We'll send this lead to other plumbers in your area.
+                        </p>
+                        <p style="color: #64748b; font-size: 14px; margin-bottom: 30px;">
+                            Keep an eye out for more leads that match your preferences!
+                        </p>
+                        <button onclick="window.close()" class="btn btn-primary" style="margin-right: 10px;">Close Window</button>
+                        <a href="/" class="btn btn-secondary">Back to Homepage</a>
+                    </div>
+                `;
+                
+                // Optionally call API to record the decline
+                fetch('/api/leads/decline', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({token: leadData.token})
+                }).catch(err => console.log('Decline logged'));
+            }
+        }
+    </script>
+</body>
+</html>
