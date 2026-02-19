@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PlumbFlow - Scraper Control</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #2c5282 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            color: #1e3a5f;
+            margin-bottom: 10px;
+        }
+        
+        .subtitle {
+            color: #64748b;
+        }
+        
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            color: #1e3a5f;
+            margin-bottom: 20px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #0ea5e9;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #0284c7;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-secondary {
+            background: #64748b;
+            color: white;
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .status-box {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 8px;
+            border: 2px solid #e2e8f0;
+            margin: 20px 0;
+        }
+        
+        .status-running {
+            border-color: #0ea5e9;
+            background: #e0f2fe;
+        }
+        
+        .status-complete {
+            border-color: #10b981;
+            background: #d1fae5;
+        }
+        
+        .status-error {
+            border-color: #ef4444;
+            background: #fee2e2;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 30px;
+            background: #e2e8f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #0ea5e9 0%, #06b6d4 100%);
+            transition: width 0.3s;
+            text-align: center;
+            line-height: 30px;
+            color: white;
+            font-weight: 600;
+        }
+        
+        .log-box {
+            background: #1e293b;
+            color: #10b981;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 400px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+        
+        .log-entry {
+            margin: 5px 0;
+        }
+        
+        .log-info { color: #0ea5e9; }
+        .log-success { color: #10b981; }
+        .log-warning { color: #f59e0b; }
+        .log-error { color: #ef4444; }
+        
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔧 PlumbFlow Scraper Control</h1>
+            <p class="subtitle">Google Maps API | 222 postcodes | Home Counties Coverage</p>
+        </div>
+        
+        <div class="card">
+            <h2>🚀 Scraper Controls</h2>
+            
+            <div class="button-group">
+                <button class="btn-success" onclick="testRun()" id="testBtn">
+                    🧪 Test Run (5 postcodes)
+                </button>
+                <button class="btn-primary" onclick="fullRun()" id="fullBtn">
+                    🚀 Full Run (222 postcodes)
+                </button>
+                <button class="btn-danger" onclick="stopScraper()" id="stopBtn" style="display:none;">
+                    🛑 Stop Scraper
+                </button>
+                <button class="btn-secondary" onclick="refreshStatus()">
+                    🔄 Refresh
+                </button>
+            </div>
+            
+            <div id="statusBox" class="status-box hidden">
+                <div id="statusContent"></div>
+                <div class="progress-bar" id="progressBar" style="display:none;">
+                    <div class="progress-fill" id="progressFill">0%</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2>📊 Activity Log</h2>
+            <div class="log-box" id="logBox">
+                <div class="log-entry log-info">[Ready] Scraper ready to start...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let statusInterval = null;
+        
+        function addLog(msg, type = 'info') {
+            const logBox = document.getElementById('logBox');
+            const time = new Date().toLocaleTimeString();
+            const entry = document.createElement('div');
+            entry.className = `log-entry log-${type}`;
+            entry.textContent = `[${time}] ${msg}`;
+            logBox.insertBefore(entry, logBox.firstChild);
+            
+            while (logBox.children.length > 50) {
+                logBox.removeChild(logBox.lastChild);
+            }
+        }
+        
+        async function testRun() {
+            const confirm = window.confirm('Start test run?\n\n• 5 postcodes\n• ~50 plumbers\n• 1 minute\n• Cost: ~£1');
+            if (!confirm) return;
+            
+            addLog('🧪 Starting test run (5 postcodes)...', 'info');
+            await startScraper(5);
+        }
+        
+        async function fullRun() {
+            const confirm = window.confirm(
+                'Start FULL scraper?\n\n' +
+                '• 222 postcodes\n' +
+                '• ~2,220 plumbers\n' +
+                '• 30-40 minutes\n' +
+                '• Cost: ~£35-40\n\n' +
+                'Continue?'
+            );
+            if (!confirm) return;
+            
+            addLog('🚀 Starting FULL run (222 postcodes)...', 'success');
+            await startScraper();
+        }
+        
+        async function startScraper(limit = null) {
+            try {
+                // Disable buttons
+                document.getElementById('testBtn').disabled = true;
+                document.getElementById('fullBtn').disabled = true;
+                
+                const body = limit ? JSON.stringify({ limit }) : '{}';
+                
+                const response = await fetch('/api/scraper/start', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: body
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'started' || data.status === 'success') {
+                    addLog('✅ Scraper started!', 'success');
+                    document.getElementById('stopBtn').style.display = 'inline-block';
+                    startStatusPolling();
+                } else if (data.status === 'already_running') {
+                    addLog('⚠️ Already running', 'warning');
+                    startStatusPolling();
+                } else {
+                    addLog('❌ Error: ' + (data.message || 'Unknown'), 'error');
+                    document.getElementById('testBtn').disabled = false;
+                    document.getElementById('fullBtn').disabled = false;
+                }
+            } catch (error) {
+                addLog('❌ Failed: ' + error.message, 'error');
+                document.getElementById('testBtn').disabled = false;
+                document.getElementById('fullBtn').disabled = false;
+            }
+        }
+        
+        async function stopScraper() {
+            try {
+                await fetch('/api/scraper/stop');
+                addLog('🛑 Stop signal sent', 'warning');
+                document.getElementById('stopBtn').style.display = 'none';
+                stopStatusPolling();
+            } catch (error) {
+                addLog('❌ Stop failed: ' + error.message, 'error');
+            }
+        }
+        
+        async function refreshStatus() {
+            await updateStatus();
+        }
+        
+        async function updateStatus() {
+            try {
+                const response = await fetch('/api/scraper/status');
+                const data = await response.json();
+                
+                const statusBox = document.getElementById('statusBox');
+                const statusContent = document.getElementById('statusContent');
+                const progressBar = document.getElementById('progressBar');
+                const progressFill = document.getElementById('progressFill');
+                
+                statusBox.classList.remove('hidden');
+                
+                if (data.running) {
+                    statusBox.className = 'status-box status-running';
+                    document.getElementById('stopBtn').style.display = 'inline-block';
+                    
+                    const progress = data.postcodes_total > 0 
+                        ? Math.round((data.postcodes_done / data.postcodes_total) * 100)
+                        : 0;
+                    
+                    progressBar.style.display = 'block';
+                    progressFill.style.width = progress + '%';
+                    progressFill.textContent = `${progress}% (${data.postcodes_done}/${data.postcodes_total})`;
+                    
+                    const cost = ((data.actual_api_calls || 0) * 0.017).toFixed(2);
+                    
+                    statusContent.innerHTML = `
+                        <h3>🔄 Scraper Running</h3>
+                        <p><strong>Current:</strong> ${data.current_postcode || 'Starting...'}</p>
+                        <p><strong>Progress:</strong> ${data.postcodes_done} / ${data.postcodes_total} postcodes</p>
+                        <p><strong>Saved:</strong> ${data.total_saved} plumbers</p>
+                        <p><strong>API calls:</strong> ${data.actual_api_calls || 0}</p>
+                        <p><strong>Cost so far:</strong> £${cost}</p>
+                    `;
+                    
+                    addLog(`Progress: ${data.postcodes_done}/${data.postcodes_total} | Saved: ${data.total_saved}`, 'info');
+                    
+                } else if (data.completed_at && !data.error) {
+                    statusBox.className = 'status-box status-complete';
+                    document.getElementById('stopBtn').style.display = 'none';
+                    document.getElementById('testBtn').disabled = false;
+                    document.getElementById('fullBtn').disabled = false;
+                    progressBar.style.display = 'none';
+                    
+                    const cost = ((data.actual_api_calls || 0) * 0.017).toFixed(2);
+                    
+                    statusContent.innerHTML = `
+                        <h3>✅ Complete!</h3>
+                        <p><strong>Total saved:</strong> ${data.total_saved} plumbers</p>
+                        <p><strong>API calls:</strong> ${data.actual_api_calls}</p>
+                        <p><strong>Final cost:</strong> £${cost}</p>
+                        <p><strong>Completed:</strong> ${new Date(data.completed_at).toLocaleString()}</p>
+                    `;
+                    
+                    addLog(`✅ COMPLETE! ${data.total_saved} plumbers | £${cost}`, 'success');
+                    stopStatusPolling();
+                    
+                } else if (data.error) {
+                    statusBox.className = 'status-box status-error';
+                    document.getElementById('stopBtn').style.display = 'none';
+                    document.getElementById('testBtn').disabled = false;
+                    document.getElementById('fullBtn').disabled = false;
+                    
+                    statusContent.innerHTML = `
+                        <h3>❌ Error</h3>
+                        <p>${data.error}</p>
+                    `;
+                    
+                    addLog('❌ ' + data.error, 'error');
+                    stopStatusPolling();
+                }
+                
+            } catch (error) {
+                addLog('⚠️ Status check failed: ' + error.message, 'warning');
+            }
+        }
+        
+        function startStatusPolling() {
+            if (statusInterval) return;
+            statusInterval = setInterval(updateStatus, 3000);
+            updateStatus();
+        }
+        
+        function stopStatusPolling() {
+            if (statusInterval) {
+                clearInterval(statusInterval);
+                statusInterval = null;
+            }
+        }
+        
+        // Auto-check status on load
+        updateStatus();
+    </script>
+</body>
+</html>
