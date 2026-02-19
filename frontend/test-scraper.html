@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PlumbFlow Scraper Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        button {
+            padding: 15px 30px;
+            font-size: 16px;
+            margin: 10px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+            color: white;
+            font-weight: bold;
+        }
+        .test { background: #10b981; }
+        .full { background: #0ea5e9; }
+        .status { background: #64748b; }
+        .results { background: #8b5cf6; }
+        #output {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            white-space: pre-wrap;
+            font-family: monospace;
+            max-height: 500px;
+            overflow-y: auto;
+        }
+        h1 { color: #1e3a5f; }
+    </style>
+</head>
+<body>
+    <h1>🔧 PlumbFlow Scraper Test</h1>
+    <p>Test your deployed scraper:</p>
+    
+    <div>
+        <button class="test" onclick="testRun()">🧪 Test Run (5 postcodes)</button>
+        <button class="full" onclick="fullRun()">🚀 Full Run (222 postcodes)</button>
+        <button class="status" onclick="checkStatus()">📊 Check Status</button>
+        <button class="results" onclick="viewResults()">👀 View Results</button>
+    </div>
+    
+    <div id="output">Ready to test...</div>
+    
+    <script>
+        const API_BASE = 'https://plumberflow.co.uk/api';
+        
+        function log(msg) {
+            const output = document.getElementById('output');
+            const time = new Date().toLocaleTimeString();
+            output.textContent = `[${time}] ${msg}\n\n` + output.textContent;
+        }
+        
+        async function testRun() {
+            log('🧪 Starting test run (5 postcodes)...');
+            try {
+                const response = await fetch(`${API_BASE}/scraper/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ limit: 5 })
+                });
+                const data = await response.json();
+                log('Response: ' + JSON.stringify(data, null, 2));
+                
+                if (data.status === 'started' || data.status === 'success') {
+                    log('✅ Scraper started! Use "Check Status" button to monitor...');
+                    setTimeout(checkStatus, 3000);
+                }
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+        
+        async function fullRun() {
+            const confirm = window.confirm(
+                'Start FULL scraper?\n\n' +
+                '• 222 postcodes\n' +
+                '• ~2,220 plumbers\n' +
+                '• 30-40 minutes\n' +
+                '• Cost: ~£35-40\n\n' +
+                'Continue?'
+            );
+            
+            if (!confirm) return;
+            
+            log('🚀 Starting FULL run (222 postcodes)...');
+            try {
+                const response = await fetch(`${API_BASE}/scraper/start`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({})
+                });
+                const data = await response.json();
+                log('Response: ' + JSON.stringify(data, null, 2));
+                
+                if (data.status === 'started' || data.status === 'success') {
+                    log('✅ Scraper started! Use "Check Status" to monitor...');
+                    setTimeout(checkStatus, 3000);
+                }
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+        
+        async function checkStatus() {
+            log('📊 Checking status...');
+            try {
+                const response = await fetch(`${API_BASE}/scraper/status`);
+                const data = await response.json();
+                
+                if (data.running) {
+                    const progress = data.postcodes_total > 0 
+                        ? Math.round((data.postcodes_done / data.postcodes_total) * 100)
+                        : 0;
+                    const cost = ((data.actual_api_calls || 0) * 0.017).toFixed(2);
+                    
+                    log(
+                        `🔄 RUNNING:\n` +
+                        `  Progress: ${data.postcodes_done}/${data.postcodes_total} (${progress}%)\n` +
+                        `  Current: ${data.current_postcode}\n` +
+                        `  Saved: ${data.total_saved} plumbers\n` +
+                        `  API calls: ${data.actual_api_calls}\n` +
+                        `  Cost: £${cost}`
+                    );
+                } else if (data.completed_at) {
+                    const cost = ((data.actual_api_calls || 0) * 0.017).toFixed(2);
+                    log(
+                        `✅ COMPLETE!\n` +
+                        `  Total saved: ${data.total_saved} plumbers\n` +
+                        `  API calls: ${data.actual_api_calls}\n` +
+                        `  Final cost: £${cost}\n` +
+                        `  Completed: ${new Date(data.completed_at).toLocaleString()}`
+                    );
+                } else {
+                    log('Status: ' + JSON.stringify(data, null, 2));
+                }
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+        
+        async function viewResults() {
+            log('👀 Fetching results...');
+            try {
+                const response = await fetch(`${API_BASE}/scraper/results?limit=20`);
+                const data = await response.json();
+                
+                log(`Found ${data.count} plumbers:\n\n` + 
+                    JSON.stringify(data.plumbers.slice(0, 5), null, 2) +
+                    `\n\n...and ${data.count - 5} more`
+                );
+            } catch (error) {
+                log('❌ Error: ' + error.message);
+            }
+        }
+        
+        // Auto-check status on load
+        checkStatus();
+    </script>
+</body>
+</html>
