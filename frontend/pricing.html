@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Plans - Best Trade | Join the UK's #1 Trade Marketplace</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #1e3a5f;
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+        
+        .container { max-width: 1200px; margin: 0 auto; }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 50px;
+        }
+        
+        h1 { font-size: 2.5rem; margin-bottom: 10px; }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .plan {
+            background: white;
+            border-radius: 15px;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            transition: transform 0.3s;
+        }
+        
+        .plan:hover {
+            transform: translateY(-5px);
+        }
+        
+        .plan.popular {
+            transform: scale(1.05);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        
+        .plan.popular::before {
+            content: "MOST POPULAR";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #10b981;
+            color: white;
+            padding: 8px 25px;
+            border-radius: 25px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+        }
+        
+        .plan-name {
+            font-size: 1.8rem;
+            color: #1e3a5f;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .plan-price {
+            font-size: 3.5rem;
+            color: #1e3a5f;
+            font-weight: bold;
+            margin: 20px 0;
+        }
+        
+        .plan-price span {
+            font-size: 1.3rem;
+            color: #666;
+            font-weight: normal;
+        }
+        
+        .savings {
+            color: #10b981;
+            font-weight: 600;
+            margin: -10px 0 20px;
+            font-size: 1.1rem;
+        }
+        
+        .plan-features {
+            list-style: none;
+            margin: 30px 0;
+            text-align: left;
+        }
+        
+        .plan-features li {
+            padding: 12px 0;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 0.95rem;
+        }
+        
+        .plan-features li:last-child {
+            border-bottom: none;
+        }
+        
+        .plan-features li::before {
+            content: "✓ ";
+            color: #10b981;
+            font-weight: bold;
+            margin-right: 10px;
+            font-size: 1.2rem;
+        }
+        
+        .plan-features li.disabled {
+            color: #ccc;
+        }
+        
+        .plan-features li.disabled::before {
+            content: "✗ ";
+            color: #ccc;
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .btn-basic {
+            background: #1e3a5f;
+            color: white;
+        }
+        
+        .btn-basic:hover {
+            background: #2d4a70;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 58, 95, 0.4);
+        }
+        
+        .btn-pro {
+            background: #1e3a5f;
+            color: white;
+        }
+        
+        .btn-pro:hover {
+            background: #2d4a70;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(30, 58, 95, 0.5);
+        }
+        
+        .btn-premium {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-premium:hover {
+            background: #059669;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(16, 185, 129, 0.4);
+        }
+        
+        .back-link {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        .back-link a {
+            color: white;
+            text-decoration: none;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .back-link a:hover {
+            opacity: 1;
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
+            h1 { font-size: 2rem; }
+            .plan.popular { transform: scale(1); }
+            .plan-price { font-size: 2.8rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Choose Your Plan</h1>
+            <p class="subtitle">Best Trade - UK's #1 All Trades Marketplace</p>
+        </header>
+        
+        <div class="pricing-grid">
+            <!-- BASIC PLAN -->
+            <div class="plan">
+                <div class="plan-name">BASIC</div>
+                <div class="plan-price">£20<span>/month</span></div>
+                
+                <ul class="plan-features">
+                    <li>Unlimited quote submissions</li>
+                    <li>Jobs within 10 mile radius</li>
+                    <li>Email notifications</li>
+                    <li>Basic profile page</li>
+                    <li>Customer reviews</li>
+                    <li class="disabled">SMS alerts</li>
+                    <li class="disabled">Priority listing</li>
+                    <li class="disabled">Verified badge</li>
+                </ul>
+                
+                <button class="btn btn-basic" onclick="selectPlan('basic')">
+                    Choose Basic
+                </button>
+            </div>
+            
+            <!-- PRO PLAN -->
+            <div class="plan popular">
+                <div class="plan-name">PRO</div>
+                <div class="plan-price">£30<span>/month</span></div>
+                
+                <ul class="plan-features">
+                    <li>Everything in Basic, PLUS:</li>
+                    <li>Jobs within 20 mile radius</li>
+                    <li>Instant SMS notifications</li>
+                    <li>Priority listing (shown 2nd)</li>
+                    <li>Advanced profile customization</li>
+                    <li>Job analytics dashboard</li>
+                    <li>Email & SMS support</li>
+                    <li class="disabled">Top listing</li>
+                </ul>
+                
+                <button class="btn btn-pro" onclick="selectPlan('pro')">
+                    Choose Pro
+                </button>
+            </div>
+            
+            <!-- PREMIUM PLAN -->
+            <div class="plan">
+                <div class="plan-name">PREMIUM</div>
+                <div class="plan-price">£200<span>/year</span></div>
+                <p class="savings">Save £160/year!</p>
+                
+                <ul class="plan-features">
+                    <li>Everything in Pro, PLUS:</li>
+                    <li>UK-wide job coverage</li>
+                    <li>TOP listing (shown FIRST)</li>
+                    <li>Verified badge ✓</li>
+                    <li>Featured on homepage</li>
+                    <li>Priority customer support</li>
+                    <li>Monthly performance reports</li>
+                    <li>Cancel anytime</li>
+                </ul>
+                
+                <button class="btn btn-premium" onclick="selectPlan('premium')">
+                    Choose Premium
+                </button>
+            </div>
+        </div>
+        
+        <div class="back-link">
+            <a href="/">← Back to Home</a>
+        </div>
+    </div>
+    
+    <script>
+        function selectPlan(tier) {
+            // Store selected tier and redirect to registration
+            sessionStorage.setItem('selectedTier', tier);
+            window.location.href = `/plumber-register.html?tier=${tier}`;
+        }
+    </script>
+</body>
+</html>
