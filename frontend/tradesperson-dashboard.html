@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Best Trade | Your Trade Marketplace</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: #f5f7fa;
+        }
+        
+        .header {
+            background: #1e3a5f;
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo { 
+            font-size: 1.5rem; 
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .logo-tick {
+            width: 24px;
+            height: 24px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .logo-tick svg {
+            width: 14px;
+            height: 14px;
+            fill: white;
+        }
+        
+        .subscription-badge {
+            background: rgba(255,255,255,0.2);
+            padding: 8px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+        
+        .subscription-badge.pro { background: #10b981; }
+        .subscription-badge.premium { background: #f59e0b; }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e3a5f;
+        }
+        
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        h2 {
+            color: #1e3a5f;
+            font-size: 1.8rem;
+        }
+        
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #1e3a5f;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2d4a70;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .jobs-list {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        
+        .job-card {
+            padding: 25px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .job-card:last-child {
+            border-bottom: none;
+        }
+        
+        .job-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 15px;
+        }
+        
+        .job-title {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: #1e3a5f;
+            margin-bottom: 5px;
+        }
+        
+        .job-meta {
+            display: flex;
+            gap: 15px;
+            color: #666;
+            font-size: 0.9rem;
+            margin-bottom: 15px;
+        }
+        
+        .job-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+        
+        .badge-emergency {
+            background: #fee2e2;
+            color: #dc2626;
+        }
+        
+        .badge-today {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .badge-normal {
+            background: #dbeafe;
+            color: #1e3a5f;
+        }
+        
+        .job-description {
+            color: #374151;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+        
+        .job-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn-quote {
+            background: #10b981;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        
+        .btn-quote:hover {
+            background: #059669;
+        }
+        
+        .btn-quoted {
+            background: #e5e7eb;
+            color: #6b7280;
+            cursor: not-allowed;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+        }
+        
+        .modal-content {
+            background: white;
+            max-width: 600px;
+            margin: 100px auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .modal-header h3 {
+            font-size: 1.5rem;
+            color: #1e3a5f;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 1rem;
+        }
+        
+        .form-group textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+        
+        .empty-state h3 {
+            color: #1e3a5f;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span class="logo-tick">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </span>
+                Best Trade
+            </div>
+            <div>
+                <span class="subscription-badge" id="subscriptionBadge">Loading...</span>
+            </div>
+        </div>
+    </div>
+    
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-label">Subscription</div>
+                <div class="stat-value" id="tierDisplay">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Coverage Radius</div>
+                <div class="stat-value" id="radiusDisplay">-</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Available Jobs</div>
+                <div class="stat-value" id="jobsCount">0</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Quotes Sent</div>
+                <div class="stat-value" id="quotesCount">0</div>
+            </div>
+        </div>
+        
+        <!-- Jobs Section -->
+        <div class="section-header">
+            <h2>Available Jobs</h2>
+            <button class="btn btn-primary" onclick="refreshJobs()">🔄 Refresh</button>
+        </div>
+        
+        <div id="jobsList" class="jobs-list">
+            <div class="loading">Loading available jobs...</div>
+        </div>
+    </div>
+    
+    <!-- Quote Modal -->
+    <div id="quoteModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Send Quote</h3>
+                <button class="close-btn" onclick="closeQuoteModal()">×</button>
+            </div>
+            
+            <form id="quoteForm" onsubmit="submitQuote(event)">
+                <input type="hidden" id="quoteJobId">
+                
+                <div class="form-group">
+                    <label>Quote Amount (£)</label>
+                    <input type="number" id="quoteAmount" step="0.01" min="0" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Message to Customer</label>
+                    <textarea id="quoteMessage" placeholder="Tell the customer about your quote, availability, and experience..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn btn-success" style="width: 100%;">
+                    Send Quote
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // Get plumber ID from URL or session
+        const urlParams = new URLSearchParams(window.location.search);
+        const plumberId = urlParams.get('id') || sessionStorage.getItem('plumberId') || 1; // Default to 1 for testing
+        
+        let currentJobs = [];
+        
+        // Load subscription status
+        async function loadSubscriptionStatus() {
+            try {
+                const response = await fetch(`/api/subscription/status?plumber_id=${plumberId}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    const sub = data.subscription;
+                    document.getElementById('subscriptionBadge').textContent = sub.tier.toUpperCase();
+                    document.getElementById('subscriptionBadge').className = `subscription-badge ${sub.tier}`;
+                    document.getElementById('tierDisplay').textContent = sub.tier.toUpperCase();
+                    document.getElementById('radiusDisplay').textContent = sub.features.radius_miles + ' miles';
+                }
+            } catch (error) {
+                console.error('Error loading subscription:', error);
+            }
+        }
+        
+        // Load available jobs
+        async function loadJobs() {
+            try {
+                const response = await fetch(`/api/jobs/browse?plumber_id=${plumberId}`);
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    currentJobs = data.jobs;
+                    displayJobs(data.jobs);
+                    document.getElementById('jobsCount').textContent = data.jobs_count;
+                } else {
+                    document.getElementById('jobsList').innerHTML = `
+                        <div class="empty-state">
+                            <h3>${data.message}</h3>
+                            <p>Subscribe to start receiving job leads!</p>
+                            <button class="btn btn-primary" onclick="window.location.href='/pricing.html'">
+                                View Plans
+                            </button>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error loading jobs:', error);
+                document.getElementById('jobsList').innerHTML = `
+                    <div class="empty-state">
+                        <h3>Error loading jobs</h3>
+                        <p>Please try again later</p>
+                    </div>
+                `;
+            }
+        }
+        
+        // Display jobs
+        function displayJobs(jobs) {
+            const container = document.getElementById('jobsList');
+            
+            if (jobs.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <h3>No jobs available right now</h3>
+                        <p>Check back soon for new opportunities!</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            container.innerHTML = jobs.map(job => `
+                <div class="job-card">
+                    <div class="job-header">
+                        <div>
+                            <div class="job-title">${job.job_type || 'General Job'}</div>
+                            <div class="job-meta">
+                                <span>📍 ${job.postcode}</span>
+                                <span>💰 Est. £${job.estimated_value || 'TBC'}</span>
+                                <span>${new Date(job.created_at).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                        <span class="badge badge-${job.urgency}">${job.urgency.toUpperCase()}</span>
+                    </div>
+                    
+                    <div class="job-description">
+                        ${job.description}
+                    </div>
+                    
+                    <div class="job-meta">
+                        <span>👤 ${job.customer_name}</span>
+                    </div>
+                    
+                    <div class="job-actions">
+                        ${job.already_quoted 
+                            ? '<button class="btn-quote btn-quoted" disabled>✓ Already Quoted</button>'
+                            : `<button class="btn-quote" onclick="openQuoteModal(${job.id})">Send Quote</button>`
+                        }
+                    </div>
+                </div>
+            `).join('');
+        }
+        
+        // Open quote modal
+        function openQuoteModal(jobId) {
+            document.getElementById('quoteJobId').value = jobId;
+            document.getElementById('quoteModal').style.display = 'block';
+        }
+        
+        // Close quote modal
+        function closeQuoteModal() {
+            document.getElementById('quoteModal').style.display = 'none';
+            document.getElementById('quoteForm').reset();
+        }
+        
+        // Submit quote
+        async function submitQuote(event) {
+            event.preventDefault();
+            
+            const jobId = document.getElementById('quoteJobId').value;
+            const amount = document.getElementById('quoteAmount').value;
+            const message = document.getElementById('quoteMessage').value;
+            
+            try {
+                const response = await fetch('/api/quote/send', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        job_id: parseInt(jobId),
+                        plumber_id: parseInt(plumberId),
+                        quote_amount: parseFloat(amount),
+                        message: message
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.status === 'success') {
+                    alert('Quote sent successfully!');
+                    closeQuoteModal();
+                    refreshJobs();
+                } else {
+                    alert('Error: ' + (data.message || 'Failed to send quote'));
+                }
+            } catch (error) {
+                console.error('Error sending quote:', error);
+                alert('Error sending quote. Please try again.');
+            }
+        }
+        
+        // Refresh jobs
+        function refreshJobs() {
+            loadJobs();
+        }
+        
+        // Initial load
+        loadSubscriptionStatus();
+        loadJobs();
+        
+        // Auto-refresh every 2 minutes
+        setInterval(refreshJobs, 120000);
+    </script>
+</body>
+</html>
