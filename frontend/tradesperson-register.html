@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register as Trade Professional - Best Trade</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            min-height: 100vh;
+        }
+
+        /* Navigation */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: opacity 0.2s;
+        }
+        
+        .logo:hover {
+            opacity: 0.8;
+        }
+        
+        .logo-tick {
+            width: 32px;
+            height: 32px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+        
+        .logo-tick svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+
+        .form-container {
+            padding: 40px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: calc(100vh - 70px);
+        }
+
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            color: white;
+            padding: 24px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1rem;
+        }
+
+        .tier-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.2);
+            padding: 6px 16px;
+            border-radius: 16px;
+            margin-top: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-size: 0.85rem;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
+        }
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e5e7eb;
+            z-index: 0;
+        }
+
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s;
+        }
+
+        .step.active {
+            background: #1e3a5f;
+            color: white;
+        }
+
+        .step.completed {
+            background: #10b981;
+            color: white;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #1e3a5f;
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+            font-family: inherit;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: #1e3a5f;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: auto;
+        }
+
+        .btn {
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+        }
+
+        .btn:hover {
+            background: #0f172a;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(30, 58, 95, 0.3);
+        }
+
+        .btn:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .btn-secondary {
+            background: #6b7280;
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+
+        /* Stripe Card Element Styling */
+        #card-element {
+            background: white;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            min-height: 44px;
+        }
+
+        .StripeElement {
+            padding: 0;
+        }
+
+        .StripeElement--focus {
+            border-color: #1e3a5f;
+        }
+
+        .StripeElement--invalid {
+            border-color: #ef4444;
+        }
+
+        .error {
+            color: #ef4444;
+            font-size: 0.9rem;
+            margin-top: 5px;
+        }
+
+        .success {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+            color: #065f46;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            color: #1e3a5f;
+        }
+
+        .spinner {
+            border: 3px solid #e5e7eb;
+            border-top: 3px solid #1e3a5f;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .plan-summary {
+            background: #f9fafb;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border: 2px solid #e5e7eb;
+        }
+
+        .plan-summary h3 {
+            color: #1e3a5f;
+            margin-bottom: 10px;
+        }
+
+        .plan-details {
+            display: flex;
+            justify-content: space-between;
+            margin: 10px 0;
+            padding: 10px 0;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .plan-details:last-child {
+            border-bottom: none;
+        }
+
+        .plan-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e3a5f;
+        }
+
+        @media (max-width: 768px) {
+            /* Mobile Navigation Fix */
+            .nav-container {
+                padding: 12px 15px;
+            }
+            
+            .logo {
+                font-size: 18px;
+            }
+            
+            .logo-tick {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .logo-tick svg {
+                width: 16px;
+                height: 16px;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .container {
+                margin: 20px;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .content {
+                padding: 30px 20px;
+            }
+            
+            /* Extra small mobile nav */
+            .logo {
+                font-size: 16px;
+            }
+            
+            .logo-tick {
+                width: 26px;
+                height: 26px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <span class="logo-tick">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </span>
+                BestTrade
+            </a>
+        </div>
+    </nav>
+
+    <div class="form-container">
+        <div class="container">
+            <div class="header">
+                <h1>Join Best Trade</h1>
+                <p>Start receiving quality leads today</p>
+                <div class="tier-badge" id="tierBadge">BASIC PLAN</div>
+            </div>
+
+            <div class="content">
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step active" id="step1">1</div>
+                    <div class="step" id="step2">2</div>
+                    <div class="step" id="step3">3</div>
+                </div>
+
+                <!-- Plan Summary -->
+                <div class="plan-summary" id="planSummary">
+                    <h3>Your Selected Plan</h3>
+                    <div class="plan-details">
+                        <span>Plan:</span>
+                        <strong id="planName">Basic</strong>
+                    </div>
+                    <div class="plan-details">
+                        <span>Coverage:</span>
+                        <span id="planRadius">10 mile radius</span>
+                    </div>
+                    <div class="plan-details">
+                        <span>Price:</span>
+                        <span class="plan-price" id="planPrice">£20/month</span>
+                    </div>
+                </div>
+
+                <!-- Step 1: Business Details -->
+                <form id="registrationForm" style="display: block;">
+                    <h2 style="color: #1e3a5f; margin-bottom: 20px;">Business Details</h2>
+                    
+                    <div class="form-group">
+                        <label for="businessName">Business Name *</label>
+                        <input type="text" id="businessName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tradeType">Trade Type *</label>
+                        <select id="tradeType" required>
+                            <option value="">Select your trade</option>
+                            <option value="plumber">Plumber</option>
+                            <option value="electrician">Electrician</option>
+                            <option value="builder">Builder</option>
+                            <option value="decorator">Decorator</option>
+                            <option value="plasterer">Plasterer</option>
+                            <option value="roofer">Roofer</option>
+                            <option value="carpenter">Carpenter</option>
+                            <option value="joiner">Joiner</option>
+                            <option value="gas_engineer">Gas Engineer</option>
+                            <option value="heating_engineer">Heating Engineer</option>
+                            <option value="tiler">Tiler</option>
+                            <option value="bricklayer">Bricklayer</option>
+                            <option value="landscaper">Landscaper</option>
+                            <option value="gardener">Gardener</option>
+                            <option value="cleaner">Cleaner</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fullName">Your Full Name *</label>
+                        <input type="text" id="fullName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="postcode">Base Postcode *</label>
+                        <input type="text" id="postcode" required placeholder="e.g., SW1A 1AA">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience">Years of Experience</label>
+                        <input type="number" id="experience" min="0" max="50">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="qualifications">Qualifications / Certifications</label>
+                        <textarea id="qualifications" placeholder="List any relevant qualifications or certifications"></textarea>
+                    </div>
+
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="terms" required>
+                        <label for="terms">I agree to the Terms & Conditions and Privacy Policy *</label>
+                    </div>
+
+                    <button type="button" class="btn" onclick="proceedToPayment()">Continue to Payment</button>
+                </form>
+
+                <!-- Step 2: Payment (Hidden initially) -->
+                <div id="paymentSection" style="display: none;">
+                    <h2 style="color: #1e3a5f; margin-bottom: 20px;">Payment Details</h2>
+                    <div id="card-element"></div>
+                    <div id="card-errors" class="error"></div>
+                    <button type="button" class="btn" id="submitPayment" style="margin-top: 20px;">Complete Registration</button>
+                    <button type="button" class="btn btn-secondary" onclick="backToDetails()">← Back</button>
+                </div>
+
+                <!-- Step 3: Success (Hidden initially) -->
+                <div id="successSection" style="display: none;">
+                    <div class="success">
+                        <h2 style="color: #065f46; margin-bottom: 10px;">✓ Registration Successful!</h2>
+                        <p>Welcome to Best Trade! Redirecting to your dashboard...</p>
+                        <div class="loading" style="margin-top: 20px;">
+                            <div class="spinner"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loading -->
+                <div id="loadingSection" style="display: none;">
+                    <div class="loading">
+                        <div class="spinner"></div>
+                        <p style="margin-top: 15px;">Processing your registration...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get selected tier from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedTier = urlParams.get('tier') || sessionStorage.getItem('selectedTier') || 'basic';
+
+        // Plan configurations
+        const plans = {
+            basic: {
+                name: 'Basic',
+                price: '£20/month',
+                radius: '10 mile radius',
+                stripePrice: 'price_basic_monthly'
+            },
+            pro: {
+                name: 'Pro',
+                price: '£30/month',
+                radius: '20 mile radius + SMS',
+                stripePrice: 'price_pro_monthly'
+            },
+            premium: {
+                name: 'Premium',
+                price: '£200/year',
+                radius: 'UK-wide + top listing',
+                stripePrice: 'price_premium_yearly'
+            }
+        };
+
+        // Update plan display
+        const plan = plans[selectedTier];
+        document.getElementById('tierBadge').textContent = `${plan.name.toUpperCase()} PLAN`;
+        document.getElementById('planName').textContent = plan.name;
+        document.getElementById('planRadius').textContent = plan.radius;
+        document.getElementById('planPrice').textContent = plan.price;
+
+        // Stripe setup
+        const stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi');
+        const elements = stripe.elements();
+        const cardElement = elements.create('card', {
+            hidePostalCode: true,  // Disable ZIP code field (we collect postcode in form)
+            style: {
+                base: {
+                    fontSize: '16px',
+                    color: '#1e293b',
+                    '::placeholder': {
+                        color: '#9ca3af',
+                    },
+                },
+            },
+        });
+
+        function proceedToPayment() {
+            // Validate form
+            const form = document.getElementById('registrationForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            // Update steps
+            document.getElementById('step1').classList.add('completed');
+            document.getElementById('step2').classList.add('active');
+
+            // Show payment section
+            document.getElementById('registrationForm').style.display = 'none';
+            document.getElementById('paymentSection').style.display = 'block';
+
+            // Mount card element
+            cardElement.mount('#card-element');
+        }
+
+        function backToDetails() {
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('paymentSection').style.display = 'none';
+            document.getElementById('registrationForm').style.display = 'block';
+        }
+
+        // Handle payment submission
+        document.getElementById('submitPayment').addEventListener('click', async () => {
+            const submitButton = document.getElementById('submitPayment');
+            submitButton.disabled = true;
+
+            try {
+                // Show loading
+                document.getElementById('paymentSection').style.display = 'none';
+                document.getElementById('loadingSection').style.display = 'block';
+
+                // Create payment method
+                const { paymentMethod, error } = await stripe.createPaymentMethod({
+                    type: 'card',
+                    card: cardElement,
+                    billing_details: {
+                        name: document.getElementById('fullName').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        address: {
+                            postal_code: document.getElementById('postcode').value,
+                            country: 'GB'
+                        }
+                    },
+                });
+
+                if (error) {
+                    throw error;
+                }
+
+                // Step 1: Register tradesperson
+                const registerResponse = await fetch('/api/register-tradesperson', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        business_name: document.getElementById('businessName').value,
+                        contact_name: document.getElementById('fullName').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        postcode: document.getElementById('postcode').value,
+                        trade_category: document.getElementById('tradeType').value,
+                        subscription_tier: selectedTier
+                    }),
+                });
+
+                if (!registerResponse.ok) {
+                    const errorData = await registerResponse.json();
+                    throw new Error(errorData.error || errorData.detail || `Server error: ${registerResponse.status}`);
+                }
+
+                const registerResult = await registerResponse.json();
+
+                if (!registerResult.success) {
+                    throw new Error(registerResult.error || 'Registration failed');
+                }
+
+                const tradesperson_id = registerResult.tradesperson_id;
+
+                // Step 2: Create Stripe subscription
+                const subscriptionResponse = await fetch('/api/subscription/create', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        tradesperson_id: tradesperson_id,
+                        tier: selectedTier,
+                        payment_method_id: paymentMethod.id
+                    }),
+                });
+
+                if (!subscriptionResponse.ok) {
+                    const errorData = await subscriptionResponse.json();
+                    throw new Error(errorData.error || errorData.detail || `Subscription error: ${subscriptionResponse.status}`);
+                }
+
+                const subscriptionResult = await subscriptionResponse.json();
+
+                if (subscriptionResult.success) {
+                    // Update steps
+                    document.getElementById('step2').classList.add('completed');
+                    document.getElementById('step3').classList.add('active');
+
+                    // Create session cookie for auto-login
+                    try {
+                        await fetch('/api/tradesperson/create-session', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            credentials: 'include',
+                            body: JSON.stringify({ tradesperson_id: tradesperson_id })
+                        });
+                    } catch (sessionError) {
+                        console.log('Session creation failed, but registration succeeded:', sessionError);
+                    }
+
+                    // Show success briefly, then redirect to dashboard
+                    document.getElementById('loadingSection').style.display = 'none';
+                    document.getElementById('successSection').style.display = 'block';
+                    
+                    // Redirect to dashboard after 2 seconds
+                    setTimeout(() => {
+                        window.location.href = '/tradesperson-dashboard.html';
+                    }, 2000);
+                } else {
+                    throw new Error(result.error || 'Registration failed');
+                }
+
+            } catch (error) {
+                console.error('Registration Error:', error);
+                console.error('Error message:', error.message);
+                document.getElementById('loadingSection').style.display = 'none';
+                document.getElementById('paymentSection').style.display = 'block';
+                document.getElementById('card-errors').textContent = error.message || 'Registration failed. Please try again.';
+                submitButton.disabled = false;
+            }
+        });
+
+        // Card element error handling
+        cardElement.on('change', (event) => {
+            const displayError = document.getElementById('card-errors');
+            if (event.error) {
+                displayError.textContent = event.error.message;
+            } else {
+                displayError.textContent = '';
+            }
+        });
+    </script>
+</body>
+</html>
