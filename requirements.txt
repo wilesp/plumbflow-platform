@@ -1,0 +1,8 @@
+fastapi==0.109.0
+uvicorn==0.27.0
+python-multipart==0.0.6
+stripe==7.11.0
+psycopg2-binary==2.9.9
+twilio==8.11.1
+sendgrid==6.11.0
+python-dotenv==1.0.0
