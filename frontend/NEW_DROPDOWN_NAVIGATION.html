@@ -1,0 +1,345 @@
+<!-- ===================================================================== -->
+<!-- BEST TRADE - NEW DROPDOWN NAVIGATION HEADER -->
+<!-- Copy this entire section to replace existing navbar in all pages -->
+<!-- ===================================================================== -->
+
+<style>
+    /* ===== DROPDOWN NAVIGATION STYLES ===== */
+    .navbar {
+        background: white;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        position: sticky;
+        top: 0;
+        z-index: 1000;
+    }
+    
+    .nav-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 15px 20px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .logo {
+        font-size: 22px;
+        font-weight: 700;
+        color: #1e293b;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        transition: opacity 0.2s;
+    }
+    
+    .logo:hover { opacity: 0.8; }
+    
+    .logo-tick {
+        width: 32px;
+        height: 32px;
+        background: #ef4444;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+    
+    .logo-tick svg {
+        width: 18px;
+        height: 18px;
+        fill: white;
+    }
+    
+    /* Main Navigation */
+    .nav-menu {
+        display: flex;
+        gap: 5px;
+        align-items: center;
+        list-style: none;
+    }
+    
+    .nav-item {
+        position: relative;
+    }
+    
+    .nav-link {
+        color: #64748b;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 15px;
+        padding: 10px 16px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.2s;
+        border-radius: 6px;
+    }
+    
+    .nav-link:hover {
+        color: #1e3a5f;
+        background: #f8fafc;
+    }
+    
+    .nav-link.active {
+        color: #1e3a5f;
+        font-weight: 600;
+    }
+    
+    /* Dropdown Arrow */
+    .dropdown-arrow {
+        width: 12px;
+        height: 12px;
+        fill: currentColor;
+        transition: transform 0.2s;
+    }
+    
+    .nav-item:hover .dropdown-arrow {
+        transform: rotate(180deg);
+    }
+    
+    /* Dropdown Menu */
+    .dropdown-menu {
+        position: absolute;
+        top: 100%;
+        left: 0;
+        background: white;
+        box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+        border-radius: 8px;
+        min-width: 220px;
+        padding: 8px 0;
+        margin-top: 8px;
+        opacity: 0;
+        visibility: hidden;
+        transform: translateY(-10px);
+        transition: all 0.2s;
+        z-index: 1000;
+    }
+    
+    .nav-item:hover .dropdown-menu {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+    
+    .dropdown-link {
+        display: block;
+        padding: 12px 20px;
+        color: #64748b;
+        text-decoration: none;
+        font-size: 14px;
+        font-weight: 500;
+        transition: all 0.2s;
+    }
+    
+    .dropdown-link:hover {
+        background: #f8fafc;
+        color: #1e3a5f;
+        padding-left: 24px;
+    }
+    
+    .dropdown-link.primary {
+        color: #1e3a5f;
+        font-weight: 600;
+    }
+    
+    .dropdown-divider {
+        height: 1px;
+        background: #e2e8f0;
+        margin: 8px 0;
+    }
+    
+    /* Sign In Button */
+    .nav-btn {
+        background: #1e3a5f;
+        color: white !important;
+        padding: 10px 24px;
+        border-radius: 6px;
+        transition: all 0.3s;
+        margin-left: 10px;
+    }
+    
+    .nav-btn:hover {
+        background: #2d4a70;
+        transform: translateY(-1px);
+    }
+    
+    /* Mobile Menu Toggle */
+    .mobile-menu-toggle {
+        display: none;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 8px;
+    }
+    
+    .mobile-menu-toggle span {
+        display: block;
+        width: 24px;
+        height: 3px;
+        background: #1e3a5f;
+        margin: 5px 0;
+        transition: 0.3s;
+    }
+    
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+        .nav-container {
+            padding: 12px 15px;
+        }
+        
+        .logo {
+            font-size: 18px;
+        }
+        
+        .logo-tick {
+            width: 28px;
+            height: 28px;
+        }
+        
+        .logo-tick svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .mobile-menu-toggle {
+            display: block;
+        }
+        
+        .nav-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            flex-direction: column;
+            gap: 0;
+            box-shadow: 0 8px 16px rgba(0,0,0,0.1);
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s;
+        }
+        
+        .nav-menu.active {
+            max-height: 600px;
+            padding: 10px 0;
+        }
+        
+        .nav-item {
+            width: 100%;
+        }
+        
+        .nav-link {
+            padding: 14px 20px;
+            width: 100%;
+        }
+        
+        .dropdown-menu {
+            position: static;
+            box-shadow: none;
+            opacity: 1;
+            visibility: visible;
+            transform: none;
+            display: none;
+            padding: 0 0 0 20px;
+        }
+        
+        .nav-item:hover .dropdown-menu {
+            display: block;
+        }
+        
+        .nav-btn {
+            margin: 10px 20px;
+            text-align: center;
+        }
+    }
+</style>
+
+<nav class="navbar">
+    <div class="nav-container">
+        <a href="/" class="logo">
+            <span class="logo-tick">
+                <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                </svg>
+            </span>
+            BestTrade
+        </a>
+        
+        <button class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+            <span></span>
+            <span></span>
+            <span></span>
+        </button>
+        
+        <ul class="nav-menu" id="navMenu">
+            <!-- Home with Dropdown -->
+            <li class="nav-item">
+                <a href="/" class="nav-link">
+                    Home
+                    <svg class="dropdown-arrow" viewBox="0 0 24 24">
+                        <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="/how-it-works.html" class="dropdown-link">How It Works</a>
+                    <a href="/why-choose-us.html" class="dropdown-link">Why Choose Us</a>
+                    <a href="/trust-and-safety.html" class="dropdown-link">Trust & Safety</a>
+                </div>
+            </li>
+            
+            <!-- For Homeowners -->
+            <li class="nav-item">
+                <a href="/customer-post-job.html" class="nav-link">For Homeowners</a>
+            </li>
+            
+            <!-- For Tradespeople with Dropdown -->
+            <li class="nav-item">
+                <a href="#" class="nav-link">
+                    For Tradespeople
+                    <svg class="dropdown-arrow" viewBox="0 0 24 24">
+                        <path d="M7 10l5 5 5-5z"/>
+                    </svg>
+                </a>
+                <div class="dropdown-menu">
+                    <a href="/tradesperson-register.html" class="dropdown-link primary">Join Now / Sign Up</a>
+                    <div class="dropdown-divider"></div>
+                    <a href="/pricing.html" class="dropdown-link">View Pricing Plans</a>
+                    <a href="/how-it-works.html#tradespeople" class="dropdown-link">How It Works</a>
+                </div>
+            </li>
+            
+            <!-- Contact -->
+            <li class="nav-item">
+                <a href="/contact.html" class="nav-link">Contact</a>
+            </li>
+            
+            <!-- Trade Sign In Button -->
+            <li class="nav-item">
+                <a href="/dashboard-login.html" class="nav-btn">Trade Sign In</a>
+            </li>
+        </ul>
+    </div>
+</nav>
+
+<script>
+    function toggleMobileMenu() {
+        const navMenu = document.getElementById('navMenu');
+        navMenu.classList.toggle('active');
+    }
+    
+    // Close mobile menu when clicking outside
+    document.addEventListener('click', function(event) {
+        const navMenu = document.getElementById('navMenu');
+        const toggle = document.querySelector('.mobile-menu-toggle');
+        
+        if (!event.target.closest('.nav-container')) {
+            navMenu.classList.remove('active');
+        }
+    });
+</script>
+
+<!-- ===================================================================== -->
+<!-- END OF NEW DROPDOWN NAVIGATION -->
+<!-- ===================================================================== -->

@@ -1,0 +1,570 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us - Best Trade | Get in Touch</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        /* ===== NAVIGATION (Standard) ===== */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: opacity 0.2s;
+        }
+        
+        .logo:hover { opacity: 0.8; }
+        
+        .logo-tick {
+            width: 32px;
+            height: 32px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-tick svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: #1e3a5f;
+        }
+        
+        .nav-btn {
+            background: #1e3a5f;
+            color: white !important;
+            padding: 10px 24px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn:hover {
+            background: #2d4a70;
+            transform: translateY(-1px);
+        }
+        
+        /* Hero */
+        .hero {
+            background: #1e3a5f;
+            color: white;
+            padding: 80px 30px;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.95;
+        }
+        
+        /* Content */
+        .section {
+            padding: 80px 30px;
+        }
+        
+        .section-light {
+            background: #f9fafb;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+        
+        /* Contact Grid */
+        .contact-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 60px;
+        }
+        
+        /* Contact Form */
+        .contact-form {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .contact-form h2 {
+            font-size: 1.8rem;
+            color: #1e3a5f;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.2s;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1e3a5f;
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .submit-btn:hover {
+            background: #2d4a70;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(30, 58, 95, 0.3);
+        }
+        
+        .message {
+            padding: 14px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .message-success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #059669;
+        }
+        
+        .message-error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #dc2626;
+        }
+        
+        /* Contact Info */
+        .contact-info h2 {
+            font-size: 1.8rem;
+            color: #1e3a5f;
+            margin-bottom: 25px;
+            font-weight: 700;
+        }
+        
+        .contact-item {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+            display: flex;
+            align-items: start;
+            gap: 20px;
+        }
+        
+        .contact-icon {
+            width: 50px;
+            height: 50px;
+            background: #1e3a5f;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            flex-shrink: 0;
+        }
+        
+        .contact-item h3 {
+            font-size: 1.1rem;
+            color: #1e3a5f;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .contact-item p {
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .contact-item a {
+            color: #1e3a5f;
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .contact-item a:hover {
+            text-decoration: underline;
+        }
+        
+        /* FAQ */
+        .faq-section {
+            background: #f9fafb;
+            padding: 80px 30px;
+        }
+        
+        .faq-section h2 {
+            font-size: 2.3rem;
+            color: #1e3a5f;
+            text-align: center;
+            margin-bottom: 50px;
+            font-weight: 800;
+        }
+        
+        .faq-item {
+            background: white;
+            padding: 25px 30px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .faq-question {
+            font-size: 1.1rem;
+            color: #1e3a5f;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+        
+        .faq-answer {
+            color: #666;
+            line-height: 1.7;
+        }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            
+            .contact-grid {
+                grid-template-columns: 1fr;
+                gap: 40px;
+            }
+            
+            .contact-form {
+                padding: 30px 20px;
+            }
+            
+            .nav-container {
+                padding: 12px 15px;
+            }
+            
+            .logo {
+                font-size: 18px;
+            }
+            
+            .logo-tick {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .nav-links {
+                gap: 15px;
+            }
+            
+            .nav-links a {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <span class="logo-tick">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </span>
+                BestTrade
+            </a>
+            <div class="nav-links">
+                <a href="/pricing.html">Pricing</a>
+                <a href="/about.html">About</a>
+                <a href="/dashboard-login.html" class="nav-btn">Trade Sign In</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero -->
+    <section class="hero">
+        <h1>Contact Us</h1>
+        <p>We're here to help. Get in touch and we'll respond as soon as possible.</p>
+    </section>
+    
+    <!-- Contact Section -->
+    <section class="section">
+        <div class="container">
+            <div class="contact-grid">
+                <!-- Contact Form -->
+                <div class="contact-form">
+                    <h2>Send Us a Message</h2>
+                    
+                    <div id="successMessage" class="message message-success"></div>
+                    <div id="errorMessage" class="message message-error"></div>
+                    
+                    <form id="contactForm">
+                        <div class="form-group">
+                            <label for="name">Your Name</label>
+                            <input type="text" id="name" name="name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="subject">Subject</label>
+                            <select id="subject" name="subject" required>
+                                <option value="">Choose a subject...</option>
+                                <option value="customer_query">I'm a customer with a question</option>
+                                <option value="tradesperson_query">I'm a tradesperson with a question</option>
+                                <option value="technical_issue">Technical issue or bug</option>
+                                <option value="account_help">Help with my account</option>
+                                <option value="partnership">Partnership enquiry</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="message">Message</label>
+                            <textarea id="message" name="message" required placeholder="Please describe your query in detail..."></textarea>
+                        </div>
+                        
+                        <button type="submit" class="submit-btn" id="submitBtn">Send Message</button>
+                    </form>
+                </div>
+                
+                <!-- Contact Info -->
+                <div class="contact-info">
+                    <h2>Other Ways to Reach Us</h2>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">📧</div>
+                        <div>
+                            <h3>Email Support</h3>
+                            <p>For general enquiries and support</p>
+                            <a href="mailto:hello@besttrade.uk">hello@besttrade.uk</a>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">🏢</div>
+                        <div>
+                            <h3>Head Office</h3>
+                            <p>Best Trade Limited<br>
+                            United Kingdom</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">⏰</div>
+                        <div>
+                            <h3>Support Hours</h3>
+                            <p>Monday - Friday: 9am - 6pm<br>
+                            Saturday: 10am - 4pm<br>
+                            Sunday: Closed</p>
+                        </div>
+                    </div>
+                    
+                    <div class="contact-item">
+                        <div class="contact-icon">💬</div>
+                        <div>
+                            <h3>Response Time</h3>
+                            <p>We aim to respond to all enquiries within 24 hours during business days.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- FAQ Section -->
+    <section class="faq-section">
+        <div class="container">
+            <h2>Frequently Asked Questions</h2>
+            
+            <div class="faq-item">
+                <div class="faq-question">How do I post a job as a customer?</div>
+                <div class="faq-answer">Simply click "Post a Job" on our homepage, fill in the details about what you need done, and we'll instantly match you with qualified local tradespeople. It's completely free and takes less than 2 minutes!</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">How much does it cost for tradespeople to join?</div>
+                <div class="faq-answer">We offer three subscription tiers: Basic (£20/month), Pro (£30/month), and Premium (£200/year). Each tier offers different benefits including lead volume, coverage area, and priority placement. Visit our Pricing page for full details.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Are all tradespeople verified?</div>
+                <div class="faq-answer">Yes, absolutely. Every tradesperson goes through our rigorous verification process including identity checks, qualification verification, insurance confirmation, and background screening. We never compromise on safety and quality.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">How quickly will I get quotes?</div>
+                <div class="faq-answer">Most customers receive their first quote within an hour, and typically have 3-5 quotes within 24 hours. For emergency jobs, responses are often even faster as tradespeople receive instant SMS notifications.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">What if I'm not happy with the work?</div>
+                <div class="faq-answer">We take quality seriously. If you're not satisfied, contact our support team and we'll help mediate. We monitor all customer reviews and investigate any complaints to ensure high standards across the platform.</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">Can I cancel my tradesperson subscription?</div>
+                <div class="faq-answer">Yes, you can cancel at any time with no penalties. Your subscription will remain active until the end of your current billing period. We want you to stay because you love the service, not because you're locked in!</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">What areas do you cover?</div>
+                <div class="faq-answer">We currently cover the entire UK with tradespeople in all major cities and towns. Our Premium tier offers nationwide coverage, while Basic and Pro tiers focus on local area coverage (10-20 miles).</div>
+            </div>
+            
+            <div class="faq-item">
+                <div class="faq-question">How do payments work?</div>
+                <div class="faq-answer">Customers pay the tradesperson directly once the work is completed to their satisfaction - we don't take any commission. Tradespeople pay their monthly subscription fee which is processed automatically via card payment.</div>
+            </div>
+        </div>
+    </section>
+    
+    <script>
+        const form = document.getElementById('contactForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const successMessage = document.getElementById('successMessage');
+        const errorMessage = document.getElementById('errorMessage');
+        
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Hide messages
+            successMessage.style.display = 'none';
+            errorMessage.style.display = 'none';
+            
+            // Disable button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sending...';
+            
+            const formData = {
+                name: document.getElementById('name').value,
+                email: document.getElementById('email').value,
+                subject: document.getElementById('subject').value,
+                message: document.getElementById('message').value
+            };
+            
+            try {
+                const response = await fetch('/api/contact/submit', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(formData)
+                });
+                
+                const result = await response.json();
+                
+                if (response.ok && result.success) {
+                    // Success!
+                    successMessage.textContent = '✓ Thank you! Your message has been sent. We\'ll respond within 24 hours.';
+                    successMessage.style.display = 'block';
+                    
+                    // Clear form
+                    form.reset();
+                    
+                } else {
+                    throw new Error(result.error || 'Failed to send message');
+                }
+                
+            } catch (error) {
+                errorMessage.textContent = '❌ ' + error.message + '. Please try emailing hello@besttrade.uk directly.';
+                errorMessage.style.display = 'block';
+            } finally {
+                // Re-enable button
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Send Message';
+            }
+        });
+    </script>
+</body>
+</html>
