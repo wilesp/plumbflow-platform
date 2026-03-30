@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trust & Safety - Best Trade | Quality Tradespeople You Can Trust</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        /* ===== NAVIGATION (Standard) ===== */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: opacity 0.2s;
+        }
+        
+        .logo:hover { opacity: 0.8; }
+        
+        .logo-tick {
+            width: 32px;
+            height: 32px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-tick svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: #1e3a5f;
+        }
+        
+        .nav-btn {
+            background: #1e3a5f;
+            color: white !important;
+            padding: 10px 24px;
+            border-radius: 6px;
+            transition: all 0.3s;
+        }
+        
+        .nav-btn:hover {
+            background: #2d4a70;
+            transform: translateY(-1px);
+        }
+        
+        /* Hero */
+        .hero {
+            background: #1e3a5f;
+            color: white;
+            padding: 80px 30px;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        
+        .hero p {
+            font-size: 1.3rem;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.95;
+        }
+        
+        /* Section Styles */
+        .section {
+            padding: 80px 30px;
+        }
+        
+        .section-light {
+            background: #f9fafb;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .container h2 {
+            font-size: 2.5rem;
+            color: #1e3a5f;
+            margin-bottom: 20px;
+            font-weight: 800;
+            text-align: center;
+        }
+        
+        .container > p {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            max-width: 800px;
+            margin: 0 auto 50px;
+            line-height: 1.8;
+        }
+        
+        /* Verification Grid */
+        .verification-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .verification-card {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+            text-align: center;
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .verification-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+        }
+        
+        .verification-icon {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+        }
+        
+        .verification-card h3 {
+            font-size: 1.4rem;
+            color: #1e3a5f;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+        
+        .verification-card p {
+            color: #666;
+            line-height: 1.7;
+            font-size: 1rem;
+        }
+        
+        /* Protection List */
+        .protection-list {
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .protection-item {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+            padding: 25px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        
+        .protection-item-icon {
+            font-size: 2rem;
+            flex-shrink: 0;
+        }
+        
+        .protection-item h4 {
+            font-size: 1.2rem;
+            color: #1e3a5f;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+        
+        .protection-item p {
+            color: #666;
+            line-height: 1.7;
+            margin: 0;
+        }
+        
+        /* Success Stats */
+        .success-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            margin-top: 40px;
+        }
+        
+        .stat-card {
+            text-align: center;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #10b981;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+        
+        /* CTA */
+        .cta-section {
+            background: #1e3a5f;
+            color: white;
+            padding: 60px 30px;
+            text-align: center;
+        }
+        
+        .cta-section h2 {
+            font-size: 2.2rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        
+        .cta-section p {
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            opacity: 0.95;
+        }
+        
+        .btn {
+            padding: 16px 40px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            display: inline-block;
+            transition: all 0.3s;
+            margin: 0 10px;
+        }
+        
+        .btn-primary {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(239, 68, 68, 0.4);
+            background: #dc2626;
+        }
+        
+        .btn-outline {
+            border: 2px solid white;
+            color: white;
+        }
+        
+        .btn-outline:hover {
+            background: white;
+            color: #1e3a5f;
+        }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            .hero h1 { font-size: 2rem; }
+            
+            .nav-container {
+                padding: 12px 15px;
+            }
+            
+            .logo {
+                font-size: 18px;
+            }
+            
+            .logo-tick {
+                width: 28px;
+                height: 28px;
+            }
+            
+            .nav-links {
+                gap: 15px;
+            }
+            
+            .nav-links a {
+                font-size: 13px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <span class="logo-tick">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </span>
+                BestTrade
+            </a>
+            <div class="nav-links">
+                <a href="/pricing.html">Pricing</a>
+                <a href="/about.html">About</a>
+                <a href="/dashboard-login.html" class="nav-btn">Trade Sign In</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero -->
+    <section class="hero">
+        <h1>Trust & Safety</h1>
+        <p>Quality tradespeople, verified subscriptions, and smart matching to connect you with the right professionals.</p>
+    </section>
+    
+    <!-- Verification Process -->
+    <section class="section">
+        <div class="container">
+            <h2>How We Ensure Quality</h2>
+            <p>Every tradesperson on Best Trade must meet our standards before they can receive jobs. Here's how we maintain quality and protect our customers.</p>
+            
+            <div class="verification-grid">
+                <div class="verification-card">
+                    <div class="verification-icon">✓</div>
+                    <h3>Trade Category Verification</h3>
+                    <p>Jobs are only sent to tradespeople in the relevant category. Plumbers get plumbing jobs, electricians get electrical work - ensuring you get the right professional.</p>
+                </div>
+                
+                <div class="verification-card">
+                    <div class="verification-icon">💳</div>
+                    <h3>Active Subscription Required</h3>
+                    <p>Only tradespeople with active, paid subscriptions can receive jobs. This ensures commitment to the platform and professional standards.</p>
+                </div>
+                
+                <div class="verification-card">
+                    <div class="verification-icon">📍</div>
+                    <h3>Location-Based Matching</h3>
+                    <p>We match you with tradespeople in your postcode area for faster response times and local service. Jobs are prioritized for nearby professionals.</p>
+                </div>
+                
+                <div class="verification-card">
+                    <div class="verification-icon">⭐</div>
+                    <h3>Quality Score Ranking</h3>
+                    <p>Tradespeople are ranked by quality score based on completion rates and platform engagement. Higher-quality professionals are matched first.</p>
+                </div>
+                
+                <div class="verification-card">
+                    <div class="verification-icon">🔄</div>
+                    <h3>Continuous Availability</h3>
+                    <p>Tradespeople must actively opt-in to receive jobs and maintain their subscription status. Inactive accounts cannot receive work.</p>
+                </div>
+                
+                <div class="verification-card">
+                    <div class="verification-icon">📞</div>
+                    <h3>Verified Contact Details</h3>
+                    <p>All business names, email addresses, and phone numbers are verified during registration to ensure legitimate professionals.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Customer Protection -->
+    <section class="section section-light">
+        <div class="container">
+            <h2>Your Protection as a Customer</h2>
+            <p>We've built multiple layers of protection to ensure you have a safe, positive experience every time you use Best Trade.</p>
+            
+            <div class="protection-list">
+                <div class="protection-item">
+                    <div class="protection-item-icon">🔒</div>
+                    <div>
+                        <h4>Secure Platform</h4>
+                        <p>All communications are handled through our secure platform. Your personal details are only shared with matched tradespeople after you post a job.</p>
+                    </div>
+                </div>
+                
+                <div class="protection-item">
+                    <div class="protection-item-icon">💳</div>
+                    <div>
+                        <h4>No Upfront Payments</h4>
+                        <p>You negotiate and pay tradespeople directly after work is completed. Best Trade charges nothing to customers - it's completely free to post jobs.</p>
+                    </div>
+                </div>
+                
+                <div class="protection-item">
+                    <div class="protection-item-icon">🎯</div>
+                    <div>
+                        <h4>Smart Matching</h4>
+                        <p>Our algorithm matches you with up to 10 qualified tradespeople in your area, giving you choice while ensuring they're all relevant professionals.</p>
+                    </div>
+                </div>
+                
+                <div class="protection-item">
+                    <div class="protection-item-icon">📱</div>
+                    <div>
+                        <h4>Direct Communication</h4>
+                        <p>Once matched, you communicate directly with tradespeople via phone or email to discuss your job, get quotes, and arrange work.</p>
+                    </div>
+                </div>
+                
+                <div class="protection-item">
+                    <div class="protection-item-icon">🛡️</div>
+                    <div>
+                        <h4>Subscription Verification</h4>
+                        <p>Only tradespeople with active, paid subscriptions can see and respond to jobs - a natural filter for serious professionals.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Success Stats -->
+            <div class="success-stats">
+                <div class="stat-card">
+                    <div class="stat-number">1,000+</div>
+                    <div class="stat-label">Verified Tradespeople</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">5,000+</div>
+                    <div class="stat-label">Jobs Completed</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">24hrs</div>
+                    <div class="stat-label">Average Response Time</div>
+                </div>
+                
+                <div class="stat-card">
+                    <div class="stat-number">100%</div>
+                    <div class="stat-label">Free for Customers</div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA -->
+    <section class="cta-section">
+        <div class="container">
+            <h2>Ready to Find Quality Tradespeople?</h2>
+            <p>Post your job for free or join as a professional today</p>
+            <div>
+                <a href="/customer-post-job.html" class="btn btn-outline">Post a Job Free</a>
+                <a href="/pricing.html" class="btn btn-primary">Join as Tradesperson</a>
+            </div>
+        </div>
+    </section>
+</body>
+</html>
