@@ -1,6 +1,6 @@
 """
 Best Trade - Main Application
-FIXED: Explicit routes for all frontend pages
+FIXED: RealDictCursor compatibility + All routes
 """
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -153,9 +153,10 @@ async def send_magic_link(request: Request):
                 "message": "If that email is registered, we've sent you a login link."
             }
         
-        tradesperson_id = result[0]
-        trading_name = result[1] if len(result) > 1 else "there"
-        subscription_status = result[2] if len(result) > 2 else None
+        # FIXED: Access dict keys instead of indices
+        tradesperson_id = result['id']
+        trading_name = result.get('trading_name', 'there')
+        subscription_status = result.get('subscription_status')
         
         # Check if subscription is active
         if subscription_status != 'active':
@@ -297,10 +298,11 @@ async def verify_magic_link(token: str, request: Request):
                 </html>
             """)
         
-        token_id = result[0]
-        tradesperson_id = result[1]
-        used_at = result[5] if len(result) > 5 else None
-        expires_at = result[6] if len(result) > 6 else None
+        # FIXED: Access dict keys
+        token_id = result['id']
+        tradesperson_id = result['tradesperson_id']
+        used_at = result.get('used_at')
+        expires_at = result.get('expires_at')
         
         # Check if already used
         if used_at:
@@ -405,7 +407,10 @@ async def register_tradesperson(request: Request):
             data.get('subscription_tier', 'basic')
         ))
         
-        tradesperson_id = cursor.fetchone()[0]
+        # FIXED: Access dict key
+        result = cursor.fetchone()
+        tradesperson_id = result['id']
+        
         conn.commit()
         cursor.close()
         conn.close()
@@ -437,7 +442,8 @@ async def create_subscription(request: Request):
         if not result:
             raise HTTPException(status_code=404, detail="Tradesperson not found")
         
-        email = result[0]
+        # FIXED: Access dict key
+        email = result['email']
         
         price_ids = {
             'basic': 'price_basic_monthly',
@@ -573,7 +579,10 @@ async def post_job(request: Request):
             data.get('email', '')
         ))
         
-        job_id = cursor.fetchone()[0]
+        # FIXED: Access dict key
+        result = cursor.fetchone()
+        job_id = result['id']
+        
         conn.commit()
         
         postcode_area = data['postcode'].split()[0]
@@ -596,9 +605,10 @@ async def post_job(request: Request):
         
         matched_ids = []
         for tradesperson in matched_tradespeople:
-            tp_id = tradesperson[0]
-            name = tradesperson[1]
-            phone = tradesperson[2]
+            # FIXED: Access dict keys instead of indices
+            tp_id = tradesperson['id']
+            name = tradesperson['trading_name']
+            phone = tradesperson['phone']
             matched_ids.append(str(tp_id))
             
             try:
