@@ -276,7 +276,240 @@
 
     <script>
         const jobTypeOptions = { /* Keep your full jobTypeOptions object exactly as it is */ 
-            // ... paste all your jobTypeOptions here (plumber, electrician, etc.)
+            // Job type options for each trade category
+        const jobTypeOptions = {
+            'plumber': [
+                'Leak Repair',
+                'Boiler Repair',
+                'Bathroom Installation',
+                'Tap Installation / Repair',
+                'Toilet Installation / Repair',
+                'Pipe Work / Replacement',
+                'Radiator Installation',
+                'Water Heater Installation',
+                'Drain Unblocking',
+                'Emergency Plumbing',
+                'Shower Installation',
+                'Other Plumbing'
+            ],
+            'electrician': [
+                'Fault Finding / Repair',
+                'Rewiring',
+                'Socket Installation',
+                'Light Fitting',
+                'Fuse Box / Consumer Unit Replacement',
+                'Electric Shower Installation',
+                'EV Charger Installation',
+                'Electrical Testing / Certificate',
+                'Security Lighting',
+                'Emergency Electrical',
+                'Outdoor Electrical Work',
+                'Other Electrical'
+            ],
+            'gas-engineer': [
+                'Boiler Service',
+                'Gas Safety Certificate',
+                'Cooker / Hob Installation',
+                'Gas Leak Detection / Repair',
+                'Central Heating Installation',
+                'Gas Fire Installation',
+                'Boiler Breakdown',
+                'Gas Appliance Installation',
+                'Emergency Gas Work',
+                'Other Gas Work'
+            ],
+            'heating-engineer': [
+                'Central Heating Installation',
+                'Boiler Installation',
+                'Radiator Installation / Replacement',
+                'Underfloor Heating',
+                'Heating System Repair',
+                'Thermostat Installation',
+                'Power Flush',
+                'Heating System Upgrade',
+                'Emergency Heating Repair',
+                'Other Heating Work'
+            ],
+            'boiler-installer': [
+                'Combi Boiler Installation',
+                'System Boiler Installation',
+                'Regular Boiler Installation',
+                'Boiler Replacement',
+                'Boiler Upgrade',
+                'Boiler Relocation',
+                'Emergency Boiler Installation',
+                'Other Boiler Work'
+            ],
+            'builder': [
+                'Extension',
+                'Loft Conversion',
+                'Kitchen Extension',
+                'General Building Work',
+                'Structural Work',
+                'Foundation Work',
+                'Brickwork',
+                'Stonework',
+                'Garage Conversion',
+                'New Build',
+                'Renovation',
+                'Other Building Work'
+            ],
+            'carpenter': [
+                'Door Hanging',
+                'Fitted Wardrobes',
+                'Shelving',
+                'Decking',
+                'Fence Installation',
+                'Kitchen Fitting',
+                'Skirting Boards',
+                'Window Installation',
+                'Staircase',
+                'Custom Furniture',
+                'Repair Work',
+                'Other Carpentry'
+            ],
+            'painter-decorator': [
+                'Interior Painting',
+                'Exterior Painting',
+                'Wallpapering',
+                'Woodwork Painting',
+                'Ceiling Painting',
+                'Feature Wall',
+                'Spray Painting',
+                'Commercial Decorating',
+                'Full House Decoration',
+                'Other Decorating'
+            ],
+            'roofer': [
+                'Roof Repair',
+                'New Roof Installation',
+                'Roof Replacement',
+                'Flat Roof',
+                'Tile Roof',
+                'Slate Roof',
+                'Chimney Work',
+                'Guttering',
+                'Roof Insulation',
+                'Fascia & Soffit',
+                'Emergency Roof Repair',
+                'Other Roofing'
+            ],
+            'plasterer': [
+                'Skimming',
+                'Dry Lining',
+                'Ceiling Repair',
+                'Wall Repair',
+                'Rendering',
+                'Coving',
+                'Artex Removal',
+                'Full Room Plastering',
+                'Patch Repair',
+                'Other Plastering'
+            ],
+            'tiler': [
+                'Bathroom Tiling',
+                'Kitchen Tiling',
+                'Floor Tiling',
+                'Wall Tiling',
+                'Splashback',
+                'Tile Repair / Replacement',
+                'Mosaic Tiling',
+                'Commercial Tiling',
+                'Other Tiling'
+            ],
+            'kitchen-fitter': [
+                'Full Kitchen Installation',
+                'Kitchen Worktop Installation',
+                'Kitchen Cabinet Installation',
+                'Kitchen Appliance Installation',
+                'Kitchen Renovation',
+                'Kitchen Design & Fit',
+                'Other Kitchen Work'
+            ],
+            'bathroom-fitter': [
+                'Full Bathroom Installation',
+                'Shower Installation',
+                'Bath Installation',
+                'Toilet Installation',
+                'Sink / Basin Installation',
+                'Wet Room Installation',
+                'Bathroom Renovation',
+                'Bathroom Design & Fit',
+                'Other Bathroom Work'
+            ],
+            'handyman': [
+                'General Repairs',
+                'Flat Pack Assembly',
+                'TV Wall Mounting',
+                'Picture Hanging',
+                'Minor Plumbing',
+                'Minor Electrical',
+                'Odd Jobs',
+                'Maintenance',
+                'Other Handyman Work'
+            ],
+            'landscaper': [
+                'Garden Design',
+                'Lawn Installation / Repair',
+                'Patio Installation',
+                'Decking',
+                'Fencing',
+                'Tree Work',
+                'Hedge Trimming',
+                'Garden Maintenance',
+                'Artificial Grass',
+                'Driveway',
+                'Other Landscaping'
+            ],
+            'drainage': [
+                'Drain Unblocking',
+                'Drain Repair',
+                'CCTV Drain Survey',
+                'Drain Installation',
+                'Septic Tank',
+                'Soakaway',
+                'Emergency Drainage',
+                'Other Drainage Work'
+            ],
+            'locksmith': [
+                'Lock Change',
+                'Lock Repair',
+                'Emergency Lockout',
+                'UPVC Lock',
+                'Security Upgrade',
+                'Key Cutting',
+                'Safe Opening',
+                'Other Locksmith Work'
+            ],
+            'window-fitter': [
+                'UPVC Windows',
+                'Double Glazing',
+                'Window Replacement',
+                'Window Repair',
+                'Conservatory',
+                'Bi-fold Doors',
+                'Patio Doors',
+                'Other Window Work'
+            ],
+            'flooring': [
+                'Laminate Flooring',
+                'Hardwood Flooring',
+                'Vinyl Flooring',
+                'Carpet Installation',
+                'Tile Flooring',
+                'Floor Repair',
+                'Underfloor Heating',
+                'Other Flooring'
+            ],
+            'hvac': [
+                'Air Conditioning Installation',
+                'Air Conditioning Repair',
+                'Ventilation System',
+                'Heat Pump Installation',
+                'HVAC Maintenance',
+                'Other HVAC Work'
+            ]
+        };
         };
 
         // Trade category → job type dropdown (unchanged)
