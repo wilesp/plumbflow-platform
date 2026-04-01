@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Post a Job - Best Trade | Find Local Tradespeople</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', Arial, sans-serif;
+            color: #1e293b;
+            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            min-height: 100vh;
+        }
+        
+        /* ===== NAVIGATION ===== */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo:hover { opacity: 0.8; }
+        
+        .logo-tick {
+            width: 32px;
+            height: 32px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .logo-tick svg {
+            width: 18px;
+            height: 18px;
+            fill: white;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 30px;
+            align-items: center;
+        }
+        
+        .nav-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+        }
+        
+        .nav-links a:hover {
+            color: #1e3a5f;
+        }
+
+        /* Rest of your beautiful CSS - unchanged */
+        .main-container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
+        .header-section { text-align: center; margin-bottom: 40px; }
+        .header-section h1 { font-size: 2.5rem; color: #1e3a5f; margin-bottom: 12px; font-weight: 700; }
+        .header-section p { font-size: 1.2rem; color: #64748b; }
+        .form-container { background: white; border-radius: 16px; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .form-section { margin-bottom: 32px; }
+        .form-section h2 { font-size: 1.3rem; color: #1e3a5f; margin-bottom: 20px; font-weight: 600; padding-bottom: 10px; border-bottom: 2px solid #f1f5f9; }
+        .form-group { margin-bottom: 24px; }
+        .form-group label { display: block; font-weight: 600; color: #334155; margin-bottom: 8px; font-size: 0.95rem; }
+        .required { color: #ef4444; margin-left: 4px; }
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem;
+        }
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none; border-color: #1e3a5f; box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+        }
+        .form-group textarea { min-height: 120px; resize: vertical; }
+        .form-group small { display: block; margin-top: 6px; color: #64748b; font-size: 0.875rem; }
+
+        .urgency-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
+        .urgency-option label {
+            display: block; padding: 16px; border: 2px solid #e2e8f0; border-radius: 8px;
+            text-align: center; cursor: pointer; font-weight: 500;
+        }
+        .urgency-option input[type="radio"]:checked + label {
+            border-color: #1e3a5f; background: #f0f4f8; color: #1e3a5f;
+        }
+
+        .submit-button {
+            width: 100%; padding: 16px 32px; background: #1e3a5f; color: white;
+            border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600;
+            cursor: pointer; transition: all 0.2s;
+        }
+        .submit-button:hover { background: #2d4a70; transform: translateY(-2px); }
+        .submit-button:disabled { background: #cbd5e1; cursor: not-allowed; }
+
+        .error-message { background: #fee2e2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: none; }
+        .success-message { background: #d1fae5; color: #065f46; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: none; }
+
+        @media (max-width: 768px) {
+            .header-section h1 { font-size: 2rem; }
+            .form-container { padding: 24px; }
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <span class="logo-tick">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
+                    </svg>
+                </span>
+                BestTrade
+            </a>
+            <div class="nav-links">
+                <a href="/pricing.html">Pricing</a>
+                <a href="/about.html">About</a>
+                <a href="/dashboard">Sign In</a>
+            </div>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="header-section">
+            <h1>Post Your Job</h1>
+            <p>Get quotes from qualified local tradespeople</p>
+        </div>
+
+        <div class="form-container">
+            <div class="error-message" id="errorMessage"></div>
+            <div class="success-message" id="successMessage"></div>
+
+            <form id="jobForm">
+                <!-- Trade & Job Type -->
+                <div class="form-section">
+                    <h2>What do you need?</h2>
+                    <div class="form-group">
+                        <label>Trade Category<span class="required">*</span></label>
+                        <select id="tradeCategory" name="trade_category" required>
+                            <option value="">Select a trade...</option>
+                            <optgroup label="Emergency Services">
+                                <option value="plumber">Plumber</option>
+                                <option value="electrician">Electrician</option>
+                                <option value="gas-engineer">Gas Engineer</option>
+                                <option value="locksmith">Locksmith</option>
+                                <option value="drainage">Drainage Specialist</option>
+                            </optgroup>
+                            <optgroup label="Heating & Boilers">
+                                <option value="heating-engineer">Heating Engineer</option>
+                                <option value="boiler-installer">Boiler Installer</option>
+                                <option value="hvac">HVAC Engineer</option>
+                            </optgroup>
+                            <optgroup label="Construction & Building">
+                                <option value="builder">Builder</option>
+                                <option value="carpenter">Carpenter</option>
+                                <option value="roofer">Roofer</option>
+                                <option value="plasterer">Plasterer</option>
+                            </optgroup>
+                            <optgroup label="Interior & Fitting">
+                                <option value="painter-decorator">Painter & Decorator</option>
+                                <option value="tiler">Tiler</option>
+                                <option value="kitchen-fitter">Kitchen Fitter</option>
+                                <option value="bathroom-fitter">Bathroom Fitter</option>
+                                <option value="flooring">Flooring Specialist</option>
+                                <option value="window-fitter">Window Fitter</option>
+                            </optgroup>
+                            <optgroup label="Other Services">
+                                <option value="handyman">Handyman</option>
+                                <option value="landscaper">Landscaper / Gardener</option>
+                            </optgroup>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Job Type<span class="required">*</span></label>
+                        <select id="jobType" name="job_type" required>
+                            <option value="">Select trade category first...</option>
+                        </select>
+                        <small>Choose the specific type of work you need</small>
+                    </div>
+                </div>
+
+                <!-- Job Details -->
+                <div class="form-section">
+                    <h2>Job Details</h2>
+                    <div class="form-group">
+                        <label>Describe the job<span class="required">*</span></label>
+                        <textarea id="description" name="description" required placeholder="Please provide as much detail as possible..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>When do you need this done?<span class="required">*</span></label>
+                        <div class="urgency-options">
+                            <div class="urgency-option urgency-emergency">
+                                <input type="radio" id="emergency" name="urgency" value="emergency" required>
+                                <label for="emergency">Emergency <span class="urgency-badge">Today</span></label>
+                            </div>
+                            <div class="urgency-option urgency-urgent">
+                                <input type="radio" id="urgent" name="urgency" value="urgent">
+                                <label for="urgent">Urgent <span class="urgency-badge">This Week</span></label>
+                            </div>
+                            <div class="urgency-option urgency-week">
+                                <input type="radio" id="week" name="urgency" value="week">
+                                <label for="week">Soon <span class="urgency-badge">2-4 Weeks</span></label>
+                            </div>
+                            <div class="urgency-option urgency-flexible">
+                                <input type="radio" id="flexible" name="urgency" value="flexible">
+                                <label for="flexible">Flexible <span class="urgency-badge">No Rush</span></label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Location -->
+                <div class="form-section">
+                    <h2>Location</h2>
+                    <div class="form-group">
+                        <label>Postcode<span class="required">*</span></label>
+                        <input type="text" id="postcode" name="postcode" required placeholder="e.g., SW1A 1AA" style="text-transform: uppercase;">
+                    </div>
+                    <div class="form-group">
+                        <label>Street Address (Optional)</label>
+                        <input type="text" id="address" name="address" placeholder="e.g., 123 High Street">
+                    </div>
+                </div>
+
+                <!-- Contact Details -->
+                <div class="form-section">
+                    <h2>Your Contact Details</h2>
+                    <div class="form-group">
+                        <label>Your Name<span class="required">*</span></label>
+                        <input type="text" id="customer_name" name="customer_name" required placeholder="e.g., John Smith">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Phone Number<span class="required">*</span></label>
+                        <input type="tel" id="phone" name="phone" required placeholder="e.g., 07700 900000">
+                        <small>Tradespeople will contact you to provide quotes</small>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Email Address (Optional)</label>
+                        <input type="email" id="email" name="email" placeholder="e.g., john@example.com">
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-button" id="submitButton">
+                    Post Job & Get Quotes
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const jobTypeOptions = { /* Keep your full jobTypeOptions object exactly as it is */ 
+            // ... paste all your jobTypeOptions here (plumber, electrician, etc.)
+        };
+
+        // Trade category → job type dropdown (unchanged)
+        document.getElementById('tradeCategory').addEventListener('change', function() {
+            const jobTypeSelect = document.getElementById('jobType');
+            const selectedTrade = this.value;
+            jobTypeSelect.innerHTML = '<option value="">Select job type...</option>';
+            
+            if (selectedTrade && jobTypeOptions[selectedTrade]) {
+                jobTypeOptions[selectedTrade].forEach(jobType => {
+                    const option = document.createElement('option');
+                    option.value = jobType.toLowerCase().replace(/\s+/g, '-');
+                    option.textContent = jobType;
+                    jobTypeSelect.appendChild(option);
+                });
+                jobTypeSelect.disabled = false;
+            }
+        });
+
+        // FIXED Form Submission - Now matches your database
+        document.getElementById('jobForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitButton = document.getElementById('submitButton');
+            const errorMessage = document.getElementById('errorMessage');
+            const successMessage = document.getElementById('successMessage');
+
+            errorMessage.style.display = 'none';
+            successMessage.style.display = 'none';
+            submitButton.disabled = true;
+            submitButton.textContent = 'Submitting...';
+
+            const formData = {
+                trade_category: document.getElementById('tradeCategory').value,
+                job_type: document.getElementById('jobType').value,
+                description: document.getElementById('description').value,
+                urgency: document.querySelector('input[name="urgency"]:checked')?.value,
+                postcode: document.getElementById('postcode').value.toUpperCase(),
+                address: document.getElementById('address').value,
+                customer_name: document.getElementById('customer_name').value,   // ← Fixed
+                phone: document.getElementById('phone').value,                 // ← Matches DB
+                email: document.getElementById('email').value                  // ← Matches DB
+            };
+
+            try {
+                const response = await fetch('/api/customer/post-job', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                const result = await response.json();
+
+                if (response.ok && result.success) {
+                    successMessage.textContent = '✓ Job posted successfully! Redirecting...';
+                    successMessage.style.display = 'block';
+
+                    this.reset();
+                    document.getElementById('jobType').innerHTML = '<option value="">Select trade category first...</option>';
+
+                    setTimeout(() => window.location.href = '/job-submitted.html', 2000);
+                } else {
+                    throw new Error(result.error || 'Failed to submit job');
+                }
+            } catch (error) {
+                errorMessage.textContent = '❌ ' + error.message;
+                errorMessage.style.display = 'block';
+                submitButton.disabled = false;
+                submitButton.textContent = 'Post Job & Get Quotes';
+            }
+        });
+
+        // Postcode uppercase
+        document.getElementById('postcode').addEventListener('input', function() {
+            this.value = this.value.toUpperCase();
+        });
+    </script>
+</body>
+</html>
