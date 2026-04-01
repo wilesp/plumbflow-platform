@@ -14,7 +14,7 @@
             min-height: 100vh;
         }
         
-        /* ===== NAVIGATION ===== */
+        /* Navigation */
         .navbar {
             background: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -73,50 +73,163 @@
             font-size: 15px;
         }
         
-        .nav-links a:hover {
+        .nav-links a:hover { color: #1e3a5f; }
+
+        /* Main Content */
+        .main-container {
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+        }
+        
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        
+        .header-section h1 {
+            font-size: 2.5rem;
+            color: #1e3a5f;
+            margin-bottom: 12px;
+            font-weight: 700;
+        }
+        
+        .header-section p {
+            font-size: 1.2rem;
+            color: #64748b;
+        }
+        
+        .form-container {
+            background: white;
+            border-radius: 16px;
+            padding: 40px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+        
+        .form-section {
+            margin-bottom: 32px;
+        }
+        
+        .form-section h2 {
+            font-size: 1.3rem;
+            color: #1e3a5f;
+            margin-bottom: 20px;
+            font-weight: 600;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f1f5f9;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .required {
+            color: #ef4444;
+            margin-left: 4px;
+        }
+        
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+        }
+        
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #1e3a5f;
+            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
+        }
+        
+        .form-group textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+        
+        .form-group small {
+            display: block;
+            margin-top: 6px;
+            color: #64748b;
+            font-size: 0.875rem;
+        }
+        
+        .urgency-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+        
+        .urgency-option label {
+            display: block;
+            padding: 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: 500;
+        }
+        
+        .urgency-option input[type="radio"]:checked + label {
+            border-color: #1e3a5f;
+            background: #f0f4f8;
             color: #1e3a5f;
         }
-
-        /* Rest of your beautiful CSS - unchanged */
-        .main-container { max-width: 800px; margin: 40px auto; padding: 0 20px; }
-        .header-section { text-align: center; margin-bottom: 40px; }
-        .header-section h1 { font-size: 2.5rem; color: #1e3a5f; margin-bottom: 12px; font-weight: 700; }
-        .header-section p { font-size: 1.2rem; color: #64748b; }
-        .form-container { background: white; border-radius: 16px; padding: 40px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .form-section { margin-bottom: 32px; }
-        .form-section h2 { font-size: 1.3rem; color: #1e3a5f; margin-bottom: 20px; font-weight: 600; padding-bottom: 10px; border-bottom: 2px solid #f1f5f9; }
-        .form-group { margin-bottom: 24px; }
-        .form-group label { display: block; font-weight: 600; color: #334155; margin-bottom: 8px; font-size: 0.95rem; }
-        .required { color: #ef4444; margin-left: 4px; }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%; padding: 12px 16px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 1rem;
-        }
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none; border-color: #1e3a5f; box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
-        }
-        .form-group textarea { min-height: 120px; resize: vertical; }
-        .form-group small { display: block; margin-top: 6px; color: #64748b; font-size: 0.875rem; }
-
-        .urgency-options { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; }
-        .urgency-option label {
-            display: block; padding: 16px; border: 2px solid #e2e8f0; border-radius: 8px;
-            text-align: center; cursor: pointer; font-weight: 500;
-        }
-        .urgency-option input[type="radio"]:checked + label {
-            border-color: #1e3a5f; background: #f0f4f8; color: #1e3a5f;
-        }
-
+        
         .submit-button {
-            width: 100%; padding: 16px 32px; background: #1e3a5f; color: white;
-            border: none; border-radius: 10px; font-size: 1.1rem; font-weight: 600;
-            cursor: pointer; transition: all 0.2s;
+            width: 100%;
+            padding: 16px 32px;
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .submit-button:hover { background: #2d4a70; transform: translateY(-2px); }
-        .submit-button:disabled { background: #cbd5e1; cursor: not-allowed; }
-
-        .error-message { background: #fee2e2; color: #991b1b; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: none; }
-        .success-message { background: #d1fae5; color: #065f46; padding: 12px 16px; border-radius: 8px; margin-bottom: 20px; display: none; }
-
+        
+        .submit-button:hover {
+            background: #2d4a70;
+            transform: translateY(-2px);
+        }
+        
+        .submit-button:disabled {
+            background: #cbd5e1;
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 12px 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
         @media (max-width: 768px) {
             .header-section h1 { font-size: 2rem; }
             .form-container { padding: 24px; }
@@ -157,6 +270,7 @@
                 <!-- Trade & Job Type -->
                 <div class="form-section">
                     <h2>What do you need?</h2>
+                    
                     <div class="form-group">
                         <label>Trade Category<span class="required">*</span></label>
                         <select id="tradeCategory" name="trade_category" required>
@@ -208,7 +322,8 @@
                     <h2>Job Details</h2>
                     <div class="form-group">
                         <label>Describe the job<span class="required">*</span></label>
-                        <textarea id="description" name="description" required placeholder="Please provide as much detail as possible..."></textarea>
+                        <textarea id="description" name="description" required placeholder="Please provide as much detail as possible about the work needed..."></textarea>
+                        <small>Include any relevant details, measurements, or specific requirements</small>
                     </div>
 
                     <div class="form-group">
@@ -240,7 +355,9 @@
                     <div class="form-group">
                         <label>Postcode<span class="required">*</span></label>
                         <input type="text" id="postcode" name="postcode" required placeholder="e.g., SW1A 1AA" style="text-transform: uppercase;">
+                        <small>We'll find tradespeople in your area</small>
                     </div>
+
                     <div class="form-group">
                         <label>Street Address (Optional)</label>
                         <input type="text" id="address" name="address" placeholder="e.g., 123 High Street">
@@ -275,247 +392,35 @@
     </div>
 
     <script>
-        const jobTypeOptions = { /* Keep your full jobTypeOptions object exactly as it is */ 
-            // Job type options for each trade category
+        // Full Job Type Options - Restored completely
         const jobTypeOptions = {
-            'plumber': [
-                'Leak Repair',
-                'Boiler Repair',
-                'Bathroom Installation',
-                'Tap Installation / Repair',
-                'Toilet Installation / Repair',
-                'Pipe Work / Replacement',
-                'Radiator Installation',
-                'Water Heater Installation',
-                'Drain Unblocking',
-                'Emergency Plumbing',
-                'Shower Installation',
-                'Other Plumbing'
-            ],
-            'electrician': [
-                'Fault Finding / Repair',
-                'Rewiring',
-                'Socket Installation',
-                'Light Fitting',
-                'Fuse Box / Consumer Unit Replacement',
-                'Electric Shower Installation',
-                'EV Charger Installation',
-                'Electrical Testing / Certificate',
-                'Security Lighting',
-                'Emergency Electrical',
-                'Outdoor Electrical Work',
-                'Other Electrical'
-            ],
-            'gas-engineer': [
-                'Boiler Service',
-                'Gas Safety Certificate',
-                'Cooker / Hob Installation',
-                'Gas Leak Detection / Repair',
-                'Central Heating Installation',
-                'Gas Fire Installation',
-                'Boiler Breakdown',
-                'Gas Appliance Installation',
-                'Emergency Gas Work',
-                'Other Gas Work'
-            ],
-            'heating-engineer': [
-                'Central Heating Installation',
-                'Boiler Installation',
-                'Radiator Installation / Replacement',
-                'Underfloor Heating',
-                'Heating System Repair',
-                'Thermostat Installation',
-                'Power Flush',
-                'Heating System Upgrade',
-                'Emergency Heating Repair',
-                'Other Heating Work'
-            ],
-            'boiler-installer': [
-                'Combi Boiler Installation',
-                'System Boiler Installation',
-                'Regular Boiler Installation',
-                'Boiler Replacement',
-                'Boiler Upgrade',
-                'Boiler Relocation',
-                'Emergency Boiler Installation',
-                'Other Boiler Work'
-            ],
-            'builder': [
-                'Extension',
-                'Loft Conversion',
-                'Kitchen Extension',
-                'General Building Work',
-                'Structural Work',
-                'Foundation Work',
-                'Brickwork',
-                'Stonework',
-                'Garage Conversion',
-                'New Build',
-                'Renovation',
-                'Other Building Work'
-            ],
-            'carpenter': [
-                'Door Hanging',
-                'Fitted Wardrobes',
-                'Shelving',
-                'Decking',
-                'Fence Installation',
-                'Kitchen Fitting',
-                'Skirting Boards',
-                'Window Installation',
-                'Staircase',
-                'Custom Furniture',
-                'Repair Work',
-                'Other Carpentry'
-            ],
-            'painter-decorator': [
-                'Interior Painting',
-                'Exterior Painting',
-                'Wallpapering',
-                'Woodwork Painting',
-                'Ceiling Painting',
-                'Feature Wall',
-                'Spray Painting',
-                'Commercial Decorating',
-                'Full House Decoration',
-                'Other Decorating'
-            ],
-            'roofer': [
-                'Roof Repair',
-                'New Roof Installation',
-                'Roof Replacement',
-                'Flat Roof',
-                'Tile Roof',
-                'Slate Roof',
-                'Chimney Work',
-                'Guttering',
-                'Roof Insulation',
-                'Fascia & Soffit',
-                'Emergency Roof Repair',
-                'Other Roofing'
-            ],
-            'plasterer': [
-                'Skimming',
-                'Dry Lining',
-                'Ceiling Repair',
-                'Wall Repair',
-                'Rendering',
-                'Coving',
-                'Artex Removal',
-                'Full Room Plastering',
-                'Patch Repair',
-                'Other Plastering'
-            ],
-            'tiler': [
-                'Bathroom Tiling',
-                'Kitchen Tiling',
-                'Floor Tiling',
-                'Wall Tiling',
-                'Splashback',
-                'Tile Repair / Replacement',
-                'Mosaic Tiling',
-                'Commercial Tiling',
-                'Other Tiling'
-            ],
-            'kitchen-fitter': [
-                'Full Kitchen Installation',
-                'Kitchen Worktop Installation',
-                'Kitchen Cabinet Installation',
-                'Kitchen Appliance Installation',
-                'Kitchen Renovation',
-                'Kitchen Design & Fit',
-                'Other Kitchen Work'
-            ],
-            'bathroom-fitter': [
-                'Full Bathroom Installation',
-                'Shower Installation',
-                'Bath Installation',
-                'Toilet Installation',
-                'Sink / Basin Installation',
-                'Wet Room Installation',
-                'Bathroom Renovation',
-                'Bathroom Design & Fit',
-                'Other Bathroom Work'
-            ],
-            'handyman': [
-                'General Repairs',
-                'Flat Pack Assembly',
-                'TV Wall Mounting',
-                'Picture Hanging',
-                'Minor Plumbing',
-                'Minor Electrical',
-                'Odd Jobs',
-                'Maintenance',
-                'Other Handyman Work'
-            ],
-            'landscaper': [
-                'Garden Design',
-                'Lawn Installation / Repair',
-                'Patio Installation',
-                'Decking',
-                'Fencing',
-                'Tree Work',
-                'Hedge Trimming',
-                'Garden Maintenance',
-                'Artificial Grass',
-                'Driveway',
-                'Other Landscaping'
-            ],
-            'drainage': [
-                'Drain Unblocking',
-                'Drain Repair',
-                'CCTV Drain Survey',
-                'Drain Installation',
-                'Septic Tank',
-                'Soakaway',
-                'Emergency Drainage',
-                'Other Drainage Work'
-            ],
-            'locksmith': [
-                'Lock Change',
-                'Lock Repair',
-                'Emergency Lockout',
-                'UPVC Lock',
-                'Security Upgrade',
-                'Key Cutting',
-                'Safe Opening',
-                'Other Locksmith Work'
-            ],
-            'window-fitter': [
-                'UPVC Windows',
-                'Double Glazing',
-                'Window Replacement',
-                'Window Repair',
-                'Conservatory',
-                'Bi-fold Doors',
-                'Patio Doors',
-                'Other Window Work'
-            ],
-            'flooring': [
-                'Laminate Flooring',
-                'Hardwood Flooring',
-                'Vinyl Flooring',
-                'Carpet Installation',
-                'Tile Flooring',
-                'Floor Repair',
-                'Underfloor Heating',
-                'Other Flooring'
-            ],
-            'hvac': [
-                'Air Conditioning Installation',
-                'Air Conditioning Repair',
-                'Ventilation System',
-                'Heat Pump Installation',
-                'HVAC Maintenance',
-                'Other HVAC Work'
-            ]
-        };
+            'plumber': ['Leak Repair','Boiler Repair','Bathroom Installation','Tap Installation / Repair','Toilet Installation / Repair','Pipe Work / Replacement','Radiator Installation','Water Heater Installation','Drain Unblocking','Emergency Plumbing','Shower Installation','Other Plumbing'],
+            'electrician': ['Fault Finding / Repair','Rewiring','Socket Installation','Light Fitting','Fuse Box / Consumer Unit Replacement','Electric Shower Installation','EV Charger Installation','Electrical Testing / Certificate','Security Lighting','Emergency Electrical','Outdoor Electrical Work','Other Electrical'],
+            'gas-engineer': ['Boiler Service','Gas Safety Certificate','Cooker / Hob Installation','Gas Leak Detection / Repair','Central Heating Installation','Gas Fire Installation','Boiler Breakdown','Gas Appliance Installation','Emergency Gas Work','Other Gas Work'],
+            'heating-engineer': ['Central Heating Installation','Boiler Installation','Radiator Installation / Replacement','Underfloor Heating','Heating System Repair','Thermostat Installation','Power Flush','Heating System Upgrade','Emergency Heating Repair','Other Heating Work'],
+            'boiler-installer': ['Combi Boiler Installation','System Boiler Installation','Regular Boiler Installation','Boiler Replacement','Boiler Upgrade','Boiler Relocation','Emergency Boiler Installation','Other Boiler Work'],
+            'builder': ['Extension','Loft Conversion','Kitchen Extension','General Building Work','Structural Work','Foundation Work','Brickwork','Stonework','Garage Conversion','New Build','Renovation','Other Building Work'],
+            'carpenter': ['Door Hanging','Fitted Wardrobes','Shelving','Decking','Fence Installation','Kitchen Fitting','Skirting Boards','Window Installation','Staircase','Custom Furniture','Repair Work','Other Carpentry'],
+            'painter-decorator': ['Interior Painting','Exterior Painting','Wallpapering','Woodwork Painting','Ceiling Painting','Feature Wall','Spray Painting','Commercial Decorating','Full House Decoration','Other Decorating'],
+            'roofer': ['Roof Repair','New Roof Installation','Roof Replacement','Flat Roof','Tile Roof','Slate Roof','Chimney Work','Guttering','Roof Insulation','Fascia & Soffit','Emergency Roof Repair','Other Roofing'],
+            'plasterer': ['Skimming','Dry Lining','Ceiling Repair','Wall Repair','Rendering','Coving','Artex Removal','Full Room Plastering','Patch Repair','Other Plastering'],
+            'tiler': ['Bathroom Tiling','Kitchen Tiling','Floor Tiling','Wall Tiling','Splashback','Tile Repair / Replacement','Mosaic Tiling','Commercial Tiling','Other Tiling'],
+            'kitchen-fitter': ['Full Kitchen Installation','Kitchen Worktop Installation','Kitchen Cabinet Installation','Kitchen Appliance Installation','Kitchen Renovation','Kitchen Design & Fit','Other Kitchen Work'],
+            'bathroom-fitter': ['Full Bathroom Installation','Shower Installation','Bath Installation','Toilet Installation','Sink / Basin Installation','Wet Room Installation','Bathroom Renovation','Bathroom Design & Fit','Other Bathroom Work'],
+            'handyman': ['General Repairs','Flat Pack Assembly','TV Wall Mounting','Picture Hanging','Minor Plumbing','Minor Electrical','Odd Jobs','Maintenance','Other Handyman Work'],
+            'landscaper': ['Garden Design','Lawn Installation / Repair','Patio Installation','Decking','Fencing','Tree Work','Hedge Trimming','Garden Maintenance','Artificial Grass','Driveway','Other Landscaping'],
+            'drainage': ['Drain Unblocking','Drain Repair','CCTV Drain Survey','Drain Installation','Septic Tank','Soakaway','Emergency Drainage','Other Drainage Work'],
+            'locksmith': ['Lock Change','Lock Repair','Emergency Lockout','UPVC Lock','Security Upgrade','Key Cutting','Safe Opening','Other Locksmith Work'],
+            'window-fitter': ['UPVC Windows','Double Glazing','Window Replacement','Window Repair','Conservatory','Bi-fold Doors','Patio Doors','Other Window Work'],
+            'flooring': ['Laminate Flooring','Hardwood Flooring','Vinyl Flooring','Carpet Installation','Tile Flooring','Floor Repair','Underfloor Heating','Other Flooring'],
+            'hvac': ['Air Conditioning Installation','Air Conditioning Repair','Ventilation System','Heat Pump Installation','HVAC Maintenance','Other HVAC Work']
         };
 
-        // Trade category → job type dropdown (unchanged)
+        // Update Job Type dropdown when Trade Category changes
         document.getElementById('tradeCategory').addEventListener('change', function() {
             const jobTypeSelect = document.getElementById('jobType');
             const selectedTrade = this.value;
+            
             jobTypeSelect.innerHTML = '<option value="">Select job type...</option>';
             
             if (selectedTrade && jobTypeOptions[selectedTrade]) {
@@ -526,19 +431,22 @@
                     jobTypeSelect.appendChild(option);
                 });
                 jobTypeSelect.disabled = false;
+            } else {
+                jobTypeSelect.disabled = true;
             }
         });
 
-        // FIXED Form Submission - Now matches your database
+        // Form Submission - Matches your database columns
         document.getElementById('jobForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
             const submitButton = document.getElementById('submitButton');
             const errorMessage = document.getElementById('errorMessage');
             const successMessage = document.getElementById('successMessage');
-
+            
             errorMessage.style.display = 'none';
             successMessage.style.display = 'none';
+            
             submitButton.disabled = true;
             submitButton.textContent = 'Submitting...';
 
@@ -549,11 +457,11 @@
                 urgency: document.querySelector('input[name="urgency"]:checked')?.value,
                 postcode: document.getElementById('postcode').value.toUpperCase(),
                 address: document.getElementById('address').value,
-                customer_name: document.getElementById('customer_name').value,   // ← Fixed
-                phone: document.getElementById('phone').value,                 // ← Matches DB
-                email: document.getElementById('email').value                  // ← Matches DB
+                customer_name: document.getElementById('customer_name').value,
+                phone: document.getElementById('phone').value,
+                email: document.getElementById('email').value
             };
-
+            
             try {
                 const response = await fetch('/api/customer/post-job', {
                     method: 'POST',
@@ -570,7 +478,9 @@
                     this.reset();
                     document.getElementById('jobType').innerHTML = '<option value="">Select trade category first...</option>';
 
-                    setTimeout(() => window.location.href = '/job-submitted.html', 2000);
+                    setTimeout(() => {
+                        window.location.href = '/job-submitted.html';
+                    }, 2000);
                 } else {
                     throw new Error(result.error || 'Failed to submit job');
                 }
@@ -582,7 +492,7 @@
             }
         });
 
-        // Postcode uppercase
+        // Postcode auto uppercase
         document.getElementById('postcode').addEventListener('input', function() {
             this.value = this.value.toUpperCase();
         });
