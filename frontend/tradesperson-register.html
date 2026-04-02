@@ -3,17 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Post a Job - Best Trade | Find Local Tradespeople</title>
+    <title>Register as Trade Professional - Best Trade</title>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', Arial, sans-serif;
-            color: #1e293b;
-            background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
             min-height: 100vh;
+            color: #333;
         }
-        
+
         .navbar {
             background: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -21,7 +22,7 @@
             top: 0;
             z-index: 1000;
         }
-        
+
         .nav-container {
             max-width: 1200px;
             margin: 0 auto;
@@ -30,7 +31,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        
+
         .logo {
             font-size: 22px;
             font-weight: 700;
@@ -40,202 +41,135 @@
             align-items: center;
             gap: 12px;
         }
-        
-        .logo:hover { opacity: 0.8; }
-        
-        .logo-tick {
-            width: 32px;
-            height: 32px;
-            background: #ef4444;
-            border-radius: 50%;
+
+        .form-container {
+            padding: 40px 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: calc(100vh - 70px);
         }
-        
-        .logo-tick svg {
-            width: 18px;
-            height: 18px;
-            fill: white;
-        }
-        
-        .nav-links {
-            display: flex;
-            gap: 30px;
-            align-items: center;
-        }
-        
-        .nav-links a {
-            color: #64748b;
-            text-decoration: none;
-            font-weight: 500;
-            font-size: 15px;
-        }
-        
-        .nav-links a:hover { color: #1e3a5f; }
 
-        .main-container {
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
+        .container {
+            max-width: 600px;
+            width: 100%;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
         }
-        
-        .header-section {
+
+        .header {
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            color: white;
+            padding: 24px 30px;
             text-align: center;
-            margin-bottom: 40px;
         }
-        
-        .header-section h1 {
-            font-size: 2.5rem;
-            color: #1e3a5f;
-            margin-bottom: 12px;
+
+        .header h1 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
             font-weight: 700;
         }
-        
-        .header-section p {
-            font-size: 1.2rem;
-            color: #64748b;
+
+        .content {
+            padding: 40px 30px;
         }
-        
-        .form-container {
-            background: white;
-            border-radius: 16px;
-            padding: 40px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+
+        .step-indicator {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 30px;
+            position: relative;
         }
-        
-        .form-section {
-            margin-bottom: 32px;
+
+        .step-indicator::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #e5e7eb;
         }
-        
-        .form-section h2 {
-            font-size: 1.3rem;
-            color: #1e3a5f;
-            margin-bottom: 20px;
+
+        .step {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: #e5e7eb;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: 600;
-            padding-bottom: 10px;
-            border-bottom: 2px solid #f1f5f9;
+            position: relative;
+            z-index: 1;
         }
-        
+
+        .step.active { background: #1e3a5f; color: white; }
+        .step.completed { background: #10b981; color: white; }
+
         .form-group {
-            margin-bottom: 24px;
+            margin-bottom: 20px;
         }
-        
-        .form-group label {
+
+        label {
             display: block;
-            font-weight: 600;
-            color: #334155;
             margin-bottom: 8px;
-            font-size: 0.95rem;
+            font-weight: 600;
+            color: #1e3a5f;
         }
-        
-        .required {
-            color: #ef4444;
-            margin-left: 4px;
-        }
-        
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
+
+        input, select, textarea {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid #e2e8f0;
+            padding: 12px 15px;
+            border: 2px solid #e5e7eb;
             border-radius: 8px;
             font-size: 1rem;
-            font-family: inherit;
         }
-        
-        .form-group input:focus,
-        .form-group select:focus,
-        .form-group textarea:focus {
+
+        input:focus, select:focus, textarea:focus {
             outline: none;
             border-color: #1e3a5f;
-            box-shadow: 0 0 0 3px rgba(30, 58, 95, 0.1);
         }
-        
-        .form-group textarea {
-            min-height: 120px;
-            resize: vertical;
-        }
-        
-        .form-group small {
-            display: block;
-            margin-top: 6px;
-            color: #64748b;
-            font-size: 0.875rem;
-        }
-        
-        .urgency-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 12px;
-        }
-        
-        .urgency-option label {
-            display: block;
-            padding: 16px;
-            border: 2px solid #e2e8f0;
-            border-radius: 8px;
-            text-align: center;
-            cursor: pointer;
-            font-weight: 500;
-        }
-        
-        .urgency-option input[type="radio"]:checked + label {
-            border-color: #1e3a5f;
-            background: #f0f4f8;
-            color: #1e3a5f;
-        }
-        
-        .submit-button {
-            width: 100%;
-            padding: 16px 32px;
+
+        .btn {
             background: #1e3a5f;
             color: white;
             border: none;
-            border-radius: 10px;
+            padding: 15px 30px;
+            border-radius: 8px;
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            width: 100%;
+            margin-top: 10px;
         }
-        
-        .submit-button:hover {
-            background: #2d4a70;
-            transform: translateY(-2px);
+
+        .btn:hover {
+            background: #0f172a;
         }
-        
-        .submit-button:disabled {
-            background: #cbd5e1;
-            cursor: not-allowed;
+
+        .btn-secondary {
+            background: #6b7280;
         }
-        
-        .error-message {
-            background: #fee2e2;
-            color: #991b1b;
-            padding: 12px 16px;
+
+        .error {
+            color: #ef4444;
+            margin-top: 5px;
+            font-size: 0.95rem;
+        }
+
+        #card-element {
+            background: white;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
             border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        .success-message {
-            background: #d1fae5;
-            color: #065f46;
-            padding: 12px 16px;
-            border-radius: 8px;
-            margin-bottom: 20px;
-            display: none;
-        }
-        
-        @media (max-width: 768px) {
-            .header-section h1 { font-size: 2rem; }
-            .form-container { padding: 24px; }
+            min-height: 44px;
         }
     </style>
 </head>
 <body>
-    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="logo">
@@ -246,252 +180,207 @@
                 </span>
                 BestTrade
             </a>
-            <div class="nav-links">
-                <a href="/pricing.html">Pricing</a>
-                <a href="/about.html">About</a>
-                <a href="/dashboard">Sign In</a>
-            </div>
         </div>
     </nav>
 
-    <div class="main-container">
-        <div class="header-section">
-            <h1>Post Your Job</h1>
-            <p>Get quotes from qualified local tradespeople</p>
-        </div>
+    <div class="form-container">
+        <div class="container">
+            <div class="header">
+                <h1>Join Best Trade</h1>
+                <p>Start receiving quality leads today</p>
+                <div class="tier-badge" id="tierBadge">BASIC PLAN</div>
+            </div>
 
-        <div class="form-container">
-            <div class="error-message" id="errorMessage"></div>
-            <div class="success-message" id="successMessage"></div>
+            <div class="content">
+                <!-- Step Indicator -->
+                <div class="step-indicator">
+                    <div class="step active" id="step1">1</div>
+                    <div class="step" id="step2">2</div>
+                    <div class="step" id="step3">3</div>
+                </div>
 
-            <form id="jobForm">
-                <!-- Trade & Job Type -->
-                <div class="form-section">
-                    <h2>What do you need?</h2>
+                <!-- Step 1: Business Details -->
+                <form id="registrationForm" style="display: block;">
+                    <h2 style="color: #1e3a5f; margin-bottom: 20px;">Business Details</h2>
                     
                     <div class="form-group">
-                        <label>Trade Category<span class="required">*</span></label>
-                        <select id="tradeCategory" name="trade_category" required>
-                            <option value="">Select a trade...</option>
-                            <optgroup label="Emergency Services">
-                                <option value="plumber">Plumber</option>
-                                <option value="electrician">Electrician</option>
-                                <option value="gas-engineer">Gas Engineer</option>
-                                <option value="locksmith">Locksmith</option>
-                                <option value="drainage">Drainage Specialist</option>
-                            </optgroup>
-                            <optgroup label="Heating & Boilers">
-                                <option value="heating-engineer">Heating Engineer</option>
-                                <option value="boiler-installer">Boiler Installer</option>
-                                <option value="hvac">HVAC Engineer</option>
-                            </optgroup>
-                            <optgroup label="Construction & Building">
-                                <option value="builder">Builder</option>
-                                <option value="carpenter">Carpenter</option>
-                                <option value="roofer">Roofer</option>
-                                <option value="plasterer">Plasterer</option>
-                            </optgroup>
-                            <optgroup label="Interior & Fitting">
-                                <option value="painter-decorator">Painter & Decorator</option>
-                                <option value="tiler">Tiler</option>
-                                <option value="kitchen-fitter">Kitchen Fitter</option>
-                                <option value="bathroom-fitter">Bathroom Fitter</option>
-                                <option value="flooring">Flooring Specialist</option>
-                                <option value="window-fitter">Window Fitter</option>
-                            </optgroup>
-                            <optgroup label="Other Services">
-                                <option value="handyman">Handyman</option>
-                                <option value="landscaper">Landscaper / Gardener</option>
-                            </optgroup>
+                        <label for="businessName">Business Name *</label>
+                        <input type="text" id="businessName" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="tradeType">Trade Type *</label>
+                        <select id="tradeType" required>
+                            <option value="">Select your trade</option>
+                            <option value="plumber">Plumber</option>
+                            <option value="electrician">Electrician</option>
+                            <option value="builder">Builder</option>
+                            <option value="gas-engineer">Gas Engineer</option>
+                            <option value="heating-engineer">Heating Engineer</option>
+                            <option value="carpenter">Carpenter</option>
+                            <option value="roofer">Roofer</option>
+                            <option value="plasterer">Plasterer</option>
+                            <option value="other">Other</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label>Job Type<span class="required">*</span></label>
-                        <select id="jobType" name="job_type" required>
-                            <option value="">Select trade category first...</option>
-                        </select>
-                        <small>Choose the specific type of work you need</small>
+                        <label for="fullName">Your Full Name *</label>
+                        <input type="text" id="fullName" required>
                     </div>
+
+                    <div class="form-group">
+                        <label for="email">Email Address *</label>
+                        <input type="email" id="email" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="phone">Phone Number *</label>
+                        <input type="tel" id="phone" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="postcode">Base Postcode *</label>
+                        <input type="text" id="postcode" required placeholder="e.g., SW1A 1AA">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="experience">Years of Experience</label>
+                        <input type="number" id="experience" min="0" max="50">
+                    </div>
+
+                    <button type="button" class="btn" onclick="proceedToPayment()">Continue to Payment</button>
+                </form>
+
+                <!-- Step 2: Payment -->
+                <div id="paymentSection" style="display: none;">
+                    <h2 style="color: #1e3a5f; margin-bottom: 20px;">Payment Details</h2>
+                    <div id="card-element"></div>
+                    <div id="card-errors" class="error"></div>
+                    <button type="button" class="btn" id="submitPayment">Complete Registration</button>
+                    <button type="button" class="btn btn-secondary" onclick="backToDetails()">← Back</button>
                 </div>
 
-                <!-- Job Details -->
-                <div class="form-section">
-                    <h2>Job Details</h2>
-                    <div class="form-group">
-                        <label>Describe the job<span class="required">*</span></label>
-                        <textarea id="description" name="description" required placeholder="Please provide as much detail as possible about the work needed..."></textarea>
-                        <small>Include any relevant details, measurements, or specific requirements</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label>When do you need this done?<span class="required">*</span></label>
-                        <div class="urgency-options">
-                            <div class="urgency-option urgency-emergency">
-                                <input type="radio" id="emergency" name="urgency" value="emergency" required>
-                                <label for="emergency">Emergency <span class="urgency-badge">Today</span></label>
-                            </div>
-                            <div class="urgency-option urgency-urgent">
-                                <input type="radio" id="urgent" name="urgency" value="urgent">
-                                <label for="urgent">Urgent <span class="urgency-badge">This Week</span></label>
-                            </div>
-                            <div class="urgency-option urgency-week">
-                                <input type="radio" id="week" name="urgency" value="week">
-                                <label for="week">Soon <span class="urgency-badge">2-4 Weeks</span></label>
-                            </div>
-                            <div class="urgency-option urgency-flexible">
-                                <input type="radio" id="flexible" name="urgency" value="flexible">
-                                <label for="flexible">Flexible <span class="urgency-badge">No Rush</span></label>
-                            </div>
-                        </div>
+                <!-- Step 3: Success -->
+                <div id="successSection" style="display: none;">
+                    <div style="background:#d1fae5; padding:30px; border-radius:12px; text-align:center;">
+                        <h2 style="color:#065f46;">✓ Registration Successful!</h2>
+                        <p>Welcome to Best Trade! Redirecting to your dashboard...</p>
                     </div>
                 </div>
-
-                <!-- Location -->
-                <div class="form-section">
-                    <h2>Location</h2>
-                    <div class="form-group">
-                        <label>Postcode<span class="required">*</span></label>
-                        <input type="text" id="postcode" name="postcode" required placeholder="e.g., SW1A 1AA" style="text-transform: uppercase;">
-                        <small>We'll find tradespeople in your area</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Street Address (Optional)</label>
-                        <input type="text" id="address" name="address" placeholder="e.g., 123 High Street">
-                    </div>
-                </div>
-
-                <!-- Contact Details -->
-                <div class="form-section">
-                    <h2>Your Contact Details</h2>
-                    <div class="form-group">
-                        <label>Your Name<span class="required">*</span></label>
-                        <input type="text" id="customer_name" name="customer_name" required placeholder="e.g., John Smith">
-                    </div>
-
-                    <div class="form-group">
-                        <label>Phone Number<span class="required">*</span></label>
-                        <input type="tel" id="phone" name="phone" required placeholder="e.g., 07700 900000">
-                        <small>Tradespeople will contact you to provide quotes</small>
-                    </div>
-
-                    <div class="form-group">
-                        <label>Email Address (Optional)</label>
-                        <input type="email" id="email" name="email" placeholder="e.g., john@example.com">
-                    </div>
-                </div>
-
-                <button type="submit" class="submit-button" id="submitButton">
-                    Post Job & Get Quotes
-                </button>
-            </form>
+            </div>
         </div>
     </div>
 
     <script>
-        const jobTypeOptions = {
-            'plumber': ['Leak Repair','Boiler Repair','Bathroom Installation','Tap Installation / Repair','Toilet Installation / Repair','Pipe Work / Replacement','Radiator Installation','Water Heater Installation','Drain Unblocking','Emergency Plumbing','Shower Installation','Other Plumbing'],
-            'electrician': ['Fault Finding / Repair','Rewiring','Socket Installation','Light Fitting','Fuse Box / Consumer Unit Replacement','Electric Shower Installation','EV Charger Installation','Electrical Testing / Certificate','Security Lighting','Emergency Electrical','Outdoor Electrical Work','Other Electrical'],
-            'gas-engineer': ['Boiler Service','Gas Safety Certificate','Cooker / Hob Installation','Gas Leak Detection / Repair','Central Heating Installation','Gas Fire Installation','Boiler Breakdown','Gas Appliance Installation','Emergency Gas Work','Other Gas Work'],
-            'heating-engineer': ['Central Heating Installation','Boiler Installation','Radiator Installation / Replacement','Underfloor Heating','Heating System Repair','Thermostat Installation','Power Flush','Heating System Upgrade','Emergency Heating Repair','Other Heating Work'],
-            'boiler-installer': ['Combi Boiler Installation','System Boiler Installation','Regular Boiler Installation','Boiler Replacement','Boiler Upgrade','Boiler Relocation','Emergency Boiler Installation','Other Boiler Work'],
-            'builder': ['Extension','Loft Conversion','Kitchen Extension','General Building Work','Structural Work','Foundation Work','Brickwork','Stonework','Garage Conversion','New Build','Renovation','Other Building Work'],
-            'carpenter': ['Door Hanging','Fitted Wardrobes','Shelving','Decking','Fence Installation','Kitchen Fitting','Skirting Boards','Window Installation','Staircase','Custom Furniture','Repair Work','Other Carpentry'],
-            'painter-decorator': ['Interior Painting','Exterior Painting','Wallpapering','Woodwork Painting','Ceiling Painting','Feature Wall','Spray Painting','Commercial Decorating','Full House Decoration','Other Decorating'],
-            'roofer': ['Roof Repair','New Roof Installation','Roof Replacement','Flat Roof','Tile Roof','Slate Roof','Chimney Work','Guttering','Roof Insulation','Fascia & Soffit','Emergency Roof Repair','Other Roofing'],
-            'plasterer': ['Skimming','Dry Lining','Ceiling Repair','Wall Repair','Rendering','Coving','Artex Removal','Full Room Plastering','Patch Repair','Other Plastering'],
-            'tiler': ['Bathroom Tiling','Kitchen Tiling','Floor Tiling','Wall Tiling','Splashback','Tile Repair / Replacement','Mosaic Tiling','Commercial Tiling','Other Tiling'],
-            'kitchen-fitter': ['Full Kitchen Installation','Kitchen Worktop Installation','Kitchen Cabinet Installation','Kitchen Appliance Installation','Kitchen Renovation','Kitchen Design & Fit','Other Kitchen Work'],
-            'bathroom-fitter': ['Full Bathroom Installation','Shower Installation','Bath Installation','Toilet Installation','Sink / Basin Installation','Wet Room Installation','Bathroom Renovation','Bathroom Design & Fit','Other Bathroom Work'],
-            'handyman': ['General Repairs','Flat Pack Assembly','TV Wall Mounting','Picture Hanging','Minor Plumbing','Minor Electrical','Odd Jobs','Maintenance','Other Handyman Work'],
-            'landscaper': ['Garden Design','Lawn Installation / Repair','Patio Installation','Decking','Fencing','Tree Work','Hedge Trimming','Garden Maintenance','Artificial Grass','Driveway','Other Landscaping'],
-            'drainage': ['Drain Unblocking','Drain Repair','CCTV Drain Survey','Drain Installation','Septic Tank','Soakaway','Emergency Drainage','Other Drainage Work'],
-            'locksmith': ['Lock Change','Lock Repair','Emergency Lockout','UPVC Lock','Security Upgrade','Key Cutting','Safe Opening','Other Locksmith Work'],
-            'window-fitter': ['UPVC Windows','Double Glazing','Window Replacement','Window Repair','Conservatory','Bi-fold Doors','Patio Doors','Other Window Work'],
-            'flooring': ['Laminate Flooring','Hardwood Flooring','Vinyl Flooring','Carpet Installation','Tile Flooring','Floor Repair','Underfloor Heating','Other Flooring'],
-            'hvac': ['Air Conditioning Installation','Air Conditioning Repair','Ventilation System','Heat Pump Installation','HVAC Maintenance','Other HVAC Work']
+        // Get tier from URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const selectedTier = urlParams.get('tier') || 'basic';
+
+        const plans = {
+            basic: { name: 'Basic', price: '£20/month' },
+            pro: { name: 'Pro', price: '£30/month' },
+            premium: { name: 'Premium', price: '£200/year' }
         };
 
-        // Update job type options
-        document.getElementById('tradeCategory').addEventListener('change', function() {
-            const jobTypeSelect = document.getElementById('jobType');
-            const selectedTrade = this.value;
-            
-            jobTypeSelect.innerHTML = '<option value="">Select job type...</option>';
-            
-            if (selectedTrade && jobTypeOptions[selectedTrade]) {
-                jobTypeOptions[selectedTrade].forEach(jobType => {
-                    const option = document.createElement('option');
-                    option.value = jobType.toLowerCase().replace(/\s+/g, '-');
-                    option.textContent = jobType;
-                    jobTypeSelect.appendChild(option);
-                });
-                jobTypeSelect.disabled = false;
-            } else {
-                jobTypeSelect.disabled = true;
+        const plan = plans[selectedTier] || plans.basic;
+        document.getElementById('tierBadge').textContent = plan.name.toUpperCase() + " PLAN";
+
+        // Stripe Setup
+        const stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi'); // ← Replace with your real test key if different
+        const elements = stripe.elements();
+        const cardElement = elements.create('card', { hidePostalCode: true });
+
+        function proceedToPayment() {
+            const form = document.getElementById('registrationForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
             }
-        });
 
-        // Form submission
-        document.getElementById('jobForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const submitButton = document.getElementById('submitButton');
-            const errorMessage = document.getElementById('errorMessage');
-            const successMessage = document.getElementById('successMessage');
-            
-            errorMessage.style.display = 'none';
-            successMessage.style.display = 'none';
-            
+            document.getElementById('step1').classList.add('completed');
+            document.getElementById('step2').classList.add('active');
+
+            document.getElementById('registrationForm').style.display = 'none';
+            document.getElementById('paymentSection').style.display = 'block';
+
+            cardElement.mount('#card-element');
+        }
+
+        function backToDetails() {
+            document.getElementById('step2').classList.remove('active');
+            document.getElementById('paymentSection').style.display = 'none';
+            document.getElementById('registrationForm').style.display = 'block';
+        }
+
+        // Submit Payment
+        document.getElementById('submitPayment').addEventListener('click', async () => {
+            const submitButton = document.getElementById('submitPayment');
             submitButton.disabled = true;
-            submitButton.textContent = 'Submitting...';
 
-            const formData = {
-                trade_category: document.getElementById('tradeCategory').value,
-                job_type: document.getElementById('jobType').value,
-                description: document.getElementById('description').value,
-                urgency: document.querySelector('input[name="urgency"]:checked')?.value,
-                postcode: document.getElementById('postcode').value.toUpperCase(),
-                address: document.getElementById('address').value,
-                customer_name: document.getElementById('customer_name').value,
-                phone: document.getElementById('phone').value,
-                email: document.getElementById('email').value
-            };
-            
             try {
-                const response = await fetch('/api/customer/post-job', {
+                document.getElementById('paymentSection').style.display = 'none';
+                // You can add a loading indicator here if you want
+
+                const { paymentMethod, error } = await stripe.createPaymentMethod({
+                    type: 'card',
+                    card: cardElement,
+                    billing_details: {
+                        name: document.getElementById('fullName').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value
+                    }
+                });
+
+                if (error) throw error;
+
+                // Send registration data to backend
+                const registerResponse = await fetch('/api/register-tradesperson', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(formData)
+                    body: JSON.stringify({
+                        business_name: document.getElementById('businessName').value,
+                        full_name: document.getElementById('fullName').value,
+                        email: document.getElementById('email').value,
+                        phone: document.getElementById('phone').value,
+                        postcode: document.getElementById('postcode').value,
+                        trade_category: document.getElementById('tradeType').value,
+                        subscription_tier: selectedTier,
+                        payment_method_id: paymentMethod.id
+                    })
                 });
 
-                const result = await response.json();
+                if (!registerResponse.ok) {
+                    const errData = await registerResponse.json();
+                    throw new Error(errData.error || 'Registration failed');
+                }
 
-                if (response.ok && result.success) {
-                    successMessage.textContent = '✓ Job posted successfully! Redirecting...';
-                    successMessage.style.display = 'block';
+                const result = await registerResponse.json();
 
-                    this.reset();
-                    document.getElementById('jobType').innerHTML = '<option value="">Select trade category first...</option>';
+                if (result.success) {
+                    document.getElementById('step2').classList.add('completed');
+                    document.getElementById('step3').classList.add('active');
+                    document.getElementById('successSection').style.display = 'block';
 
                     setTimeout(() => {
-                        window.location.href = '/job-submitted.html';
-                    }, 2000);
+                        window.location.href = '/tradesperson-dashboard.html';
+                    }, 2500);
                 } else {
-                    throw new Error(result.error || 'Failed to submit job');
+                    throw new Error(result.error || 'Registration failed');
                 }
+
             } catch (error) {
-                errorMessage.textContent = '❌ ' + error.message;
-                errorMessage.style.display = 'block';
+                console.error(error);
+                document.getElementById('paymentSection').style.display = 'block';
+                document.getElementById('card-errors').textContent = error.message || 'Something went wrong. Please try again.';
                 submitButton.disabled = false;
-                submitButton.textContent = 'Post Job & Get Quotes';
             }
         });
 
-        // Postcode uppercase
-        document.getElementById('postcode').addEventListener('input', function() {
-            this.value = this.value.toUpperCase();
+        // Card error handling
+        cardElement.on('change', (event) => {
+            const displayError = document.getElementById('card-errors');
+            displayError.textContent = event.error ? event.error.message : '';
         });
     </script>
 </body>
