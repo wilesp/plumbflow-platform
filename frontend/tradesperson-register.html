@@ -156,7 +156,7 @@
 
         .error {
             color: #ef4444;
-            margin-top: 5px;
+            margin-top: 8px;
             font-size: 0.95rem;
         }
 
@@ -192,7 +192,6 @@
             </div>
 
             <div class="content">
-                <!-- Step Indicator -->
                 <div class="step-indicator">
                     <div class="step active" id="step1">1</div>
                     <div class="step" id="step2">2</div>
@@ -241,12 +240,7 @@
 
                     <div class="form-group">
                         <label for="postcode">Base Postcode *</label>
-                        <input type="text" id="postcode" required placeholder="e.g., SW1A 1AA">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="experience">Years of Experience</label>
-                        <input type="number" id="experience" min="0" max="50">
+                        <input type="text" id="postcode" required placeholder="e.g., HP1 1TT">
                     </div>
 
                     <button type="button" class="btn" onclick="proceedToPayment()">Continue to Payment</button>
@@ -261,12 +255,10 @@
                     <button type="button" class="btn btn-secondary" onclick="backToDetails()">← Back</button>
                 </div>
 
-                <!-- Step 3: Success -->
-                <div id="successSection" style="display: none;">
-                    <div style="background:#d1fae5; padding:30px; border-radius:12px; text-align:center;">
-                        <h2 style="color:#065f46;">✓ Registration Successful!</h2>
-                        <p>Welcome to Best Trade! Redirecting to your dashboard...</p>
-                    </div>
+                <!-- Success -->
+                <div id="successSection" style="display: none; text-align:center; padding:30px;">
+                    <h2 style="color:#065f46;">✓ Registration Successful!</h2>
+                    <p>Welcome to Best Trade!<br>Redirecting to your dashboard...</p>
                 </div>
             </div>
         </div>
@@ -278,16 +270,15 @@
         const selectedTier = urlParams.get('tier') || 'basic';
 
         const plans = {
-            basic: { name: 'Basic', price: '£20/month' },
-            pro: { name: 'Pro', price: '£30/month' },
-            premium: { name: 'Premium', price: '£200/year' }
+            basic: { name: 'Basic' },
+            pro: { name: 'Pro' },
+            premium: { name: 'Premium' }
         };
 
-        const plan = plans[selectedTier] || plans.basic;
-        document.getElementById('tierBadge').textContent = plan.name.toUpperCase() + " PLAN";
+        document.getElementById('tierBadge').textContent = (plans[selectedTier] || plans.basic).name.toUpperCase() + " PLAN";
 
-        // Stripe Setup
-        const stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi'); // ← Replace with your real test key if different
+        // Stripe (Test Mode)
+        const stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi'); 
         const elements = stripe.elements();
         const cardElement = elements.create('card', { hidePostalCode: true });
 
@@ -313,33 +304,31 @@
             document.getElementById('registrationForm').style.display = 'block';
         }
 
-        // Submit Payment
+        // Complete Registration
         document.getElementById('submitPayment').addEventListener('click', async () => {
             const submitButton = document.getElementById('submitPayment');
             submitButton.disabled = true;
+            document.getElementById('card-errors').textContent = '';
 
             try {
-                document.getElementById('paymentSection').style.display = 'none';
-                // You can add a loading indicator here if you want
-
                 const { paymentMethod, error } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: cardElement,
                     billing_details: {
                         name: document.getElementById('fullName').value,
-                        email: document.getElementById('email').value,
-                        phone: document.getElementById('phone').value
+                        email: document.getElementById('email').value
                     }
                 });
 
                 if (error) throw error;
 
-                // Send registration data to backend
-                const registerResponse = await fetch('/api/register-tradesperson', {
+                // Send to backend
+                const response = await fetch('/api/register-tradesperson', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        business_name: document.getElementById('businessName').value,
+                        name: document.getElementById('fullName').value,           // Most important - matches "name" column
+                        trading_name: document.getElementById('businessName').value,
                         full_name: document.getElementById('fullName').value,
                         email: document.getElementById('email').value,
                         phone: document.getElementById('phone').value,
@@ -350,16 +339,16 @@
                     })
                 });
 
-                if (!registerResponse.ok) {
-                    const errData = await registerResponse.json();
-                    throw new Error(errData.error || 'Registration failed');
-                }
+                const result = await response.json();
 
-                const result = await registerResponse.json();
+                if (!response.ok) {
+                    throw new Error(result.error || 'Registration failed');
+                }
 
                 if (result.success) {
                     document.getElementById('step2').classList.add('completed');
                     document.getElementById('step3').classList.add('active');
+                    document.getElementById('paymentSection').style.display = 'none';
                     document.getElementById('successSection').style.display = 'block';
 
                     setTimeout(() => {
@@ -369,18 +358,16 @@
                     throw new Error(result.error || 'Registration failed');
                 }
 
-            } catch (error) {
-                console.error(error);
+            } catch (err) {
+                document.getElementById('card-errors').textContent = err.message || 'Payment failed. Please try again.';
                 document.getElementById('paymentSection').style.display = 'block';
-                document.getElementById('card-errors').textContent = error.message || 'Something went wrong. Please try again.';
                 submitButton.disabled = false;
             }
         });
 
-        // Card error handling
+        // Real-time card error display
         cardElement.on('change', (event) => {
-            const displayError = document.getElementById('card-errors');
-            displayError.textContent = event.error ? event.error.message : '';
+            document.getElementById('card-errors').textContent = event.error ? event.error.message : '';
         });
     </script>
 </body>
