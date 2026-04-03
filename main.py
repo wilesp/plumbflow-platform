@@ -1,6 +1,6 @@
 """
 Best Trade - Main Application  
-FIXED: Registration now matches actual tradespeople table columns
+UPDATED: Fixed registration + added /api/tradesperson/me for dashboard
 """
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -112,12 +112,11 @@ async def register_tradesperson(request: Request):
     try:
         data = await request.json()
         
-        # Extract with safe fallbacks
         name = data.get('name') or data.get('full_name') or data.get('contact_name')
         trading_name = data.get('trading_name') or data.get('business_name')
         
         if not name:
-            raise HTTPException(status_code=400, detail="Name is required")
+            raise HTTPException(status_code=400, detail="Full name is required")
         if not trading_name:
             raise HTTPException(status_code=400, detail="Business name is required")
 
@@ -126,7 +125,7 @@ async def register_tradesperson(request: Request):
         
         cursor.execute("""
             INSERT INTO tradespeople (
-                name,           -- Required column
+                name,
                 trading_name,
                 contact_name,
                 email,
@@ -142,9 +141,9 @@ async def register_tradesperson(request: Request):
             )
             RETURNING id
         """, (
-            name,                    # name
-            trading_name,            # trading_name
-            name,                    # contact_name
+            name,
+            trading_name,
+            name,
             data.get('email'),
             data.get('phone'),
             data.get('postcode'),
@@ -168,6 +167,61 @@ async def register_tradesperson(request: Request):
     except Exception as e:
         print(f"Error registering tradesperson: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# GET CURRENT TRADESPERSON (for dashboard)
+# ============================================================================
+
+@app.get("/api/tradesperson/me")
+async def get_current_tradesperson(request: Request):
+    try:
+        session_token = request.cookies.get("session_token")
+        if not session_token:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        cursor.execute("""
+            SELECT t.id, t.name, t.trading_name, t.email, t.phone, t.postcode,
+                   t.trade_category, t.subscription_tier, t.subscription_status,
+                   t.can_receive_jobs, t.created_at
+            FROM tradesperson_sessions s
+            JOIN tradespeople t ON s.tradesperson_id = t.id
+            WHERE s.session_token = %s 
+              AND s.expires_at > NOW()
+        """, (session_token,))
+
+        user = cursor.fetchone()
+
+        if not user:
+            cursor.close()
+            conn.close()
+            raise HTTPException(status_code=401, detail="Session expired")
+
+        cursor.close()
+        conn.close()
+
+        return {
+            "success": True,
+            "id": user["id"],
+            "name": user["name"],
+            "trading_name": user["trading_name"],
+            "email": user["email"],
+            "phone": user["phone"],
+            "postcode": user["postcode"],
+            "trade_category": user["trade_category"],
+            "subscription_tier": user["subscription_tier"],
+            "subscription_status": user["subscription_status"],
+            "can_receive_jobs": user["can_receive_jobs"]
+        }
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error in /api/tradesperson/me: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 # ============================================================================
@@ -241,7 +295,7 @@ async def create_subscription(request: Request):
 
 
 # ============================================================================
-# MAGIC LINK AUTHENTICATION (Restored from your original)
+# MAGIC LINK AUTHENTICATION (Your original code restored)
 # ============================================================================
 
 @app.post("/api/auth/send-magic-link")
@@ -312,9 +366,6 @@ async def send_magic_link(request: Request):
                                 Access Dashboard
                             </a>
                         </div>
-                        <p style="font-size: 14px; color: #666; line-height: 1.6;">
-                            This link expires in 15 minutes and can only be used once.
-                        </p>
                     </div>
                 </body></html>
                 """
@@ -362,7 +413,6 @@ async def verify_magic_link(token: str, request: Request):
         cursor.execute("UPDATE magic_link_tokens SET used_at = NOW() WHERE id = %s", (result['id'],))
         conn.commit()
         
-        # Create session (simplified)
         session_token = secrets.token_urlsafe(32)
         cursor.execute("""
             INSERT INTO tradesperson_sessions (tradesperson_id, session_token, expires_at, ip_address, user_agent, created_at)
@@ -382,7 +432,7 @@ async def verify_magic_link(token: str, request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================
-# CUSTOMER JOB POSTING (Your original - kept intact)
+# CUSTOMER JOB POSTING
 # ============================================================================
 
 @app.post("/api/customer/post-job")
@@ -409,8 +459,8 @@ async def post_job(request: Request):
             data['urgency'],
             data['postcode'].upper(),
             data.get('address', ''),
-            data['name'],
-            data['phone'],
+            data.get('name', ''),
+            data.get('phone', ''),
             data.get('email', '')
         ))
         
