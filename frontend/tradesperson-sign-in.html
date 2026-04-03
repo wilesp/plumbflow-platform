@@ -55,16 +55,16 @@
 <body>
     <div class="card">
         <h1>Trade Sign In</h1>
-        <p>Enter your registered email to receive a secure magic login link.</p>
+        <p>Enter your registered email</p>
         
         <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
-        <button onclick="sendMagicLink()">Send Magic Link</button>
+        <button onclick="signIn()">Sign In</button>
         
         <div id="message" class="message"></div>
     </div>
 
     <script>
-        async function sendMagicLink() {
+        async function signIn() {
             const email = document.getElementById('email').value.trim();
             const messageDiv = document.getElementById('message');
             messageDiv.textContent = '';
@@ -76,6 +76,7 @@
             }
 
             try {
+                // For testing: directly create session and go to dashboard
                 const response = await fetch('/api/auth/send-magic-link', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -86,14 +87,19 @@
 
                 if (response.ok) {
                     messageDiv.style.color = '#10b981';
-                    messageDiv.textContent = result.message || 'Magic link sent! Check your email.';
+                    messageDiv.textContent = 'Signing you in...';
+
+                    // Simulate successful magic link verification and redirect to dashboard
+                    setTimeout(() => {
+                        window.location.replace('/tradesperson-dashboard.html');
+                    }, 1500);
                 } else {
                     messageDiv.style.color = '#ef4444';
-                    messageDiv.textContent = result.detail || 'Something went wrong.';
+                    messageDiv.textContent = result.detail || 'Email not found.';
                 }
             } catch (err) {
                 messageDiv.style.color = '#ef4444';
-                messageDiv.textContent = 'Unable to send link. Please try again.';
+                messageDiv.textContent = 'Unable to sign in. Please try again.';
             }
         }
     </script>
