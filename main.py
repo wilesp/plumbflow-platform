@@ -1,6 +1,6 @@
 """
 Best Trade - Main Application  
-UPDATED: Fixed registration + added /api/tradesperson/me for dashboard
+UPDATED: Correct Stripe Price IDs + Fixed Registration + Dashboard Support
 """
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -225,7 +225,7 @@ async def get_current_tradesperson(request: Request):
 
 
 # ============================================================================
-# SUBSCRIPTION CREATION
+# SUBSCRIPTION CREATION - FIXED WITH YOUR REAL PRICE IDs
 # ============================================================================
 
 @app.post("/api/subscription/create")
@@ -239,6 +239,13 @@ async def create_subscription(request: Request):
         if not tradesperson_id or not tier or not payment_method_id:
             raise HTTPException(status_code=400, detail="Missing required fields")
 
+        # Your actual Price IDs
+        price_ids = {
+            'basic': 'price_1T9RVDIrb6iFFzVYMd2Uslrv',   # Best Trade Basic
+            'pro': 'price_1T9RpaIrb6iFFzVYCFezjAHq',     # Best Trade Pro
+            'premium': 'price_1T9RZAIrb6iFFzVYu8p8tdgb'  # Best Trade Premium
+        }
+
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
@@ -249,12 +256,6 @@ async def create_subscription(request: Request):
         
         email = result['email']
         
-        price_ids = {
-            'basic': 'price_basic_monthly',
-            'pro': 'price_pro_monthly',
-            'premium': 'price_premium_yearly'
-        }
-        
         customer = stripe.Customer.create(
             email=email,
             payment_method=payment_method_id,
@@ -263,7 +264,7 @@ async def create_subscription(request: Request):
         
         subscription = stripe.Subscription.create(
             customer=customer.id,
-            items=[{'price': price_ids.get(tier, 'price_basic_monthly')}],
+            items=[{'price': price_ids.get(tier, price_ids['basic'])}],
             expand=['latest_invoice.payment_intent']
         )
         
@@ -295,7 +296,7 @@ async def create_subscription(request: Request):
 
 
 # ============================================================================
-# MAGIC LINK AUTHENTICATION (Your original code restored)
+# MAGIC LINK AUTHENTICATION (Your original restored)
 # ============================================================================
 
 @app.post("/api/auth/send-magic-link")
