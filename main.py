@@ -1,6 +1,6 @@
 """
 Best Trade - Main Application  
-UPDATED: Correct Stripe Price IDs + Fixed Registration + Dashboard Support
+FINAL VERSION: Fixed registration, dashboard support, and sign-in route
 """
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -75,6 +75,10 @@ async def tradesperson_register():
 async def tradesperson_dashboard():
     return FileResponse("frontend/tradesperson-dashboard.html")
 
+@app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)   # ← FIXED ROUTE
+async def tradesperson_sign_in():
+    return FileResponse("frontend/tradesperson-sign-in.html")
+
 @app.get("/how-it-works.html", response_class=HTMLResponse)
 async def how_it_works():
     return FileResponse("frontend/how-it-works.html")
@@ -101,7 +105,7 @@ async def expired_link():
 
 @app.get("/dashboard")
 async def dashboard_redirect():
-    return RedirectResponse(url="/dashboard-login.html")
+    return RedirectResponse(url="/tradesperson-sign-in.html")
 
 # ============================================================================
 # TRADESPERSON REGISTRATION - FIXED
@@ -225,7 +229,7 @@ async def get_current_tradesperson(request: Request):
 
 
 # ============================================================================
-# SUBSCRIPTION CREATION - FIXED WITH YOUR REAL PRICE IDs
+# SUBSCRIPTION CREATION - With your real Price IDs
 # ============================================================================
 
 @app.post("/api/subscription/create")
@@ -239,11 +243,10 @@ async def create_subscription(request: Request):
         if not tradesperson_id or not tier or not payment_method_id:
             raise HTTPException(status_code=400, detail="Missing required fields")
 
-        # Your actual Price IDs
         price_ids = {
-            'basic': 'price_1T9RVDIrb6iFFzVYMd2Uslrv',   # Best Trade Basic
-            'pro': 'price_1T9RpaIrb6iFFzVYCFezjAHq',     # Best Trade Pro
-            'premium': 'price_1T9RZAIrb6iFFzVYu8p8tdgb'  # Best Trade Premium
+            'basic': 'price_1T9RVDIrb6iFFzVYMd2Uslrv',
+            'pro': 'price_1T9RpaIrb6iFFzVYCFezjAHq',
+            'premium': 'price_1T9RZAIrb6iFFzVYu8p8tdgb'
         }
 
         conn = db.get_connection()
@@ -296,7 +299,7 @@ async def create_subscription(request: Request):
 
 
 # ============================================================================
-# MAGIC LINK AUTHENTICATION (Your original restored)
+# MAGIC LINK AUTHENTICATION
 # ============================================================================
 
 @app.post("/api/auth/send-magic-link")
@@ -406,10 +409,10 @@ async def verify_magic_link(token: str, request: Request):
         result = cursor.fetchone()
         
         if not result:
-            return HTMLResponse(content="<h1>Invalid or Expired Link</h1><p><a href='/dashboard-login.html'>Request new link</a></p>")
+            return HTMLResponse(content="<h1>Invalid or Expired Link</h1><p><a href='/tradesperson-sign-in.html'>Request new link</a></p>")
         
         if result.get('used_at') or (result.get('expires_at') and datetime.utcnow() > result['expires_at']):
-            return HTMLResponse(content="<h1>Link Expired or Used</h1><p><a href='/dashboard-login.html'>Request new link</a></p>")
+            return HTMLResponse(content="<h1>Link Expired or Used</h1><p><a href='/tradesperson-sign-in.html'>Request new link</a></p>")
         
         cursor.execute("UPDATE magic_link_tokens SET used_at = NOW() WHERE id = %s", (result['id'],))
         conn.commit()
