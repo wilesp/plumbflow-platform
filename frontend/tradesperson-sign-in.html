@@ -3,617 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta name="theme-color" content="#1e3a5f">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>Dashboard - Best Trade</title>
-    <link rel="manifest" href="/manifest.json">
+    <title>Trade Sign In - Best Trade</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
-            background: #f5f7fa;
-            color: #1e293b;
-        }
-
-        /* Header */
-        .header {
-            background: #1e3a5f;
-            color: white;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-        }
-
-        .logo-section {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .logo-tick {
-            width: 32px;
-            height: 32px;
-            background: #ef4444;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .logo-text {
-            font-size: 22px;
-            font-weight: 700;
-        }
-
-        .user-info {
-            text-align: right;
-            font-size: 14px;
-        }
-
-        .logout-btn {
-            background: rgba(255,255,255,0.15);
-            border: 1px solid rgba(255,255,255,0.3);
-            color: white;
-            padding: 6px 14px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 13px;
-            margin-top: 6px;
-        }
-
-        .logout-btn:hover {
-            background: rgba(255,255,255,0.25);
-        }
-
-        /* Login Screen */
-        .login-screen {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 20px;
-            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
         }
-
-        .login-box {
+        .card {
             background: white;
-            padding: 40px 30px;
+            padding: 40px;
             border-radius: 12px;
-            box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             max-width: 400px;
             width: 100%;
             text-align: center;
         }
-
-        .login-box h1 {
-            color: #1e3a5f;
-            margin-bottom: 10px;
-            font-size: 28px;
-        }
-
-        .login-box p {
-            color: #64748b;
-            margin-bottom: 25px;
-        }
-
-        .phone-input-group {
-            margin-bottom: 20px;
-        }
-
-        .phone-input {
+        h1 { color: #1e3a5f; margin-bottom: 10px; }
+        p { color: #64748b; margin-bottom: 30px; }
+        input {
             width: 100%;
-            padding: 14px;
-            border: 2px solid #e2e8f0;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e5e7eb;
             border-radius: 8px;
-            font-size: 16px;
-            transition: border 0.3s;
         }
-
-        .phone-input:focus {
-            outline: none;
-            border-color: #1e3a5f;
-        }
-
-        .btn {
+        button {
             width: 100%;
             padding: 14px;
             background: #1e3a5f;
             color: white;
             border: none;
             border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
+            font-size: 1.1rem;
             cursor: pointer;
-            transition: background 0.3s;
         }
-
-        .btn:hover {
-            background: #0f172a;
-        }
-
-        .btn:disabled {
-            background: #94a3b8;
-            cursor: not-allowed;
-        }
-
-        .success-message {
-            background: #10b981;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
-            display: none;
-        }
-
-        .error-message {
-            background: #ef4444;
-            color: white;
-            padding: 12px;
-            border-radius: 8px;
-            margin-top: 15px;
-            display: none;
-        }
-
-        /* Dashboard */
-        .dashboard {
-            display: none;
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-
-        .stat-label {
-            color: #64748b;
-            font-size: 13px;
-            margin-bottom: 6px;
-        }
-
-        .stat-value {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1e3a5f;
-        }
-
-        .jobs-section {
-            background: white;
-            padding: 25px;
-            border-radius: 10px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-        }
-
-        .section-title {
-            font-size: 22px;
-            font-weight: 700;
-            color: #1e3a5f;
-            margin-bottom: 20px;
-        }
-
-        .job-card {
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 18px;
-            margin-bottom: 15px;
-            transition: border 0.3s;
-        }
-
-        .job-card:hover {
-            border-color: #1e3a5f;
-        }
-
-        .job-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 12px;
-        }
-
-        .job-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #1e293b;
-        }
-
-        .job-urgency {
-            background: #ef4444;
-            color: white;
-            padding: 4px 10px;
-            border-radius: 4px;
-            font-size: 12px;
-            font-weight: 600;
-        }
-
-        .job-urgency.normal {
-            background: #10b981;
-        }
-
-        .job-details {
-            color: #64748b;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 12px;
-        }
-
-        .job-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 12px;
-            border-top: 1px solid #f1f5f9;
-        }
-
-        .job-location {
-            color: #475569;
-            font-size: 14px;
-        }
-
-        .quote-btn {
-            background: #1e3a5f;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        .quote-btn:hover {
-            background: #0f172a;
-        }
-
-        .loading {
-            text-align: center;
-            padding: 60px 20px;
-            color: #64748b;
-        }
-
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f4f6;
-            border-top-color: #1e3a5f;
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin: 0 auto 15px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Mobile responsive */
-        @media (max-width: 600px) {
-            .stats-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-
-            .job-header {
-                flex-direction: column;
-                gap: 8px;
-            }
-
-            .job-footer {
-                flex-direction: column;
-                gap: 12px;
-                align-items: stretch;
-            }
-
-            .quote-btn {
-                width: 100%;
-            }
-        }
-
-        /* Install Prompt */
-        .install-prompt {
-            background: linear-gradient(135deg, #1e3a5f, #0f172a);
-            color: white;
-            padding: 15px 20px;
-            display: none;
-            align-items: center;
-            justify-content: space-between;
-            gap: 15px;
-        }
-
-        .install-prompt-text {
-            flex: 1;
-            font-size: 14px;
-        }
-
-        .install-btn {
-            background: #ef4444;
-            color: white;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        .close-install {
-            background: transparent;
-            border: none;
-            color: white;
-            cursor: pointer;
-            font-size: 24px;
-            padding: 0 8px;
-        }
+        button:hover { background: #0f172a; }
     </style>
 </head>
 <body>
-    <!-- Loading Screen -->
-    <div id="loadingScreen" class="loading">
-        <div class="spinner"></div>
-        <p>Checking your session...</p>
-    </div>
-
-    <!-- Login Screen -->
-    <div id="loginScreen" class="login-screen" style="display: none;">
-        <div class="login-box">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 20px;">
-                <div class="logo-tick">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 6L9 17L4 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <div class="logo-text">BestTrade</div>
-            </div>
-            
-            <h1>Dashboard Login</h1>
-            <p>Enter your phone number to receive a login link via text message.</p>
-            <p style="font-size: 12px; color: #94a3b8; margin-top: 8px;">💡 Tip: After logging in, bookmark this page or add to your home screen for instant access!</p>
-            
-            <div class="phone-input-group">
-                <input type="tel" id="phoneInput" class="phone-input" placeholder="07700 900 123" />
-            </div>
-            
-            <button id="sendLinkBtn" class="btn">Send Login Link</button>
-            
-            <div id="successMessage" class="success-message"></div>
-            <div id="errorMessage" class="error-message"></div>
-        </div>
-    </div>
-
-    <!-- Dashboard -->
-    <div id="dashboardScreen" class="dashboard">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo-section">
-                <div class="logo-tick">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none">
-                        <path d="M20 6L9 17L4 12" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                </div>
-                <div class="logo-text">BestTrade</div>
-            </div>
-            <div class="user-info">
-                <div id="userName" style="font-weight: 600;"></div>
-                <div id="userTier" style="opacity: 0.9; font-size: 12px;"></div>
-                <button id="logoutBtn" class="logout-btn">Logout</button>
-            </div>
-        </div>
-
-        <!-- Install Prompt (iOS/Android) -->
-        <div id="installPrompt" class="install-prompt">
-            <div class="install-prompt-text">
-                📱 Add Best Trade to your home screen for quick access!
-            </div>
-            <button id="installBtn" class="install-btn">Add Now</button>
-            <button id="closeInstall" class="close-install">&times;</button>
-        </div>
-
-        <!-- Stats -->
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-label">Available Jobs</div>
-                <div class="stat-value" id="availableJobs">-</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Quotes Sent</div>
-                <div class="stat-value" id="quotesSent">-</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-label">Active Leads</div>
-                <div class="stat-value" id="activeLeads">-</div>
-            </div>
-        </div>
-
-        <!-- Jobs List -->
-        <div class="jobs-section">
-            <h2 class="section-title">Available Jobs Near You</h2>
-            <div id="jobsList">
-                <div class="loading">
-                    <div class="spinner"></div>
-                    <p>Loading jobs...</p>
-                </div>
-            </div>
-        </div>
+    <div class="card">
+        <h1>Trade Sign In</h1>
+        <p>Enter your email to receive a magic login link</p>
+        
+        <input type="email" id="email" placeholder="your@email.com" style="margin-bottom:20px;">
+        
+        <button onclick="sendMagicLink()">Send Magic Link</button>
+        
+        <p style="margin-top:30px; font-size:0.9rem; color:#666;">
+            We'll email you a secure link to access your dashboard.
+        </p>
     </div>
 
     <script>
-        let currentUser = null;
-
-        // Check session on page load
-        async function checkSession() {
-            try {
-                const response = await fetch('/api/tradesperson/session', {
-                    credentials: 'include'  // Send cookies
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.authenticated) {
-                        currentUser = data.tradesperson;
-                        showDashboard();
-                        loadDashboardData();
-                        checkInstallPrompt();
-                    } else {
-                        showLogin();
-                    }
-                } else {
-                    showLogin();
-                }
-            } catch (error) {
-                console.error('Session check error:', error);
-                showLogin();
-            }
-        }
-
-        function showLogin() {
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('dashboardScreen').style.display = 'none';
-        }
-
-        function showDashboard() {
-            document.getElementById('loadingScreen').style.display = 'none';
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('dashboardScreen').style.display = 'block';
-
-            // Update user info
-            document.getElementById('userName').textContent = currentUser.trading_name || currentUser.name;
-            document.getElementById('userTier').textContent = currentUser.subscription_tier.toUpperCase() + ' Member';
-        }
-
-        // Send magic link
-        document.getElementById('sendLinkBtn')?.addEventListener('click', async () => {
-            const phone = document.getElementById('phoneInput').value.trim();
-            const btn = document.getElementById('sendLinkBtn');
-            const successMsg = document.getElementById('successMessage');
-            const errorMsg = document.getElementById('errorMessage');
-
-            if (!phone) {
-                errorMsg.textContent = 'Please enter your phone number';
-                errorMsg.style.display = 'block';
-                successMsg.style.display = 'none';
+        async function sendMagicLink() {
+            const email = document.getElementById('email').value.trim();
+            if (!email) {
+                alert("Please enter your email");
                 return;
             }
 
-            btn.disabled = true;
-            btn.textContent = 'Sending...';
-            errorMsg.style.display = 'none';
-            successMsg.style.display = 'none';
-
             try {
-                const response = await fetch('/api/tradesperson/request-link', {
+                const response = await fetch('/api/auth/send-magic-link', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ phone })
+                    body: JSON.stringify({ email: email })
                 });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    successMsg.textContent = '✓ Login link sent! Check your phone.';
-                    successMsg.style.display = 'block';
-                    document.getElementById('phoneInput').value = '';
-                } else {
-                    errorMsg.textContent = data.error || 'Failed to send link';
-                    errorMsg.style.display = 'block';
-                }
-            } catch (error) {
-                errorMsg.textContent = 'Network error. Please try again.';
-                errorMsg.style.display = 'block';
-            } finally {
-                btn.disabled = false;
-                btn.textContent = 'Send Login Link';
-            }
-        });
-
-        // Load dashboard data
-        async function loadDashboardData() {
-            try {
-                // Load stats and jobs
-                // TODO: Implement actual endpoints
-                document.getElementById('availableJobs').textContent = '12';
-                document.getElementById('quotesSent').textContent = '3';
-                document.getElementById('activeLeads').textContent = '1';
-
-                // Load jobs
-                document.getElementById('jobsList').innerHTML = `
-                    <div class="job-card">
-                        <div class="job-header">
-                            <div class="job-title">Leaking Kitchen Tap</div>
-                            <div class="job-urgency">Emergency</div>
-                        </div>
-                        <div class="job-details">
-                            Kitchen tap dripping constantly. Water pressure seems low. Needs fixing ASAP.
-                        </div>
-                        <div class="job-footer">
-                            <div class="job-location">📍 SW19 2AB</div>
-                            <button class="quote-btn">Send Quote</button>
-                        </div>
-                    </div>
-                `;
-            } catch (error) {
-                console.error('Error loading dashboard:', error);
+                const result = await response.json();
+                alert(result.message || "Check your email for the login link!");
+            } catch (err) {
+                alert("Error sending link. Please try again.");
             }
         }
-
-        // Logout
-        document.getElementById('logoutBtn')?.addEventListener('click', async () => {
-            try {
-                await fetch('/api/tradesperson/logout', {
-                    method: 'POST',
-                    credentials: 'include'
-                });
-                location.reload();
-            } catch (error) {
-                console.error('Logout error:', error);
-                location.reload();
-            }
-        });
-
-        // Install prompt for iOS/Android
-        function checkInstallPrompt() {
-            const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            const isAndroid = /Android/.test(navigator.userAgent);
-
-            if (!isStandalone && (isIOS || isAndroid)) {
-                const dismissed = localStorage.getItem('installPromptDismissed');
-                if (!dismissed) {
-                    document.getElementById('installPrompt').style.display = 'flex';
-                }
-            }
-        }
-
-        document.getElementById('installBtn')?.addEventListener('click', () => {
-            const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-            if (isIOS) {
-                alert('To add to home screen:\n\n1. Tap the Share button (⬆️)\n2. Scroll down and tap "Add to Home Screen"\n3. Tap "Add"');
-            }
-            document.getElementById('installPrompt').style.display = 'none';
-        });
-
-        document.getElementById('closeInstall')?.addEventListener('click', () => {
-            document.getElementById('installPrompt').style.display = 'none';
-            localStorage.setItem('installPromptDismissed', 'true');
-        });
-
-        // Start session check on page load
-        checkSession();
     </script>
 </body>
 </html>
