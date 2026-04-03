@@ -1,6 +1,6 @@
 """
 Best Trade - Main Application  
-FINAL VERSION: Fixed registration, dashboard support, and sign-in route
+FINAL VERSION: Clean registration, Stripe, magic link email, and dashboard support
 """
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -51,10 +51,6 @@ async def home_page():
 async def index_page():
     return FileResponse("frontend/index.html")
 
-@app.get("/dashboard-login.html", response_class=HTMLResponse)
-async def dashboard_login():
-    return FileResponse("frontend/dashboard-login.html")
-
 @app.get("/pricing.html", response_class=HTMLResponse)
 async def pricing_page():
     return FileResponse("frontend/pricing.html")
@@ -75,7 +71,7 @@ async def tradesperson_register():
 async def tradesperson_dashboard():
     return FileResponse("frontend/tradesperson-dashboard.html")
 
-@app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)   # ← FIXED ROUTE
+@app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)
 async def tradesperson_sign_in():
     return FileResponse("frontend/tradesperson-sign-in.html")
 
@@ -108,7 +104,7 @@ async def dashboard_redirect():
     return RedirectResponse(url="/tradesperson-sign-in.html")
 
 # ============================================================================
-# TRADESPERSON REGISTRATION - FIXED
+# TRADESPERSON REGISTRATION
 # ============================================================================
 
 @app.post("/api/register-tradesperson")
@@ -129,29 +125,16 @@ async def register_tradesperson(request: Request):
         
         cursor.execute("""
             INSERT INTO tradespeople (
-                name,
-                trading_name,
-                contact_name,
-                email,
-                phone,
-                postcode,
-                trade_category,
-                subscription_status,
-                subscription_tier,
-                can_receive_jobs,
-                created_at
+                name, trading_name, contact_name, email, phone, postcode,
+                trade_category, subscription_status, subscription_tier,
+                can_receive_jobs, created_at
             ) VALUES (
                 %s, %s, %s, %s, %s, %s, %s, 'pending', %s, false, NOW()
             )
             RETURNING id
         """, (
-            name,
-            trading_name,
-            name,
-            data.get('email'),
-            data.get('phone'),
-            data.get('postcode'),
-            data.get('trade_category'),
+            name, trading_name, name, data.get('email'), data.get('phone'),
+            data.get('postcode'), data.get('trade_category'),
             data.get('subscription_tier', 'basic')
         ))
         
@@ -299,7 +282,7 @@ async def create_subscription(request: Request):
 
 
 # ============================================================================
-# MAGIC LINK AUTHENTICATION
+# MAGIC LINK - IMPROVED EMAIL
 # ============================================================================
 
 @app.post("/api/auth/send-magic-link")
@@ -356,22 +339,35 @@ async def send_magic_link(request: Request):
                 to_email=email,
                 subject="Your Best Trade Dashboard Login Link",
                 html_content=f"""
-                <html><body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+                <html>
+                <body style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; background:#f8fafc;">
                     <div style="background: #1e3a5f; padding: 30px; text-align: center;">
                         <h1 style="color: white; margin: 0;">Best Trade</h1>
                     </div>
-                    <div style="padding: 40px 30px;">
+                    <div style="padding: 40px 30px; background: white;">
                         <h2 style="color: #1e3a5f;">Hi {trading_name},</h2>
                         <p style="font-size: 16px; line-height: 1.6; color: #333;">
-                            Click the button below to securely access your dashboard:
+                            Click the button below to access your personal dashboard:
                         </p>
                         <div style="text-align: center; margin: 30px 0;">
-                            <a href="{magic_link}" style="display: inline-block; background: #1e3a5f; color: white; padding: 16px 40px; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 16px;">
-                                Access Dashboard
+                            <a href="{magic_link}" 
+                               style="display: inline-block; background: #1e3a5f; color: white; 
+                                      padding: 16px 40px; text-decoration: none; border-radius: 6px;
+                                      font-weight: 600; font-size: 16px;">
+                                Access My Dashboard
                             </a>
                         </div>
+                        <p style="font-size: 14px; color: #666; line-height: 1.6;">
+                            • This link expires in 15 minutes<br>
+                            • Can only be used once<br>
+                            • If you didn't request this, please ignore this email
+                        </p>
                     </div>
-                </body></html>
+                    <div style="background: #f9fafb; padding: 20px; text-align: center; font-size: 12px; color: #666;">
+                        © 2025 Best Trade. All rights reserved.
+                    </div>
+                </body>
+                </html>
                 """
             )
         except Exception as e:
@@ -457,11 +453,11 @@ async def post_job(request: Request):
             )
             RETURNING id
         """, (
-            data['trade_category'],
-            data['job_type'],
-            data['description'],
-            data['urgency'],
-            data['postcode'].upper(),
+            data.get('trade_category'),
+            data.get('job_type'),
+            data.get('description'),
+            data.get('urgency'),
+            data.get('postcode', '').upper(),
             data.get('address', ''),
             data.get('name', ''),
             data.get('phone', ''),
