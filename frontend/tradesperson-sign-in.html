@@ -45,7 +45,7 @@
             cursor: pointer;
         }
         button:hover { background: #0f172a; }
-        .message { margin-top: 15px; font-size: 0.95rem; }
+        .message { margin-top: 20px; font-size: 0.95rem; color: #10b981; }
     </style>
 </head>
 <body>
@@ -53,7 +53,7 @@
         <h1>Trade Sign In</h1>
         <p>Enter your registered email to access your dashboard</p>
         
-        <input type="email" id="email" placeholder="your@email.com">
+        <input type="email" id="email" placeholder="paul.wiles@gmail.com" value="paul.wiles@gmail.com">
         <button onclick="signIn()">Access Dashboard</button>
         
         <div id="message" class="message"></div>
@@ -81,16 +81,16 @@
                     body: JSON.stringify({ email: email })
                 });
 
-                const result = await response.json();
-
                 if (response.ok) {
-                    messageDiv.textContent = 'Success! Redirecting...';
+                    messageDiv.textContent = 'Success! Redirecting to dashboard...';
+                    // Use replace so Back button doesn't return to sign-in
                     setTimeout(() => {
                         window.location.replace('/tradesperson-dashboard.html');
                     }, 1000);
                 } else {
+                    const error = await response.json();
                     messageDiv.style.color = '#ef4444';
-                    messageDiv.textContent = result.detail || 'Email not found.';
+                    messageDiv.textContent = error.detail || 'Email not found';
                 }
             } catch (err) {
                 messageDiv.style.color = '#ef4444';
