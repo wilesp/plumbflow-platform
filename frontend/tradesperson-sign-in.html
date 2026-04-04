@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sign In - Best Trade</title>
+    <title>Trade Sign In - Best Trade</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
@@ -24,11 +24,11 @@
             text-align: center;
         }
         h1 { color: #1e3a5f; margin-bottom: 8px; }
-        p { color: #64748b; margin-bottom: 30px; line-height: 1.5; }
+        p { color: #64748b; margin-bottom: 25px; }
         input {
             width: 100%;
             padding: 14px;
-            margin: 10px 0 20px;
+            margin-bottom: 20px;
             border: 2px solid #e5e7eb;
             border-radius: 8px;
             font-size: 1rem;
@@ -45,20 +45,16 @@
             cursor: pointer;
         }
         button:hover { background: #0f172a; }
-        .message {
-            margin-top: 20px;
-            font-size: 0.95rem;
-            color: #10b981;
-        }
+        .message { margin-top: 15px; font-size: 0.95rem; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>Trade Sign In</h1>
-        <p>Enter your registered email</p>
+        <p>Enter your registered email to access your dashboard</p>
         
-        <input type="email" id="email" placeholder="your@email.com" autocomplete="email">
-        <button onclick="signIn()">Sign In</button>
+        <input type="email" id="email" placeholder="your@email.com">
+        <button onclick="signIn()">Access Dashboard</button>
         
         <div id="message" class="message"></div>
     </div>
@@ -71,13 +67,15 @@
 
             if (!email) {
                 messageDiv.style.color = '#ef4444';
-                messageDiv.textContent = 'Please enter your email address';
+                messageDiv.textContent = 'Please enter your email';
                 return;
             }
 
             try {
-                // For testing: directly create session and go to dashboard
-                const response = await fetch('/api/auth/send-magic-link', {
+                messageDiv.style.color = '#10b981';
+                messageDiv.textContent = 'Signing you in...';
+
+                const response = await fetch('/api/auth/signin', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email: email })
@@ -86,13 +84,10 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    messageDiv.style.color = '#10b981';
-                    messageDiv.textContent = 'Signing you in...';
-
-                    // Simulate successful magic link verification and redirect to dashboard
+                    messageDiv.textContent = 'Success! Redirecting...';
                     setTimeout(() => {
                         window.location.replace('/tradesperson-dashboard.html');
-                    }, 1500);
+                    }, 1000);
                 } else {
                     messageDiv.style.color = '#ef4444';
                     messageDiv.textContent = result.detail || 'Email not found.';
