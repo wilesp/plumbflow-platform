@@ -1,6 +1,6 @@
 """
 Best Trade - Main Application  
-FINAL FIXED VERSION - Health check + Session + Registration
+FINAL: Simple Sign In + Registration + Dashboard
 """
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -10,7 +10,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import stripe
 import secrets
-import hashlib
 from datetime import datetime, timedelta
 import psycopg2.extras
 
@@ -35,17 +34,9 @@ app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="front
 # FRONTEND ROUTES
 # ============================================================================
 
-@app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)
-async def tradesperson_sign_in():
-    return FileResponse("frontend/tradesperson-sign-in.html")
-
-@app.get("/tradesperson-dashboard.html", response_class=HTMLResponse)
-async def tradesperson_dashboard():
-    return FileResponse("frontend/tradesperson-dashboard.html")
-
-@app.get("/tradesperson-register.html", response_class=HTMLResponse)
-async def tradesperson_register():
-    return FileResponse("frontend/tradesperson-register.html")
+@app.get("/", response_class=HTMLResponse)
+async def home_page():
+    return FileResponse("frontend/index.html")
 
 @app.get("/pricing.html", response_class=HTMLResponse)
 async def pricing_page():
@@ -55,12 +46,20 @@ async def pricing_page():
 async def customer_post_job():
     return FileResponse("frontend/customer-post-job.html")
 
-@app.get("/", response_class=HTMLResponse)
-async def home_page():
-    return FileResponse("frontend/index.html")
+@app.get("/tradesperson-register.html", response_class=HTMLResponse)
+async def tradesperson_register():
+    return FileResponse("frontend/tradesperson-register.html")
+
+@app.get("/tradesperson-dashboard.html", response_class=HTMLResponse)
+async def tradesperson_dashboard():
+    return FileResponse("frontend/tradesperson-dashboard.html")
+
+@app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)
+async def tradesperson_sign_in():
+    return FileResponse("frontend/tradesperson-sign-in.html")
 
 # ============================================================================
-# HEALTH CHECK - FIXED FOR RAILWAY
+# HEALTH CHECK
 # ============================================================================
 
 @app.get("/health")
@@ -71,7 +70,7 @@ async def health_check():
         cursor.execute("SELECT 1")
         cursor.close()
         conn.close()
-        return {"status": "healthy", "database": "connected"}
+        return {"status": "healthy"}
     except:
         return {"status": "healthy", "database": "disconnected"}
 
@@ -109,7 +108,7 @@ async def register_tradesperson(request: Request):
         result = cursor.fetchone()
         tradesperson_id = result['id']
         
-        # Create session immediately
+        # Create 30-day session immediately after registration
         session_token = secrets.token_urlsafe(32)
         expires_at = datetime.utcnow() + timedelta(days=30)
         
@@ -129,17 +128,72 @@ async def register_tradesperson(request: Request):
         
         return {
             "success": True,
-            "tradesperson_id": tradesperson_id,
-            "session_token": session_token
+            "tradesperson_id": tradesperson_id
         }
         
     except Exception as e:
-        print(f"Error registering: {str(e)}")
+        print(f"Error registering tradesperson: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============================================================================
-# GET CURRENT USER
+# SIMPLE SIGN IN (for returning users)
+# ============================================================================
+
+@app.post("/api/auth/signin")
+async def simple_signin(request: Request):
+    try:
+        data = await request.json()
+        email = data.get('email', '').strip().lower()
+        
+        if not email:
+            raise HTTPException(status_code=400, detail="Email is required")
+
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        
+        cursor.execute("""
+            SELECT id, trading_name 
+            FROM tradespeople 
+            WHERE LOWER(email) = %s
+        """, (email,))
+        
+        user = cursor.fetchone()
+        
+        if not user:
+            cursor.close()
+            conn.close()
+            raise HTTPException(status_code=404, detail="Email not found. Please register first.")
+
+        tradesperson_id = user['id']
+        
+        # Create new 30-day session
+        session_token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(days=30)
+        
+        cursor.execute("""
+            INSERT INTO tradesperson_sessions (
+                tradesperson_id, session_token, expires_at,
+                ip_address, user_agent, created_at
+            ) VALUES (%s, %s, %s, %s, %s, NOW())
+        """, (
+            tradesperson_id, session_token, expires_at,
+            request.client.host, request.headers.get('user-agent', '')
+        ))
+        
+        conn.commit()
+        cursor.close()
+        conn.close()
+        
+        return {"success": True, "message": "Signed in successfully"}
+        
+    except Exception as e:
+        print(f"Error in signin: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+# ============================================================================
+# GET CURRENT TRADESPERSON
 # ============================================================================
 
 @app.get("/api/tradesperson/me")
@@ -250,7 +304,7 @@ async def create_subscription(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================
-# RUN
+# RUN APPLICATION
 # ============================================================================
 
 if __name__ == "__main__":
