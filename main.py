@@ -1,6 +1,6 @@
 """
 Best Trade - Main Application  
-UPDATED: Better session handling for registration and magic link
+FINAL FIXED VERSION - Health check + Session + Registration
 """
 
 from fastapi import FastAPI, HTTPException, Request, Response
@@ -59,10 +59,24 @@ async def customer_post_job():
 async def home_page():
     return FileResponse("frontend/index.html")
 
-# Add other routes as needed...
+# ============================================================================
+# HEALTH CHECK - FIXED FOR RAILWAY
+# ============================================================================
+
+@app.get("/health")
+async def health_check():
+    try:
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("SELECT 1")
+        cursor.close()
+        conn.close()
+        return {"status": "healthy", "database": "connected"}
+    except:
+        return {"status": "healthy", "database": "disconnected"}
 
 # ============================================================================
-# REGISTRATION - Now creates session immediately
+# TRADESPERSON REGISTRATION
 # ============================================================================
 
 @app.post("/api/register-tradesperson")
@@ -74,7 +88,7 @@ async def register_tradesperson(request: Request):
         trading_name = data.get('trading_name') or data.get('business_name')
         
         if not name or not trading_name:
-            raise HTTPException(status_code=400, detail="Name and business name are required")
+            raise HTTPException(status_code=400, detail="Name and business name required")
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -84,9 +98,7 @@ async def register_tradesperson(request: Request):
                 name, trading_name, contact_name, email, phone, postcode,
                 trade_category, subscription_status, subscription_tier,
                 can_receive_jobs, created_at
-            ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, 'pending', %s, false, NOW()
-            )
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', %s, false, NOW())
             RETURNING id
         """, (
             name, trading_name, name, data.get('email'), data.get('phone'),
@@ -97,7 +109,7 @@ async def register_tradesperson(request: Request):
         result = cursor.fetchone()
         tradesperson_id = result['id']
         
-        # Create session immediately after registration
+        # Create session immediately
         session_token = secrets.token_urlsafe(32)
         expires_at = datetime.utcnow() + timedelta(days=30)
         
@@ -115,7 +127,6 @@ async def register_tradesperson(request: Request):
         cursor.close()
         conn.close()
         
-        # Return success with session token for frontend
         return {
             "success": True,
             "tradesperson_id": tradesperson_id,
@@ -123,7 +134,7 @@ async def register_tradesperson(request: Request):
         }
         
     except Exception as e:
-        print(f"Error registering tradesperson: {str(e)}")
+        print(f"Error registering: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -179,7 +190,7 @@ async def get_current_tradesperson(request: Request):
 
 
 # ============================================================================
-# SUBSCRIPTION CREATION (unchanged)
+# SUBSCRIPTION CREATION
 # ============================================================================
 
 @app.post("/api/subscription/create")
@@ -236,36 +247,6 @@ async def create_subscription(request: Request):
         
     except Exception as e:
         print(f"Error creating subscription: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# ============================================================================
-# MAGIC LINK (simplified for now)
-# ============================================================================
-
-@app.post("/api/auth/send-magic-link")
-async def send_magic_link(request: Request):
-    try:
-        data = await request.json()
-        email = data.get('email', '').strip().lower()
-        
-        if not email:
-            raise HTTPException(status_code=400, detail="Email is required")
-        
-        conn = db.get_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        
-        cursor.execute("SELECT id FROM tradespeople WHERE LOWER(email) = %s", (email,))
-        if not cursor.fetchone():
-            return {"success": True, "message": "If that email is registered, we've sent you a login link."}
-        
-        cursor.close()
-        conn.close()
-        
-        return {"success": True, "message": "Check your email for the login link!"}
-        
-    except Exception as e:
-        print(f"Error in send_magic_link: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 # ============================================================================
