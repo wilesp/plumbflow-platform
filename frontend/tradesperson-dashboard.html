@@ -27,7 +27,12 @@
             justify-content: space-between;
             align-items: center;
         }
-        .logo { font-size: 22px; font-weight: 700; color: #1e293b; text-decoration: none; }
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            text-decoration: none;
+        }
         .main-container {
             max-width: 1200px;
             margin: 40px auto;
@@ -53,6 +58,22 @@
             margin-bottom: 16px;
             font-weight: 600;
         }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+        .stat {
+            background: #f8fafc;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
+        .stat-number {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: #1e3a5f;
+        }
         .empty-state {
             text-align: center;
             padding: 40px 20px;
@@ -68,6 +89,11 @@
             cursor: pointer;
             text-decoration: none;
             display: inline-block;
+        }
+        .btn-outline {
+            background: transparent;
+            border: 2px solid #1e3a5f;
+            color: #1e3a5f;
         }
     </style>
 </head>
@@ -85,37 +111,40 @@
     <div class="main-container">
         <div class="welcome">
             <h1>Welcome back, <span id="welcomeName">Trader</span>!</h1>
-            <p id="welcomeSubtitle">Your personal dashboard • Let's find you more work today</p>
+            <p id="welcomeSubtitle">Here's what's happening with your business today</p>
         </div>
 
-        <!-- Subscription -->
-        <div class="card">
-            <h2 class="section-title">Your Subscription</h2>
-            <div id="subscriptionInfo">
-                <p><strong>Plan:</strong> <span id="planName">Loading...</span></p>
-                <p><strong>Status:</strong> <span id="planStatus" style="color:#10b981;">Active</span></p>
+        <div class="grid">
+            <!-- Subscription Card -->
+            <div class="card">
+                <h2 class="section-title">Your Subscription</h2>
+                <div id="subscriptionCard">
+                    <p><strong>Plan:</strong> <span id="planName">Loading...</span></p>
+                    <p><strong>Status:</strong> <span id="planStatus" style="color:#10b981;">Active</span></p>
+                    <p><strong>Next billing:</strong> <span id="nextBilling">—</span></p>
+                </div>
+            </div>
+
+            <!-- Pending Leads -->
+            <div class="card">
+                <h2 class="section-title">Pending Leads</h2>
+                <div id="pendingLeads">
+                    <p class="empty-state">No pending leads yet.<br>New customer jobs will appear here.</p>
+                </div>
+            </div>
+
+            <!-- Active Jobs -->
+            <div class="card">
+                <h2 class="section-title">Jobs You're Managing</h2>
+                <div id="activeJobs">
+                    <p class="empty-state">No active jobs yet.<br>Accepted leads will appear here.</p>
+                </div>
             </div>
         </div>
 
-        <!-- Pending Leads -->
-        <div class="card">
-            <h2 class="section-title">Pending Leads</h2>
-            <div id="pendingLeads" class="empty-state">
-                No pending leads yet.<br>When customers submit jobs matching your trade, they will appear here.
-            </div>
-        </div>
-
-        <!-- Active Jobs -->
-        <div class="card">
-            <h2 class="section-title">Jobs You're Managing</h2>
-            <div id="activeJobs" class="empty-state">
-                No active jobs yet.<br>When you accept a lead, it will move here.
-            </div>
-        </div>
-
-        <div style="text-align: center; margin-top: 30px;">
+        <div style="text-align: center; margin-top: 40px;">
             <a href="/customer-post-job.html" class="btn" style="margin-right: 12px;">Browse New Leads</a>
-            <a href="/pricing.html" class="btn" style="background:#10b981;">Manage Subscription</a>
+            <a href="/pricing.html" class="btn btn-outline">Manage Subscription</a>
         </div>
     </div>
 
@@ -126,19 +155,21 @@
                     credentials: 'include'
                 });
 
-                if (!response.ok) {
-                    throw new Error('Not logged in');
-                }
+                if (!response.ok) throw new Error('Not logged in');
 
                 const user = await response.json();
 
-                // Populate user name
+                // Populate user info
                 const displayName = user.trading_name || user.name || "Trader";
                 document.getElementById('welcomeName').textContent = displayName;
                 document.getElementById('userName').textContent = displayName;
 
-                // Populate subscription
-                document.getElementById('planName').textContent = (user.subscription_tier || 'Basic').toUpperCase() + " Plan";
+                // Subscription info
+                document.getElementById('planName').textContent = 
+                    (user.subscription_tier || 'Basic').toUpperCase() + " Plan";
+                
+                document.getElementById('planStatus').textContent = 
+                    user.subscription_status === 'active' ? 'Active' : 'Pending';
 
             } catch (err) {
                 console.log("Could not load user data:", err);
