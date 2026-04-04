@@ -5,157 +5,29 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Dashboard - Best Trade</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-            line-height: 1.6;
-        }
-        .navbar {
-            background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .logo { font-size: 22px; font-weight: 700; color: #1e293b; text-decoration: none; }
-        .main-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        .welcome {
-            background: #1e3a5f;
-            color: white;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-        }
-        .card {
-            background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin-bottom: 24px;
-        }
-        .section-title {
-            font-size: 1.4rem;
-            color: #1e3a5f;
-            margin-bottom: 16px;
-            font-weight: 600;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #64748b;
-            font-style: italic;
-        }
-        .btn {
-            background: #1e3a5f;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
-        }
-        .error { color: #ef4444; font-size: 0.9rem; }
+        body { font-family: Arial, sans-serif; padding: 40px; background: #f8fafc; }
+        .card { background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); max-width: 800px; margin: 0 auto; }
+        h1 { color: #1e3a5f; }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="/" class="logo">BestTrade</a>
-            <div>
-                <span id="userName" style="margin-right: 20px; font-weight: 500;">Loading...</span>
-                <button onclick="logout()" class="btn" style="background:#ef4444;">Sign Out</button>
-            </div>
-        </div>
-    </nav>
-
-    <div class="main-container">
-        <div class="welcome">
-            <h1>Welcome back, <span id="welcomeName">Trader</span>!</h1>
-            <p id="welcomeSubtitle">Your personal dashboard • Let's find you more work today</p>
-        </div>
-
-        <div class="card">
-            <h2 class="section-title">Your Subscription</h2>
-            <div id="subscriptionCard">
-                <p><strong>Plan:</strong> <span id="planName">Loading...</span></p>
-                <p><strong>Status:</strong> <span id="planStatus">Loading...</span></p>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2 class="section-title">Pending Leads</h2>
-            <div id="pendingLeads" class="empty-state">
-                No pending leads yet.
-            </div>
-        </div>
-
-        <div class="card">
-            <h2 class="section-title">Jobs You're Managing</h2>
-            <div id="activeJobs" class="empty-state">
-                No active jobs yet.
-            </div>
-        </div>
+    <div class="card">
+        <h1>Dashboard Test</h1>
+        <p id="status">Loading user data...</p>
+        <pre id="output"></pre>
     </div>
 
     <script>
-        async function loadDashboard() {
-            const welcomeName = document.getElementById('welcomeName');
-            const userName = document.getElementById('userName');
-            const planName = document.getElementById('planName');
-            const planStatus = document.getElementById('planStatus');
-
-            try {
-                const response = await fetch('/api/tradesperson/me', {
-                    credentials: 'include'   // Important: sends cookies
-                });
-
-                if (!response.ok) {
-                    throw new Error('Session invalid');
-                }
-
-                const user = await response.json();
-
-                const displayName = user.trading_name || user.name || "Trader";
-                welcomeName.textContent = displayName;
-                userName.textContent = displayName;
-
-                planName.textContent = (user.subscription_tier || 'Basic').toUpperCase() + " Plan";
-                planStatus.textContent = user.subscription_status === 'active' ? 'Active' : 'Pending';
-                planStatus.style.color = user.subscription_status === 'active' ? '#10b981' : '#f59e0b';
-
-            } catch (err) {
-                console.error("Dashboard load error:", err);
-                welcomeName.textContent = "Trader";
-                userName.textContent = "Trader";
-                planName.textContent = "Not loaded";
-                planStatus.textContent = "Unknown";
-            }
-        }
-
-        function logout() {
-            if (confirm("Sign out?")) {
-                document.cookie = "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                window.location.href = '/tradesperson-sign-in.html';
-            }
-        }
-
-        // Load when page opens
-        window.onload = loadDashboard;
+        fetch('/api/tradesperson/me', { credentials: 'include' })
+            .then(r => r.json())
+            .then(data => {
+                document.getElementById('status').innerHTML = '<strong>Success!</strong>';
+                document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+            })
+            .catch(err => {
+                document.getElementById('status').innerHTML = '<strong style="color:red">Failed</strong>';
+                document.getElementById('output').textContent = err.message;
+            });
     </script>
 </body>
 </html>
