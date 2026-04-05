@@ -45,10 +45,7 @@ async def tradesperson_sign_in():
 async def pricing_page():
     return FileResponse("frontend/pricing.html")
 
-@app.get("/customer-post-job.html", response_class=HTMLResponse)
-async def customer_post_job():
-    return FileResponse("frontend/customer-post-job.html")
-
+# Health
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
@@ -58,7 +55,8 @@ async def health_check():
 async def register_tradesperson(request: Request):
     try:
         data = await request.json()
-        
+        print("Received registration data:", data)  # Debug
+
         name = data.get('name') or data.get('full_name')
         trading_name = data.get('trading_name') or data.get('business_name')
 
@@ -84,19 +82,11 @@ async def register_tradesperson(request: Request):
         result = cursor.fetchone()
         tradesperson_id = result['id']
 
-        session_token = secrets.token_urlsafe(32)
-        expires_at = datetime.utcnow() + timedelta(days=30)
-
-        cursor.execute("""
-            INSERT INTO tradesperson_sessions (
-                tradesperson_id, session_token, expires_at,
-                ip_address, user_agent, created_at
-            ) VALUES (%s, %s, %s, %s, %s, NOW())
-        """, (tradesperson_id, session_token, expires_at, request.client.host, request.headers.get('user-agent', '')))
-
         conn.commit()
         cursor.close()
         conn.close()
+
+        print(f"Registration successful - ID: {tradesperson_id}")
 
         return {"success": True, "tradesperson_id": tradesperson_id}
 
@@ -158,8 +148,8 @@ async def create_subscription(request: Request):
         cursor.close()
         conn.close()
         
-        return {"success": True, "subscription_id": subscription.id}
-        
+        return {"success": True}
+
     except Exception as e:
         print(f"Subscription error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
