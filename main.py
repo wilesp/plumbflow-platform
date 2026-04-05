@@ -25,15 +25,11 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
 # ============================================================================
-# ALL PAGE ROUTES (this fixes the "Not Found" errors)
+# PAGE ROUTES
 # ============================================================================
 
 @app.get("/", response_class=HTMLResponse)
 async def home_page():
-    return FileResponse("frontend/index.html")
-
-@app.get("/index.html", response_class=HTMLResponse)
-async def index_page():
     return FileResponse("frontend/index.html")
 
 @app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)
@@ -56,10 +52,6 @@ async def pricing_page():
 async def customer_post_job():
     return FileResponse("frontend/customer-post-job.html")
 
-@app.get("/job-submitted.html", response_class=HTMLResponse)
-async def job_submitted():
-    return FileResponse("frontend/job-submitted.html")
-
 # ============================================================================
 # HEALTH CHECK
 # ============================================================================
@@ -69,39 +61,37 @@ async def health_check():
     return {"status": "healthy"}
 
 # ============================================================================
-# REGISTRATION + SESSION COOKIE
+# SIGN IN - FIXED
 # ============================================================================
 
-@app.post("/api/register-tradesperson")
-async def register_tradesperson(request: Request):
+@app.post("/api/auth/signin")
+async def simple_signin(request: Request):
     try:
         data = await request.json()
+        email = data.get('email', '').strip().lower()
         
-        name = data.get('name') or data.get('full_name')
-        trading_name = data.get('trading_name') or data.get('business_name')
+        print(f"Signin attempt for email: {email}")   # Debug log
 
-        if not name or not trading_name:
-            raise HTTPException(status_code=400, detail="Name and business name required")
+        if not email:
+            raise HTTPException(status_code=400, detail="Email is required")
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
-        cursor.execute("""
-            INSERT INTO tradespeople (
-                name, trading_name, contact_name, email, phone, postcode,
-                trade_category, subscription_status, subscription_tier,
-                can_receive_jobs, created_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', %s, false, NOW())
-            RETURNING id
-        """, (
-            name, trading_name, name, data.get('email'), data.get('phone'),
-            data.get('postcode'), data.get('trade_category'),
-            data.get('subscription_tier', 'pro')
-        ))
+        cursor.execute("SELECT id, trading_name FROM tradespeople WHERE LOWER(email) = %s", (email,))
+        user = cursor.fetchone()
+        
+        if not user:
+            cursor.close()
+            conn.close()
+            print(f"User not found for email: {email}")
+            raise HTTPException(status_code=404, detail="Email not found. Please register first.")
 
-        result = cursor.fetchone()
-        tradesperson_id = result['id']
+        tradesperson_id = user['id']
+        trading_name = user.get('trading_name', 'Trader')
+        print(f"User found: {trading_name} (ID: {tradesperson_id})")
 
+        # Create session
         session_token = secrets.token_urlsafe(32)
         expires_at = datetime.utcnow() + timedelta(days=30)
 
@@ -116,7 +106,8 @@ async def register_tradesperson(request: Request):
         cursor.close()
         conn.close()
 
-        response = Response(content='{"success": true}', media_type="application/json")
+        # Set cookie
+        response = Response(content='{"success": true, "message": "Signed in"}', media_type="application/json")
         response.set_cookie(
             key="session_token",
             value=session_token,
@@ -128,18 +119,20 @@ async def register_tradesperson(request: Request):
         return response
 
     except Exception as e:
-        print(f"Registration error: {str(e)}")
+        print(f"Signin error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
 # ============================================================================
-# DASHBOARD USER DATA
+# DASHBOARD DATA
 # ============================================================================
 
 @app.get("/api/tradesperson/me")
 async def get_current_tradesperson(request: Request):
     try:
         session_token = request.cookies.get("session_token")
+        print(f"Dashboard request with session_token: {session_token}")
+
         if not session_token:
             raise HTTPException(status_code=401, detail="Not authenticated")
 
@@ -170,7 +163,7 @@ async def get_current_tradesperson(request: Request):
     except HTTPException:
         raise
     except Exception as e:
-        print(f"Me error: {str(e)}")
+        print(f"Dashboard me error: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
 
