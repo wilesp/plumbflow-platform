@@ -40,16 +40,9 @@
             margin: 0 20px;
             color: #64748b;
         }
-        .step.active {
-            color: #1e3a5f;
-            font-weight: 600;
-        }
-        .form-container {
-            padding: 40px;
-        }
-        .form-group {
-            margin-bottom: 20px;
-        }
+        .step.active { color: #1e3a5f; font-weight: 600; }
+        .form-container { padding: 40px; }
+        .form-group { margin-bottom: 20px; }
         label {
             display: block;
             margin-bottom: 8px;
@@ -78,7 +71,7 @@
         .success-section {
             display: none;
             text-align: center;
-            padding: 40px 20px;
+            padding: 60px 20px;
         }
         .success-section h2 {
             color: #10b981;
@@ -99,7 +92,7 @@
         </div>
 
         <div class="form-container">
-            <!-- Step 1: Business Details -->
+            <!-- Step 1 -->
             <div id="step1">
                 <div class="form-group">
                     <label>Business / Trading Name</label>
@@ -140,7 +133,7 @@
                 <div id="card-element" style="border: 2px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
                 <button onclick="createSubscription()">Complete Registration & Pay</button>
                 <p style="text-align: center; margin-top: 15px; color: #64748b; font-size: 0.9rem;">
-                    You will be charged based on your chosen plan from the pricing page.
+                    Test Mode Active — Use card number 4242 4242 4242 4242
                 </p>
             </div>
 
@@ -152,11 +145,10 @@
     </div>
 
     <script>
-        const stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // ← Replace with your actual publishable key
+        const stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // Keep as test key
         let elements, cardElement;
-        let currentTier = 'pro'; // Default - change based on pricing link if needed
+        let currentTier = 'pro'; // Change this if coming from pricing page
 
-        // Initialize Stripe Elements
         function initializeStripe() {
             elements = stripe.elements();
             cardElement = elements.create('card');
@@ -172,19 +164,19 @@
         async function createSubscription() {
             const button = document.querySelector('#step2 button');
             button.disabled = true;
-            button.textContent = 'Processing...';
+            button.textContent = 'Processing Payment...';
 
             try {
-                // Step 1: Register the tradesperson
+                // Register tradesperson
                 const regResponse = await fetch('/api/register-tradesperson', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
-                        trading_name: document.getElementById('trading_name').value,
-                        name: document.getElementById('name').value,
-                        email: document.getElementById('email').value,
-                        phone: document.getElementById('phone').value,
-                        postcode: document.getElementById('postcode').value,
+                        trading_name: document.getElementById('trading_name').value.trim(),
+                        name: document.getElementById('name').value.trim(),
+                        email: document.getElementById('email').value.trim(),
+                        phone: document.getElementById('phone').value.trim(),
+                        postcode: document.getElementById('postcode').value.trim().toUpperCase(),
                         trade_category: document.getElementById('trade_category').value,
                         subscription_tier: currentTier
                     })
@@ -195,13 +187,13 @@
 
                 const tradesperson_id = regData.tradesperson_id;
 
-                // Step 2: Create Payment Method
+                // Create Payment Method
                 const { paymentMethod } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: cardElement
                 });
 
-                // Step 3: Complete subscription and redirect
+                // Show success message
                 const successSection = document.getElementById('successSection');
                 const successMessage = document.getElementById('successMessage');
 
@@ -210,27 +202,26 @@
                     <h2>✅ Registration Successful!</h2>
                     <p>Your ${currentTier.toUpperCase()} subscription has been activated.</p>
                     <p>You will now be redirected to your personal dashboard...</p>
-                    <p style="font-size: 0.95rem; color: #64748b; margin-top: 20px;">
-                        You can now manage jobs, view leads, and grow your business.
+                    <p style="font-size: 0.95rem; color: #64748b; margin-top: 25px;">
+                        From there you can view new leads, manage jobs, and grow your business.
                     </p>
                 `;
 
-                // Final redirect to dashboard
+                // Redirect to dashboard
                 setTimeout(() => {
                     window.location.replace('/tradesperson-dashboard.html');
                 }, 2500);
 
             } catch (err) {
                 console.error(err);
-                alert('Something went wrong: ' + err.message);
+                alert('Error: ' + err.message);
                 button.disabled = false;
                 button.textContent = 'Complete Registration & Pay';
             }
         }
 
-        // Auto start
+        // Initialize
         window.onload = () => {
-            // You can set currentTier from URL param if coming from pricing page
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('tier')) {
                 currentTier = urlParams.get('tier');
