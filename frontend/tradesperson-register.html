@@ -81,23 +81,23 @@
         </div>
 
         <div class="form-container">
-            <!-- Step 1: Business Details -->
+            <!-- Step 1 -->
             <div id="step1">
                 <div class="form-group">
                     <label>Business / Trading Name *</label>
-                    <input type="text" id="trading_name" placeholder="e.g. Dan's Plumbing Services">
+                    <input type="text" id="trading_name" placeholder="e.g. Wiles Plumbers">
                 </div>
                 <div class="form-group">
                     <label>Your Full Name *</label>
-                    <input type="text" id="name" placeholder="John Smith">
+                    <input type="text" id="name" placeholder="Paul Wiles">
                 </div>
                 <div class="form-group">
                     <label>Email Address *</label>
-                    <input type="email" id="email" placeholder="your@email.com">
+                    <input type="email" id="email" placeholder="paul.wiles@gmail.com">
                 </div>
                 <div class="form-group">
                     <label>Phone Number *</label>
-                    <input type="tel" id="phone" placeholder="07812 345678">
+                    <input type="tel" id="phone" placeholder="07812 899000">
                 </div>
                 <div class="form-group">
                     <label>Postcode *</label>
@@ -116,8 +116,6 @@
                         <option value="roofer">Roofer</option>
                         <option value="heating engineer">Heating Engineer</option>
                         <option value="landscaper">Landscaper</option>
-                        <option value="tiler">Tiler</option>
-                        <option value="plasterer">Plasterer</option>
                     </select>
                 </div>
                 <button onclick="nextStep()">Continue to Payment</button>
@@ -128,7 +126,7 @@
                 <div id="card-element" style="border: 2px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
                 <button onclick="createSubscription()">Complete Registration & Pay</button>
                 <p style="text-align: center; margin-top: 15px; color: #64748b; font-size: 0.9rem;">
-                    Test Mode • Use card 4242 4242 4242 4242 (any expiry / CVC)
+                    Test Mode • Use card 4242 4242 4242 4242
                 </p>
             </div>
 
@@ -140,16 +138,13 @@
     </div>
 
     <script>
-        const stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // ← Keep as test key
+        const stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // Keep test key
         let elements, cardElement;
         let currentTier = 'pro';
 
         function initializeStripe() {
             elements = stripe.elements();
-            cardElement = elements.create('card', {
-                style: { base: { fontSize: '16px' } },
-                hidePostalCode: true   // ← This removes the Zip code field for UK users
-            });
+            cardElement = elements.create('card', { hidePostalCode: true });
             cardElement.mount('#card-element');
         }
 
@@ -165,6 +160,7 @@
             button.textContent = 'Processing...';
 
             try {
+                // 1. Register
                 const regResponse = await fetch('/api/register-tradesperson', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -184,9 +180,21 @@
 
                 const tradesperson_id = regData.tradesperson_id;
 
+                // 2. Create Payment Method
                 const { paymentMethod } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: cardElement
+                });
+
+                // 3. Create Subscription
+                await fetch('/api/subscription/create', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        tradesperson_id: tradesperson_id,
+                        tier: currentTier,
+                        payment_method_id: paymentMethod.id
+                    })
                 });
 
                 // Show success and redirect
@@ -198,9 +206,6 @@
                     <h2>✅ Registration Successful!</h2>
                     <p>Your ${currentTier.toUpperCase()} subscription has been activated.</p>
                     <p>You will now be redirected to your personal dashboard...</p>
-                    <p style="font-size: 0.95rem; color: #64748b; margin-top: 25px;">
-                        From there you can view new leads, manage jobs, and grow your business.
-                    </p>
                 `;
 
                 setTimeout(() => {
