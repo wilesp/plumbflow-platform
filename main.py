@@ -10,7 +10,7 @@ import psycopg2.extras
 
 from database import db
 
-app = FastAPI()
+app = FastAPI(title="Best Trade")
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,39 +24,44 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
-# Page routes
+# ====================== PAGE ROUTES ======================
+
 @app.get("/", response_class=HTMLResponse)
-async def home_page():
+async def home():
     return FileResponse("frontend/index.html")
 
 @app.get("/tradesperson-register.html", response_class=HTMLResponse)
-async def tradesperson_register():
+async def register_page():
     return FileResponse("frontend/tradesperson-register.html")
 
 @app.get("/tradesperson-dashboard.html", response_class=HTMLResponse)
-async def tradesperson_dashboard():
+async def dashboard_page():
     return FileResponse("frontend/tradesperson-dashboard.html")
 
 @app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)
-async def tradesperson_sign_in():
+async def signin_page():
     return FileResponse("frontend/tradesperson-sign-in.html")
 
 @app.get("/pricing.html", response_class=HTMLResponse)
 async def pricing_page():
     return FileResponse("frontend/pricing.html")
 
-# Health
+@app.get("/customer-post-job.html", response_class=HTMLResponse)
+async def post_job_page():
+    return FileResponse("frontend/customer-post-job.html")
+
+# ====================== HEALTH ======================
+
 @app.get("/health")
-async def health_check():
+async def health():
     return {"status": "healthy"}
 
-# Registration
+# ====================== REGISTRATION ======================
+
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
         data = await request.json()
-        print("Received registration data:", data)  # Debug
-
         name = data.get('name') or data.get('full_name')
         trading_name = data.get('trading_name') or data.get('business_name')
 
@@ -67,35 +72,36 @@ async def register_tradesperson(request: Request):
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
         cursor.execute("""
-            INSERT INTO tradespeople (
-                name, trading_name, contact_name, email, phone, postcode,
-                trade_category, subscription_status, subscription_tier,
-                can_receive_jobs, created_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', %s, false, NOW())
+            INSERT INTO tradespeople (name, trading_name, contact_name, email, phone, postcode, trade_category, 
+                                     subscription_status, subscription_tier, can_receive_jobs, created_at)
+            VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', %s, false, NOW())
             RETURNING id
-        """, (
-            name, trading_name, name, data.get('email'), data.get('phone'),
-            data.get('postcode'), data.get('trade_category'),
-            data.get('subscription_tier', 'pro')
-        ))
+        """, (name, trading_name, name, data.get('email'), data.get('phone'), data.get('postcode'), 
+              data.get('trade_category'), data.get('subscription_tier', 'pro')))
 
-        result = cursor.fetchone()
-        tradesperson_id = result['id']
+        tradesperson_id = cursor.fetchone()['id']
+
+        # Create session
+        session_token = secrets.token_urlsafe(32)
+        cursor.execute("""
+            INSERT INTO tradesperson_sessions (tradesperson_id, session_token, expires_at, ip_address, user_agent, created_at)
+            VALUES (%s, %s, %s, %s, %s, NOW())
+        """, (tradesperson_id, session_token, datetime.utcnow() + timedelta(days=30), 
+              request.client.host, request.headers.get('user-agent', '')))
 
         conn.commit()
         cursor.close()
         conn.close()
 
-        print(f"Registration successful - ID: {tradesperson_id}")
-
         return {"success": True, "tradesperson_id": tradesperson_id}
 
     except Exception as e:
-        print(f"Registration error: {str(e)}")
+        print("Registration error:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Subscription
+# ====================== SUBSCRIPTION ======================
+
 @app.post("/api/subscription/create")
 async def create_subscription(request: Request):
     try:
@@ -103,9 +109,6 @@ async def create_subscription(request: Request):
         tradesperson_id = data.get('tradesperson_id')
         tier = data.get('tier')
         payment_method_id = data.get('payment_method_id')
-
-        if not tradesperson_id or not tier or not payment_method_id:
-            raise HTTPException(status_code=400, detail="Missing required fields")
 
         price_ids = {
             'basic': 'price_1T9RVDIrb6iFFzVYMd2Uslrv',
@@ -117,41 +120,37 @@ async def create_subscription(request: Request):
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
         cursor.execute("SELECT email FROM tradespeople WHERE id = %s", (tradesperson_id,))
-        result = cursor.fetchone()
-        if not result:
-            raise HTTPException(status_code=404, detail="Tradesperson not found")
-        
-        email = result['email']
-        
+        email = cursor.fetchone()['email']
+
         customer = stripe.Customer.create(
             email=email,
             payment_method=payment_method_id,
             invoice_settings={'default_payment_method': payment_method_id}
         )
-        
+
         subscription = stripe.Subscription.create(
             customer=customer.id,
             items=[{'price': price_ids.get(tier, price_ids['basic'])}]
         )
-        
+
         cursor.execute("""
-            UPDATE tradespeople
-            SET subscription_status = 'active',
+            UPDATE tradespeople 
+            SET subscription_status = 'active', 
                 subscription_tier = %s,
                 stripe_customer_id = %s,
                 stripe_subscription_id = %s,
                 can_receive_jobs = true
             WHERE id = %s
         """, (tier, customer.id, subscription.id, tradesperson_id))
-        
+
         conn.commit()
         cursor.close()
         conn.close()
-        
+
         return {"success": True}
 
     except Exception as e:
-        print(f"Subscription error: {str(e)}")
+        print("Subscription error:", str(e))
         raise HTTPException(status_code=500, detail=str(e))
 
 
