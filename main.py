@@ -25,7 +25,7 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
 # ============================================================================
-# ALL PAGE ROUTES
+# ALL PAGE ROUTES (this fixes the "Not Found" errors)
 # ============================================================================
 
 @app.get("/", response_class=HTMLResponse)
@@ -69,7 +69,7 @@ async def health_check():
     return {"status": "healthy"}
 
 # ============================================================================
-# REGISTRATION + SESSION
+# REGISTRATION + SESSION COOKIE
 # ============================================================================
 
 @app.post("/api/register-tradesperson")
