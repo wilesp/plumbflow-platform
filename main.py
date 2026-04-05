@@ -24,25 +24,22 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
-# ============================================================================
-# ALL PAGE ROUTES
-# ============================================================================
-
+# Page routes
 @app.get("/", response_class=HTMLResponse)
 async def home_page():
     return FileResponse("frontend/index.html")
 
-@app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)
-async def tradesperson_sign_in():
-    return FileResponse("frontend/tradesperson-sign-in.html")
+@app.get("/tradesperson-register.html", response_class=HTMLResponse)
+async def tradesperson_register():
+    return FileResponse("frontend/tradesperson-register.html")
 
 @app.get("/tradesperson-dashboard.html", response_class=HTMLResponse)
 async def tradesperson_dashboard():
     return FileResponse("frontend/tradesperson-dashboard.html")
 
-@app.get("/tradesperson-register.html", response_class=HTMLResponse)
-async def tradesperson_register():
-    return FileResponse("frontend/tradesperson-register.html")
+@app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)
+async def tradesperson_sign_in():
+    return FileResponse("frontend/tradesperson-sign-in.html")
 
 @app.get("/pricing.html", response_class=HTMLResponse)
 async def pricing_page():
@@ -52,22 +49,11 @@ async def pricing_page():
 async def customer_post_job():
     return FileResponse("frontend/customer-post-job.html")
 
-@app.get("/job-submitted.html", response_class=HTMLResponse)
-async def job_submitted():
-    return FileResponse("frontend/job-submitted.html")
-
-# ============================================================================
-# HEALTH CHECK
-# ============================================================================
-
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
 
-# ============================================================================
-# REGISTRATION ENDPOINT (this was missing)
-# ============================================================================
-
+# Registration
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
@@ -98,7 +84,6 @@ async def register_tradesperson(request: Request):
         result = cursor.fetchone()
         tradesperson_id = result['id']
 
-        # Create session immediately
         session_token = secrets.token_urlsafe(32)
         expires_at = datetime.utcnow() + timedelta(days=30)
 
@@ -113,26 +98,14 @@ async def register_tradesperson(request: Request):
         cursor.close()
         conn.close()
 
-        response = Response(content='{"success": true, "tradesperson_id": ' + str(tradesperson_id) + '}', media_type="application/json")
-        response.set_cookie(
-            key="session_token",
-            value=session_token,
-            max_age=30*24*60*60,
-            httponly=True,
-            secure=False,
-            samesite="lax"
-        )
-        return response
+        return {"success": True, "tradesperson_id": tradesperson_id}
 
     except Exception as e:
         print(f"Registration error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ============================================================================
-# SUBSCRIPTION CREATION
-# ============================================================================
-
+# Subscription
 @app.post("/api/subscription/create")
 async def create_subscription(request: Request):
     try:
@@ -187,9 +160,6 @@ async def create_subscription(request: Request):
         
         return {"success": True, "subscription_id": subscription.id}
         
-    except stripe.error.StripeError as e:
-        print(f"Stripe error: {str(e)}")
-        raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         print(f"Subscription error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
