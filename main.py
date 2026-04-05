@@ -24,12 +24,54 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
-# Health check for Railway
+# ============================================================================
+# ALL PAGE ROUTES
+# ============================================================================
+
+@app.get("/", response_class=HTMLResponse)
+async def home_page():
+    return FileResponse("frontend/index.html")
+
+@app.get("/index.html", response_class=HTMLResponse)
+async def index_page():
+    return FileResponse("frontend/index.html")
+
+@app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)
+async def tradesperson_sign_in():
+    return FileResponse("frontend/tradesperson-sign-in.html")
+
+@app.get("/tradesperson-dashboard.html", response_class=HTMLResponse)
+async def tradesperson_dashboard():
+    return FileResponse("frontend/tradesperson-dashboard.html")
+
+@app.get("/tradesperson-register.html", response_class=HTMLResponse)
+async def tradesperson_register():
+    return FileResponse("frontend/tradesperson-register.html")
+
+@app.get("/pricing.html", response_class=HTMLResponse)
+async def pricing_page():
+    return FileResponse("frontend/pricing.html")
+
+@app.get("/customer-post-job.html", response_class=HTMLResponse)
+async def customer_post_job():
+    return FileResponse("frontend/customer-post-job.html")
+
+@app.get("/job-submitted.html", response_class=HTMLResponse)
+async def job_submitted():
+    return FileResponse("frontend/job-submitted.html")
+
+# ============================================================================
+# HEALTH CHECK
+# ============================================================================
+
 @app.get("/health")
 async def health_check():
     return {"status": "healthy"}
 
-# Register + create session + set cookie
+# ============================================================================
+# REGISTRATION + SESSION
+# ============================================================================
+
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
@@ -60,7 +102,6 @@ async def register_tradesperson(request: Request):
         result = cursor.fetchone()
         tradesperson_id = result['id']
 
-        # Create session immediately
         session_token = secrets.token_urlsafe(32)
         expires_at = datetime.utcnow() + timedelta(days=30)
 
@@ -75,8 +116,7 @@ async def register_tradesperson(request: Request):
         cursor.close()
         conn.close()
 
-        # Return response WITH cookie
-        response = Response(content='{"success": true, "tradesperson_id": ' + str(tradesperson_id) + '}', media_type="application/json")
+        response = Response(content='{"success": true}', media_type="application/json")
         response.set_cookie(
             key="session_token",
             value=session_token,
@@ -92,7 +132,10 @@ async def register_tradesperson(request: Request):
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Get current user for dashboard
+# ============================================================================
+# DASHBOARD USER DATA
+# ============================================================================
+
 @app.get("/api/tradesperson/me")
 async def get_current_tradesperson(request: Request):
     try:
@@ -119,7 +162,7 @@ async def get_current_tradesperson(request: Request):
 
         return {
             "success": True,
-            "trading_name": user["trading_name"],
+            "trading_name": user["trading_name"] or "Trader",
             "subscription_tier": user["subscription_tier"],
             "subscription_status": user["subscription_status"]
         }
@@ -129,43 +172,6 @@ async def get_current_tradesperson(request: Request):
     except Exception as e:
         print(f"Me error: {str(e)}")
         raise HTTPException(status_code=500, detail="Internal server error")
-
-
-# Minimal subscription (for now)
-@app.post("/api/subscription/create")
-async def create_subscription(request: Request):
-    try:
-        data = await request.json()
-        tradesperson_id = data.get('tradesperson_id')
-        tier = data.get('tier')
-        payment_method_id = data.get('payment_method_id')
-
-        price_ids = {
-            'basic': 'price_1T9RVDIrb6iFFzVYMd2Uslrv',
-            'pro': 'price_1T9RpaIrb6iFFzVYCFezjAHq',
-            'premium': 'price_1T9RZAIrb6iFFzVYu8p8tdgb'
-        }
-
-        conn = db.get_connection()
-        cursor = conn.cursor()
-
-        cursor.execute("""
-            UPDATE tradespeople
-            SET subscription_status = 'active',
-                subscription_tier = %s,
-                can_receive_jobs = true
-            WHERE id = %s
-        """, (tier, tradesperson_id))
-
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-        return {"success": True}
-
-    except Exception as e:
-        print(f"Subscription error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
 
 
 if __name__ == "__main__":
