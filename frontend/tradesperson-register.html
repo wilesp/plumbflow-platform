@@ -81,7 +81,7 @@
         </div>
 
         <div class="form-container">
-            <!-- Step 1 -->
+            <!-- Step 1: Business Details -->
             <div id="step1">
                 <div class="form-group">
                     <label>Business / Trading Name *</label>
@@ -116,6 +116,8 @@
                         <option value="roofer">Roofer</option>
                         <option value="heating engineer">Heating Engineer</option>
                         <option value="landscaper">Landscaper</option>
+                        <option value="tiler">Tiler</option>
+                        <option value="plasterer">Plasterer</option>
                     </select>
                 </div>
                 <button onclick="nextStep()">Continue to Payment</button>
@@ -126,7 +128,7 @@
                 <div id="card-element" style="border: 2px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
                 <button onclick="createSubscription()">Complete Registration & Pay</button>
                 <p style="text-align: center; margin-top: 15px; color: #64748b; font-size: 0.9rem;">
-                    Test Mode • Use card 4242 4242 4242 4242 (any future date / CVC)
+                    Test Mode • Use card 4242 4242 4242 4242 (any expiry / CVC)
                 </p>
             </div>
 
@@ -138,14 +140,15 @@
     </div>
 
     <script>
-        const stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // Keep as test key
+        const stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // ← Keep as test key
         let elements, cardElement;
         let currentTier = 'pro';
 
         function initializeStripe() {
             elements = stripe.elements();
             cardElement = elements.create('card', {
-                style: { base: { fontSize: '16px' } }
+                style: { base: { fontSize: '16px' } },
+                hidePostalCode: true   // ← This removes the Zip code field for UK users
             });
             cardElement.mount('#card-element');
         }
@@ -186,7 +189,7 @@
                     card: cardElement
                 });
 
-                // Success UI
+                // Show success and redirect
                 const successSection = document.getElementById('successSection');
                 const successMessage = document.getElementById('successMessage');
 
