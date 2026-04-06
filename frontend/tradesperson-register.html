@@ -3,18 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Register Debug</title>
+    <title>Register as Tradesperson - Best Trade</title>
     <style>
-        body { font-family: Arial, sans-serif; padding: 40px; background: #f8fafc; }
-        .card { max-width: 600px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); }
-        input, select, button { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; }
-        button { background: #1e3a5f; color: white; border: none; font-size: 1.1rem; cursor: pointer; }
-        #message { margin-top: 20px; padding: 15px; border-radius: 6px; font-family: monospace; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            padding: 40px;
+            text-align: center;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+        button {
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        button:hover { background: #0f172a; }
+        #message { margin-top: 20px; padding: 15px; border-radius: 8px; font-weight: bold; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <h2>Registration Debug (No Stripe)</h2>
+    <div class="container">
+        <h2>Register Test</h2>
         
         <input type="text" id="trading_name" value="Wiles Plumbers" placeholder="Trading Name">
         <input type="text" id="name" value="Paul Wiles" placeholder="Full Name">
@@ -24,6 +53,7 @@
         <select id="trade_category">
             <option value="plumber">Plumber</option>
         </select>
+        
         <button onclick="register()">Register & Go to Dashboard</button>
         
         <div id="message"></div>
@@ -32,7 +62,8 @@
     <script>
         async function register() {
             const msg = document.getElementById('message');
-            msg.innerHTML = 'Sending registration request...';
+            msg.style.background = '#fff3cd';
+            msg.textContent = 'Registering...';
 
             try {
                 const response = await fetch('/api/register-tradesperson', {
@@ -49,32 +80,22 @@
                     })
                 });
 
-                const text = await response.text();
-                console.log("Raw response:", text);
+                const data = await response.json();
 
-                let data;
-                try {
-                    data = JSON.parse(text);
-                } catch (e) {
-                    data = { raw: text };
-                }
-
-                msg.style.background = response.ok ? '#d4edda' : '#f8d7da';
-                msg.innerHTML = `
-                    Status: ${response.status}<br>
-                    Response: <pre>${JSON.stringify(data, null, 2)}</pre>
-                `;
-
-                if (response.ok && data.tradesperson_id) {
-                    msg.innerHTML += '<br><strong>Success! Redirecting to dashboard...</strong>';
+                if (response.ok) {
+                    msg.style.background = '#d4edda';
+                    msg.innerHTML = '✅ Registration successful!<br>Redirecting to dashboard...';
+                    
                     setTimeout(() => {
                         window.location.replace('/tradesperson-dashboard.html');
                     }, 1500);
+                } else {
+                    msg.style.background = '#f8d7da';
+                    msg.textContent = 'Error: ' + (data.detail || 'Unknown error');
                 }
-
             } catch (err) {
                 msg.style.background = '#f8d7da';
-                msg.innerHTML = `Network error: ${err.message}`;
+                msg.textContent = 'Network error: ' + err.message;
             }
         }
     </script>
