@@ -7,6 +7,7 @@ import stripe
 import secrets
 from datetime import datetime, timedelta
 import psycopg2.extras
+import json
 
 from database import db
 
@@ -24,8 +25,7 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
-# ====================== PAGE ROUTES ======================
-
+# Page routes
 @app.get("/", response_class=HTMLResponse)
 async def home():
     return FileResponse("frontend/index.html")
@@ -50,18 +50,11 @@ async def pricing_page():
 async def post_job_page():
     return FileResponse("frontend/customer-post-job.html")
 
-@app.get("/job-submitted.html", response_class=HTMLResponse)
-async def job_submitted():
-    return FileResponse("frontend/job-submitted.html")
-
-# ====================== HEALTH ======================
-
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
 
-# ====================== REGISTRATION ======================
-
+# Registration - Fixed JSON response
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
@@ -109,24 +102,15 @@ async def register_tradesperson(request: Request):
         cursor.close()
         conn.close()
 
-        response = Response(content='{"success": True, "tradesperson_id": ' + str(tradesperson_id) + '}', media_type="application/json")
-        response.set_cookie(
-            key="session_token",
-            value=session_token,
-            max_age=30*24*60*60,
-            httponly=True,
-            secure=False,
-            samesite="lax"
-        )
-        return response
+        # Proper JSON response with lowercase true
+        return {"success": True, "tradesperson_id": tradesperson_id}
 
     except Exception as e:
         print(f"Registration error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ====================== DASHBOARD DATA (this was missing) ======================
-
+# Dashboard data
 @app.get("/api/tradesperson/me")
 async def get_current_tradesperson(request: Request):
     try:
