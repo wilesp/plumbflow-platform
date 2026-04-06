@@ -10,7 +10,7 @@ import psycopg2.extras
 
 from database import db
 
-app = FastAPI(title="Best Trade")
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,8 +24,7 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
-# ====================== PAGE ROUTES ======================
-
+# Page routes
 @app.get("/", response_class=HTMLResponse)
 async def home():
     return FileResponse("frontend/index.html")
@@ -50,14 +49,12 @@ async def pricing_page():
 async def post_job_page():
     return FileResponse("frontend/customer-post-job.html")
 
-# ====================== HEALTH ======================
-
+# Health
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
 
-# ====================== REGISTRATION ======================
-
+# Registration
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
@@ -72,22 +69,30 @@ async def register_tradesperson(request: Request):
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
         cursor.execute("""
-            INSERT INTO tradespeople (name, trading_name, contact_name, email, phone, postcode, trade_category, 
-                                     subscription_status, subscription_tier, can_receive_jobs, created_at)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', %s, false, NOW())
+            INSERT INTO tradespeople (
+                name, trading_name, contact_name, email, phone, postcode,
+                trade_category, subscription_status, subscription_tier,
+                can_receive_jobs, created_at
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', %s, false, NOW())
             RETURNING id
-        """, (name, trading_name, name, data.get('email'), data.get('phone'), data.get('postcode'), 
-              data.get('trade_category'), data.get('subscription_tier', 'pro')))
+        """, (
+            name, trading_name, name, data.get('email'), data.get('phone'),
+            data.get('postcode'), data.get('trade_category'),
+            data.get('subscription_tier', 'pro')
+        ))
 
-        tradesperson_id = cursor.fetchone()['id']
+        result = cursor.fetchone()
+        tradesperson_id = result['id']
 
-        # Create session
         session_token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(days=30)
+
         cursor.execute("""
-            INSERT INTO tradesperson_sessions (tradesperson_id, session_token, expires_at, ip_address, user_agent, created_at)
-            VALUES (%s, %s, %s, %s, %s, NOW())
-        """, (tradesperson_id, session_token, datetime.utcnow() + timedelta(days=30), 
-              request.client.host, request.headers.get('user-agent', '')))
+            INSERT INTO tradesperson_sessions (
+                tradesperson_id, session_token, expires_at,
+                ip_address, user_agent, created_at
+            ) VALUES (%s, %s, %s, %s, %s, NOW())
+        """, (tradesperson_id, session_token, expires_at, request.client.host, request.headers.get('user-agent', '')))
 
         conn.commit()
         cursor.close()
@@ -96,62 +101,47 @@ async def register_tradesperson(request: Request):
         return {"success": True, "tradesperson_id": tradesperson_id}
 
     except Exception as e:
-        print("Registration error:", str(e))
+        print(f"Registration error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ====================== SUBSCRIPTION ======================
-
-@app.post("/api/subscription/create")
-async def create_subscription(request: Request):
+# DASHBOARD DATA - THIS WAS MISSING
+@app.get("/api/tradesperson/me")
+async def get_current_tradesperson(request: Request):
     try:
-        data = await request.json()
-        tradesperson_id = data.get('tradesperson_id')
-        tier = data.get('tier')
-        payment_method_id = data.get('payment_method_id')
-
-        price_ids = {
-            'basic': 'price_1T9RVDIrb6iFFzVYMd2Uslrv',
-            'pro': 'price_1T9RpaIrb6iFFzVYCFezjAHq',
-            'premium': 'price_1T9RZAIrb6iFFzVYu8p8tdgb'
-        }
+        session_token = request.cookies.get("session_token")
+        if not session_token:
+            raise HTTPException(status_code=401, detail="Not authenticated")
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        
-        cursor.execute("SELECT email FROM tradespeople WHERE id = %s", (tradesperson_id,))
-        email = cursor.fetchone()['email']
-
-        customer = stripe.Customer.create(
-            email=email,
-            payment_method=payment_method_id,
-            invoice_settings={'default_payment_method': payment_method_id}
-        )
-
-        subscription = stripe.Subscription.create(
-            customer=customer.id,
-            items=[{'price': price_ids.get(tier, price_ids['basic'])}]
-        )
 
         cursor.execute("""
-            UPDATE tradespeople 
-            SET subscription_status = 'active', 
-                subscription_tier = %s,
-                stripe_customer_id = %s,
-                stripe_subscription_id = %s,
-                can_receive_jobs = true
-            WHERE id = %s
-        """, (tier, customer.id, subscription.id, tradesperson_id))
+            SELECT t.trading_name, t.subscription_tier, t.subscription_status
+            FROM tradesperson_sessions s
+            JOIN tradespeople t ON s.tradesperson_id = t.id
+            WHERE s.session_token = %s AND s.expires_at > NOW()
+        """, (session_token,))
 
-        conn.commit()
+        user = cursor.fetchone()
         cursor.close()
         conn.close()
 
-        return {"success": True}
+        if not user:
+            raise HTTPException(status_code=401, detail="Session expired")
 
+        return {
+            "success": True,
+            "trading_name": user["trading_name"] or "Trader",
+            "subscription_tier": user["subscription_tier"],
+            "subscription_status": user["subscription_status"]
+        }
+
+    except HTTPException:
+        raise
     except Exception as e:
-        print("Subscription error:", str(e))
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Dashboard error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 if __name__ == "__main__":
