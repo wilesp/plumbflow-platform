@@ -7,10 +7,11 @@ import stripe
 import secrets
 from datetime import datetime, timedelta
 import psycopg2.extras
+import json
 
 from database import db
 
-app = FastAPI(title="Best Trade")
+app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
@@ -24,8 +25,7 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
-# ====================== PAGE ROUTES ======================
-
+# Page routes
 @app.get("/", response_class=HTMLResponse)
 async def home():
     return FileResponse("frontend/index.html")
@@ -50,18 +50,11 @@ async def pricing_page():
 async def post_job_page():
     return FileResponse("frontend/customer-post-job.html")
 
-@app.get("/job-submitted.html", response_class=HTMLResponse)
-async def job_submitted():
-    return FileResponse("frontend/job-submitted.html")
-
-# ====================== HEALTH ======================
-
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
 
-# ====================== REGISTRATION ======================
-
+# Registration
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
@@ -92,10 +85,9 @@ async def register_tradesperson(request: Request):
         result = cursor.fetchone()
         tradesperson_id = result['id']
 
-        # Clean old sessions for this user
+        # Clean old sessions
         cursor.execute("DELETE FROM tradesperson_sessions WHERE tradesperson_id = %s", (tradesperson_id,))
 
-        # Create fresh session
         session_token = secrets.token_urlsafe(32)
         expires_at = datetime.utcnow() + timedelta(days=30)
 
@@ -110,64 +102,14 @@ async def register_tradesperson(request: Request):
         cursor.close()
         conn.close()
 
-        response = Response(content='{"success": True, "tradesperson_id": ' + str(tradesperson_id) + '}', media_type="application/json")
-        response.set_cookie(
-            key="session_token",
-            value=session_token,
-            max_age=30*24*60*60,
-            httponly=True,
-            secure=False,
-            samesite="lax"
-        )
-        return response
+        return {"success": True, "tradesperson_id": tradesperson_id}
 
     except Exception as e:
         print(f"Registration error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# ====================== DASHBOARD DATA ======================
-
-@app.get("/api/tradesperson/me")
-async def get_current_tradesperson(request: Request):
-    try:
-        session_token = request.cookies.get("session_token")
-        if not session_token:
-            raise HTTPException(status_code=401, detail="Not authenticated")
-
-        conn = db.get_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
-        cursor.execute("""
-            SELECT t.trading_name, t.subscription_tier, t.subscription_status
-            FROM tradesperson_sessions s
-            JOIN tradespeople t ON s.tradesperson_id = t.id
-            WHERE s.session_token = %s AND s.expires_at > NOW()
-        """, (session_token,))
-
-        user = cursor.fetchone()
-        cursor.close()
-        conn.close()
-
-        if not user:
-            raise HTTPException(status_code=401, detail="Session expired")
-
-        return {
-            "success": True,
-            "trading_name": user["trading_name"] or "Trader",
-            "subscription_tier": user["subscription_tier"],
-            "subscription_status": user["subscription_status"]
-        }
-
-    except HTTPException:
-        raise
-    except Exception as e:
-        print(f"Dashboard me error: {str(e)}")
-        raise HTTPException(status_code=500, detail="Internal server error")
-
-
-# ====================== SUBSCRIPTION ======================
-
+# Subscription
 @app.post("/api/subscription/create")
 async def create_subscription(request: Request):
     try:
