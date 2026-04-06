@@ -7,7 +7,6 @@ import stripe
 import secrets
 from datetime import datetime, timedelta
 import psycopg2.extras
-import json
 
 from database import db
 
@@ -25,7 +24,8 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
-# Page routes
+# ====================== PAGE ROUTES ======================
+
 @app.get("/", response_class=HTMLResponse)
 async def home():
     return FileResponse("frontend/index.html")
@@ -50,11 +50,18 @@ async def pricing_page():
 async def post_job_page():
     return FileResponse("frontend/customer-post-job.html")
 
+@app.get("/job-submitted.html", response_class=HTMLResponse)
+async def job_submitted():
+    return FileResponse("frontend/job-submitted.html")
+
+# ====================== HEALTH ======================
+
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
 
-# Registration
+# ====================== REGISTRATION ======================
+
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
@@ -102,71 +109,60 @@ async def register_tradesperson(request: Request):
         cursor.close()
         conn.close()
 
-        return {"success": True, "tradesperson_id": tradesperson_id}
+        response = Response(content='{"success": True, "tradesperson_id": ' + str(tradesperson_id) + '}', media_type="application/json")
+        response.set_cookie(
+            key="session_token",
+            value=session_token,
+            max_age=30*24*60*60,
+            httponly=True,
+            secure=False,
+            samesite="lax"
+        )
+        return response
 
     except Exception as e:
         print(f"Registration error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Subscription
-@app.post("/api/subscription/create")
-async def create_subscription(request: Request):
+# ====================== DASHBOARD DATA (this was missing) ======================
+
+@app.get("/api/tradesperson/me")
+async def get_current_tradesperson(request: Request):
     try:
-        data = await request.json()
-        tradesperson_id = data.get('tradesperson_id')
-        tier = data.get('tier')
-        payment_method_id = data.get('payment_method_id')
-
-        if not tradesperson_id or not tier or not payment_method_id:
-            raise HTTPException(status_code=400, detail="Missing required fields")
-
-        price_ids = {
-            'basic': 'price_1T9RVDIrb6iFFzVYMd2Uslrv',
-            'pro': 'price_1T9RpaIrb6iFFzVYCFezjAHq',
-            'premium': 'price_1T9RZAIrb6iFFzVYu8p8tdgb'
-        }
+        session_token = request.cookies.get("session_token")
+        if not session_token:
+            raise HTTPException(status_code=401, detail="Not authenticated")
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        
-        cursor.execute("SELECT email FROM tradespeople WHERE id = %s", (tradesperson_id,))
-        result = cursor.fetchone()
-        if not result:
-            raise HTTPException(status_code=404, detail="Tradesperson not found")
-        
-        email = result['email']
-        
-        customer = stripe.Customer.create(
-            email=email,
-            payment_method=payment_method_id,
-            invoice_settings={'default_payment_method': payment_method_id}
-        )
-        
-        subscription = stripe.Subscription.create(
-            customer=customer.id,
-            items=[{'price': price_ids.get(tier, price_ids['basic'])}]
-        )
-        
+
         cursor.execute("""
-            UPDATE tradespeople
-            SET subscription_status = 'active',
-                subscription_tier = %s,
-                stripe_customer_id = %s,
-                stripe_subscription_id = %s,
-                can_receive_jobs = true
-            WHERE id = %s
-        """, (tier, customer.id, subscription.id, tradesperson_id))
-        
-        conn.commit()
+            SELECT t.trading_name, t.subscription_tier, t.subscription_status
+            FROM tradesperson_sessions s
+            JOIN tradespeople t ON s.tradesperson_id = t.id
+            WHERE s.session_token = %s AND s.expires_at > NOW()
+        """, (session_token,))
+
+        user = cursor.fetchone()
         cursor.close()
         conn.close()
-        
-        return {"success": True}
 
+        if not user:
+            raise HTTPException(status_code=401, detail="Session expired")
+
+        return {
+            "success": True,
+            "trading_name": user["trading_name"] or "Trader",
+            "subscription_tier": user["subscription_tier"],
+            "subscription_status": user["subscription_status"]
+        }
+
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Subscription error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        print(f"Dashboard me error: {str(e)}")
+        raise HTTPException(status_code=500, detail="Internal server error")
 
 
 if __name__ == "__main__":
