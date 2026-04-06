@@ -156,7 +156,7 @@
             button.textContent = 'Processing...';
 
             try {
-                // Register
+                // 1. Register
                 const regResponse = await fetch('/api/register-tradesperson', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -172,20 +172,24 @@
                 });
 
                 if (!regResponse.ok) {
-                    const err = await regResponse.json();
-                    throw new Error(err.detail || 'Registration failed');
+                    const errText = await regResponse.text();
+                    throw new Error('Registration failed: ' + errText);
                 }
 
                 const regData = await regResponse.json();
                 const tradesperson_id = regData.tradesperson_id;
 
-                // Create Payment Method
+                if (!tradesperson_id) {
+                    throw new Error('No tradesperson_id returned from server');
+                }
+
+                // 2. Create Payment Method
                 const { paymentMethod } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: cardElement
                 });
 
-                // Create Subscription
+                // 3. Create Subscription
                 const subResponse = await fetch('/api/subscription/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -197,8 +201,8 @@
                 });
 
                 if (!subResponse.ok) {
-                    const err = await subResponse.json();
-                    throw new Error(err.detail || 'Subscription failed');
+                    const errText = await subResponse.text();
+                    throw new Error('Subscription failed: ' + errText);
                 }
 
                 // Success
