@@ -180,7 +180,7 @@
 
                 const regData = JSON.parse(regText);
 
-                // SAFE ACCESS - try both possible keys
+                // SAFE ACCESS TO ID - this fixes the "undefined (reading 'id')" error
                 const tradesperson_id = regData.tradesperson_id || regData.id;
 
                 if (!tradesperson_id) {
