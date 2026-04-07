@@ -134,7 +134,9 @@
     </div>
 
     <script>
-        const stripe = Stripe('pk_test_YOUR_STRIPE_PUBLISHABLE_KEY'); // Keep test key
+        // ←←← REPLACE THIS WITH YOUR ACTUAL TEST PUBLISHABLE KEY FROM STRIPE DASHBOARD
+        const stripe = Stripe('pk_test_XXXXXXXXXXXXXXXXXXXXXXXX'); 
+
         let elements, cardElement;
         let currentTier = 'pro';
 
@@ -171,27 +173,27 @@
                     })
                 });
 
-                const regText = await regResponse.text();
-                console.log("Raw registration response:", regText);
+                const regData = await regResponse.json();
 
                 if (!regResponse.ok) {
-                    throw new Error('Registration failed: ' + regText);
+                    throw new Error(regData.detail || 'Registration failed');
                 }
 
-                const regData = JSON.parse(regText);
-
-                // SAFE ACCESS TO ID - this fixes the "undefined (reading 'id')" error
-                const tradesperson_id = regData.tradesperson_id || regData.id;
-
-                if (!tradesperson_id) {
-                    throw new Error('No tradesperson_id returned from server. Got: ' + JSON.stringify(regData));
+                if (!regData.tradesperson_id) {
+                    throw new Error('No tradesperson_id returned');
                 }
+
+                const tradesperson_id = regData.tradesperson_id;
 
                 // 2. Create Payment Method
-                const { paymentMethod } = await stripe.createPaymentMethod({
+                const { paymentMethod, error } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: cardElement
                 });
+
+                if (error) {
+                    throw new Error(error.message);
+                }
 
                 // 3. Create Subscription
                 const subResponse = await fetch('/api/subscription/create', {
@@ -205,8 +207,8 @@
                 });
 
                 if (!subResponse.ok) {
-                    const errText = await subResponse.text();
-                    throw new Error('Subscription failed: ' + errText);
+                    const err = await subResponse.json();
+                    throw new Error(err.detail || 'Subscription failed');
                 }
 
                 // Success
