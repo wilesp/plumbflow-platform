@@ -156,7 +156,7 @@
             button.textContent = 'Processing...';
 
             try {
-                // Register
+                // 1. Register
                 const regResponse = await fetch('/api/register-tradesperson', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -171,27 +171,27 @@
                     })
                 });
 
-                const regText = await regResponse.text();
-                console.log("Registration raw response:", regText);
-
                 if (!regResponse.ok) {
-                    throw new Error('Registration failed: ' + regText);
+                    const errText = await regResponse.text();
+                    throw new Error('Registration failed: ' + errText);
                 }
 
-                const regData = JSON.parse(regText);
+                const regData = await regResponse.json();
+
+                // FIXED: Use the correct key from backend
                 const tradesperson_id = regData.tradesperson_id;
 
                 if (!tradesperson_id) {
-                    throw new Error('No tradesperson_id returned from server');
+                    throw new Error('No tradesperson_id returned from server. Response: ' + JSON.stringify(regData));
                 }
 
-                // Create Payment Method
+                // 2. Create Payment Method
                 const { paymentMethod } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: cardElement
                 });
 
-                // Create Subscription
+                // 3. Create Subscription
                 const subResponse = await fetch('/api/subscription/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
