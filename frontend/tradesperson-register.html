@@ -156,7 +156,7 @@
             button.textContent = 'Processing...';
 
             try {
-                // 1. Register
+                // Register
                 const regResponse = await fetch('/api/register-tradesperson', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -171,25 +171,27 @@
                     })
                 });
 
+                const regText = await regResponse.text();
+                console.log("Registration raw response:", regText);
+
                 if (!regResponse.ok) {
-                    const errText = await regResponse.text();
-                    throw new Error('Registration failed: ' + errText);
+                    throw new Error('Registration failed: ' + regText);
                 }
 
-                const regData = await regResponse.json();
+                const regData = JSON.parse(regText);
                 const tradesperson_id = regData.tradesperson_id;
 
                 if (!tradesperson_id) {
                     throw new Error('No tradesperson_id returned from server');
                 }
 
-                // 2. Create Payment Method
+                // Create Payment Method
                 const { paymentMethod } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: cardElement
                 });
 
-                // 3. Create Subscription
+                // Create Subscription
                 const subResponse = await fetch('/api/subscription/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -222,7 +224,7 @@
 
             } catch (err) {
                 console.error(err);
-                alert('Error: ' + err.message);
+                alert('Error during registration: ' + err.message);
                 button.disabled = false;
                 button.textContent = 'Complete Registration & Pay';
             }
