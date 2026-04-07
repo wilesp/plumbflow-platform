@@ -171,18 +171,20 @@
                     })
                 });
 
+                const regText = await regResponse.text();
+                console.log("Raw registration response:", regText);
+
                 if (!regResponse.ok) {
-                    const errText = await regResponse.text();
-                    throw new Error('Registration failed: ' + errText);
+                    throw new Error('Registration failed: ' + regText);
                 }
 
-                const regData = await regResponse.json();
+                const regData = JSON.parse(regText);
 
-                // FIXED: Use the correct key from backend
-                const tradesperson_id = regData.tradesperson_id;
+                // Safe access to tradesperson_id
+                const tradesperson_id = regData.tradesperson_id || regData.id;
 
                 if (!tradesperson_id) {
-                    throw new Error('No tradesperson_id returned from server. Response: ' + JSON.stringify(regData));
+                    throw new Error('No tradesperson_id in response. Got: ' + JSON.stringify(regData));
                 }
 
                 // 2. Create Payment Method
