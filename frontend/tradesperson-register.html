@@ -180,11 +180,11 @@
 
                 const regData = JSON.parse(regText);
 
-                // SAFE ACCESS - check both possible keys
+                // SAFE ACCESS - try both possible keys
                 const tradesperson_id = regData.tradesperson_id || regData.id;
 
                 if (!tradesperson_id) {
-                    throw new Error('No tradesperson_id returned. Got: ' + JSON.stringify(regData));
+                    throw new Error('No tradesperson_id returned from server. Got: ' + JSON.stringify(regData));
                 }
 
                 // 2. Create Payment Method
