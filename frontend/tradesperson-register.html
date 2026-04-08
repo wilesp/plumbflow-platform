@@ -60,12 +60,27 @@
             margin-top: 10px;
         }
         button:hover { background: #0f172a; }
+        button:disabled {
+            background: #6b7280;
+            cursor: not-allowed;
+        }
         .success-section {
             display: none;
             text-align: center;
             padding: 60px 20px;
         }
         .success-section h2 { color: #10b981; margin-bottom: 15px; }
+        .close-btn {
+            background: #3b82f6;
+            color: white;
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 25px;
+        }
+        .close-btn:hover { background: #2563eb; }
     </style>
 </head>
 <body>
@@ -120,7 +135,7 @@
             <!-- Step 2: Payment -->
             <div id="step2" style="display: none;">
                 <div id="card-element" style="border: 2px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
-                <button onclick="createSubscription()">Complete Registration & Pay</button>
+                <button id="payButton" onclick="createSubscription()">Complete Registration & Pay</button>
                 <p style="text-align: center; margin-top: 15px; color: #64748b; font-size: 0.9rem;">
                     Test Mode • Use card 4242 4242 4242 4242
                 </p>
@@ -129,6 +144,7 @@
             <!-- Success -->
             <div id="successSection" class="success-section">
                 <div id="successMessage"></div>
+                <button class="close-btn" onclick="closeWindow()">Close Window</button>
             </div>
         </div>
     </div>
@@ -151,11 +167,12 @@
         }
 
         async function createSubscription() {
-            const button = document.querySelector('#step2 button');
+            const button = document.getElementById('payButton');
             button.disabled = true;
             button.textContent = 'Processing...';
 
             try {
+                // 1. Register
                 const regResponse = await fetch('/api/register-tradesperson', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -176,6 +193,7 @@
 
                 const tradesperson_id = regData.tradesperson_id;
 
+                // 2. Create Payment Method
                 const { paymentMethod, error } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: cardElement
@@ -183,7 +201,8 @@
 
                 if (error) throw new Error(error.message);
 
-                await fetch('/api/subscription/create', {
+                // 3. Create Subscription
+                const subResponse = await fetch('/api/subscription/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -193,7 +212,12 @@
                     })
                 });
 
-                // SUCCESS - NO AUTO REDIRECT
+                if (!subResponse.ok) {
+                    const err = await subResponse.json();
+                    throw new Error(err.detail || 'Subscription failed');
+                }
+
+                // SUCCESS
                 const successSection = document.getElementById('successSection');
                 const successMessage = document.getElementById('successMessage');
 
@@ -202,13 +226,12 @@
                     <h2>✅ Registration Successful!</h2>
                     <p>Your ${currentTier.toUpperCase()} subscription has been activated.</p>
                     <p>You can now sign in using the "Trade Sign In" button on the home page whenever you want.</p>
-                    <p style="margin-top: 30px; font-size: 0.95rem; color: #64748b;">
-                        To access your dashboard later:<br>
-                        → Go to the home page<br>
-                        → Click "Trade Sign In"<br>
-                        → Enter your email address
-                    </p>
                 `;
+
+                // Update button to "Complete"
+                button.textContent = '✓ Complete';
+                button.style.background = '#10b981';
+                button.disabled = true;
 
             } catch (err) {
                 console.error(err);
@@ -216,6 +239,13 @@
                 button.disabled = false;
                 button.textContent = 'Complete Registration & Pay';
             }
+        }
+
+        function closeWindow() {
+            if (confirm("Close this window?")) {
+                window.close();
+            }
+            window.location.href = '/';
         }
 
         window.onload = () => {
