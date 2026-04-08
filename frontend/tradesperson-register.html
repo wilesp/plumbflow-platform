@@ -71,7 +71,7 @@
         }
         .success-section h2 { color: #10b981; margin-bottom: 15px; }
         .close-btn {
-            background: #3b82f6;
+            background: #1e3a5f;
             color: white;
             padding: 12px 30px;
             border: none;
@@ -80,7 +80,7 @@
             cursor: pointer;
             margin-top: 25px;
         }
-        .close-btn:hover { background: #2563eb; }
+        .close-btn:hover { background: #0f172a; }
     </style>
 </head>
 <body>
@@ -172,7 +172,6 @@
             button.textContent = 'Processing...';
 
             try {
-                // 1. Register
                 const regResponse = await fetch('/api/register-tradesperson', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -193,7 +192,6 @@
 
                 const tradesperson_id = regData.tradesperson_id;
 
-                // 2. Create Payment Method
                 const { paymentMethod, error } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: cardElement
@@ -201,8 +199,7 @@
 
                 if (error) throw new Error(error.message);
 
-                // 3. Create Subscription
-                const subResponse = await fetch('/api/subscription/create', {
+                await fetch('/api/subscription/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -211,11 +208,6 @@
                         payment_method_id: paymentMethod.id
                     })
                 });
-
-                if (!subResponse.ok) {
-                    const err = await subResponse.json();
-                    throw new Error(err.detail || 'Subscription failed');
-                }
 
                 // SUCCESS
                 const successSection = document.getElementById('successSection');
@@ -228,7 +220,7 @@
                     <p>You can now sign in using the "Trade Sign In" button on the home page whenever you want.</p>
                 `;
 
-                // Update button to "Complete"
+                // Update button to Complete
                 button.textContent = '✓ Complete';
                 button.style.background = '#10b981';
                 button.disabled = true;
