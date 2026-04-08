@@ -45,7 +45,7 @@
             cursor: pointer;
         }
         button:hover { background: #0f172a; }
-        .message { margin-top: 20px; font-size: 0.95rem; color: #10b981; }
+        .message { margin-top: 20px; font-size: 0.95rem; }
     </style>
 </head>
 <body>
@@ -53,7 +53,7 @@
         <h1>Trade Sign In</h1>
         <p>Enter your registered email to access your dashboard</p>
         
-        <input type="email" id="email" placeholder="paul.wiles@gmail.com" value="paul.wiles@gmail.com">
+        <input type="email" id="email" placeholder="your@email.com">
         <button onclick="signIn()">Access Dashboard</button>
         
         <div id="message" class="message"></div>
@@ -82,8 +82,8 @@
                 });
 
                 if (response.ok) {
+                    messageDiv.style.color = '#10b981';
                     messageDiv.textContent = 'Success! Redirecting to dashboard...';
-                    // Use replace so Back button doesn't return to sign-in
                     setTimeout(() => {
                         window.location.replace('/tradesperson-dashboard.html');
                     }, 1000);
