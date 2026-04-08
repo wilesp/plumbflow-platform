@@ -60,7 +60,7 @@ async def job_submitted():
 async def health():
     return {"status": "healthy"}
 
-# ====================== REGISTRATION ======================
+# ====================== REGISTRATION + COOKIE ======================
 
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
@@ -109,71 +109,20 @@ async def register_tradesperson(request: Request):
         cursor.close()
         conn.close()
 
-        return {"success": True, "tradesperson_id": tradesperson_id}
+        # Set cookie
+        response = Response(content='{"success": True, "tradesperson_id": ' + str(tradesperson_id) + '}', media_type="application/json")
+        response.set_cookie(
+            key="session_token",
+            value=session_token,
+            max_age=30*24*60*60,
+            httponly=True,
+            secure=False,
+            samesite="lax"
+        )
+        return response
 
     except Exception as e:
         print(f"Registration error: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-# ====================== SUBSCRIPTION CREATION ======================
-
-@app.post("/api/subscription/create")
-async def create_subscription(request: Request):
-    try:
-        data = await request.json()
-        tradesperson_id = data.get('tradesperson_id')
-        tier = data.get('tier')
-        payment_method_id = data.get('payment_method_id')
-
-        if not tradesperson_id or not tier or not payment_method_id:
-            raise HTTPException(status_code=400, detail="Missing required fields")
-
-        price_ids = {
-            'basic': 'price_1T9RVDIrb6iFFzVYMd2Uslrv',
-            'pro': 'price_1T9RpaIrb6iFFzVYCFezjAHq',
-            'premium': 'price_1T9RZAIrb6iFFzVYu8p8tdgb'
-        }
-
-        conn = db.get_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        
-        cursor.execute("SELECT email FROM tradespeople WHERE id = %s", (tradesperson_id,))
-        result = cursor.fetchone()
-        if not result:
-            raise HTTPException(status_code=404, detail="Tradesperson not found")
-        
-        email = result['email']
-        
-        customer = stripe.Customer.create(
-            email=email,
-            payment_method=payment_method_id,
-            invoice_settings={'default_payment_method': payment_method_id}
-        )
-        
-        subscription = stripe.Subscription.create(
-            customer=customer.id,
-            items=[{'price': price_ids.get(tier, price_ids['basic'])}]
-        )
-        
-        cursor.execute("""
-            UPDATE tradespeople
-            SET subscription_status = 'active',
-                subscription_tier = %s,
-                stripe_customer_id = %s,
-                stripe_subscription_id = %s,
-                can_receive_jobs = true
-            WHERE id = %s
-        """, (tier, customer.id, subscription.id, tradesperson_id))
-        
-        conn.commit()
-        cursor.close()
-        conn.close()
-        
-        return {"success": True}
-
-    except Exception as e:
-        print(f"Subscription error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
