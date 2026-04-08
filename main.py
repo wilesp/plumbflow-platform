@@ -24,7 +24,8 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
 app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
 
-# Page routes
+# ====================== PAGE ROUTES ======================
+
 @app.get("/", response_class=HTMLResponse)
 async def home():
     return FileResponse("frontend/index.html")
@@ -49,11 +50,18 @@ async def pricing_page():
 async def post_job_page():
     return FileResponse("frontend/customer-post-job.html")
 
+@app.get("/job-submitted.html", response_class=HTMLResponse)
+async def job_submitted():
+    return FileResponse("frontend/job-submitted.html")
+
+# ====================== HEALTH ======================
+
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
 
-# Registration
+# ====================== REGISTRATION ======================
+
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
@@ -101,74 +109,89 @@ async def register_tradesperson(request: Request):
         cursor.close()
         conn.close()
 
-        return {"success": True, "tradesperson_id": tradesperson_id}
+        response = Response(content='{"success": True, "tradesperson_id": ' + str(tradesperson_id) + '}', media_type="application/json")
+        response.set_cookie(
+            key="session_token",
+            value=session_token,
+            max_age=30*24*60*60,
+            httponly=True,
+            secure=False,
+            samesite="lax"
+        )
+        return response
 
     except Exception as e:
         print(f"Registration error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Subscription
-@app.post("/api/subscription/create")
-async def create_subscription(request: Request):
+# ====================== SIGN IN - FIXED ======================
+
+@app.post("/api/auth/signin")
+async def simple_signin(request: Request):
     try:
         data = await request.json()
-        tradesperson_id = data.get('tradesperson_id')
-        tier = data.get('tier')
-        payment_method_id = data.get('payment_method_id')
+        email = data.get('email', '').strip().lower()
+        
+        print(f"Signin attempt for email: '{email}'")
 
-        if not tradesperson_id or not tier or not payment_method_id:
-            raise HTTPException(status_code=400, detail="Missing required fields")
-
-        price_ids = {
-            'basic': 'price_1T9RVDIrb6iFFzVYMd2Uslrv',
-            'pro': 'price_1T9RpaIrb6iFFzVYCFezjAHq',
-            'premium': 'price_1T9RZAIrb6iFFzVYu8p8tdgb'
-        }
+        if not email:
+            raise HTTPException(status_code=400, detail="Email is required")
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
-        cursor.execute("SELECT email FROM tradespeople WHERE id = %s", (tradesperson_id,))
-        result = cursor.fetchone()
-        if not result:
-            raise HTTPException(status_code=404, detail="Tradesperson not found")
-        
-        email = result['email']
-        
-        customer = stripe.Customer.create(
-            email=email,
-            payment_method=payment_method_id,
-            invoice_settings={'default_payment_method': payment_method_id}
-        )
-        
-        subscription = stripe.Subscription.create(
-            customer=customer.id,
-            items=[{'price': price_ids.get(tier, price_ids['basic'])}]
-        )
-        
+        # Simple query using the 'email' column
         cursor.execute("""
-            UPDATE tradespeople
-            SET subscription_status = 'active',
-                subscription_tier = %s,
-                stripe_customer_id = %s,
-                stripe_subscription_id = %s,
-                can_receive_jobs = true
-            WHERE id = %s
-        """, (tier, customer.id, subscription.id, tradesperson_id))
+            SELECT id, trading_name 
+            FROM tradespeople 
+            WHERE LOWER(email) = %s
+        """, (email,))
         
+        user = cursor.fetchone()
+        
+        if not user:
+            cursor.close()
+            conn.close()
+            print(f"User not found for email: {email}")
+            raise HTTPException(status_code=404, detail="Email not found. Please register first.")
+
+        tradesperson_id = user['id']
+        print(f"User found - ID: {tradesperson_id}")
+
+        # Create new session
+        session_token = secrets.token_urlsafe(32)
+        expires_at = datetime.utcnow() + timedelta(days=30)
+
+        cursor.execute("""
+            INSERT INTO tradesperson_sessions (
+                tradesperson_id, session_token, expires_at,
+                ip_address, user_agent, created_at
+            ) VALUES (%s, %s, %s, %s, %s, NOW())
+        """, (tradesperson_id, session_token, expires_at, request.client.host, request.headers.get('user-agent', '')))
+
         conn.commit()
         cursor.close()
         conn.close()
-        
-        return {"success": True}
+
+        response = Response(content='{"success": True}', media_type="application/json")
+        response.set_cookie(
+            key="session_token",
+            value=session_token,
+            max_age=30*24*60*60,
+            httponly=True,
+            secure=False,
+            samesite="lax"
+        )
+        return response
 
     except Exception as e:
-        print(f"Subscription error: {str(e)}")
+        print(f"Signin error: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
-# Dashboard
+# ====================== DASHBOARD DATA ======================
+
 @app.get("/api/tradesperson/me")
 async def get_current_tradesperson(request: Request):
     try:
