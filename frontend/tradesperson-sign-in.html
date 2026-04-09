@@ -45,7 +45,11 @@
             cursor: pointer;
         }
         button:hover { background: #0f172a; }
-        .message { margin-top: 20px; font-size: 0.95rem; }
+        .message { 
+            margin-top: 20px; 
+            font-size: 0.95rem; 
+            min-height: 24px;
+        }
     </style>
 </head>
 <body>
@@ -53,7 +57,7 @@
         <h1>Trade Sign In</h1>
         <p>Enter your registered email to access your dashboard</p>
         
-        <input type="email" id="email" placeholder="your@email.com">
+        <input type="email" id="email" placeholder="your@email.com" autofocus>
         <button onclick="signIn()">Access Dashboard</button>
         
         <div id="message" class="message"></div>
@@ -73,7 +77,7 @@
 
             try {
                 messageDiv.style.color = '#10b981';
-                messageDiv.textContent = 'Signing you in...';
+                messageDiv.textContent = 'Checking...';
 
                 const response = await fetch('/api/auth/signin', {
                     method: 'POST',
@@ -83,20 +87,29 @@
 
                 if (response.ok) {
                     messageDiv.style.color = '#10b981';
-                    messageDiv.textContent = 'Success! Redirecting to dashboard...';
+                    messageDiv.textContent = 'Success! Loading dashboard...';
+                    
+                    // Direct redirect - no extra delay
                     setTimeout(() => {
                         window.location.replace('/tradesperson-dashboard.html');
-                    }, 1000);
+                    }, 800);
                 } else {
-                    const error = await response.json();
+                    const errorData = await response.json().catch(() => ({}));
                     messageDiv.style.color = '#ef4444';
-                    messageDiv.textContent = error.detail || 'Email not found';
+                    messageDiv.textContent = errorData.detail || 'Email not found. Please register first.';
                 }
             } catch (err) {
                 messageDiv.style.color = '#ef4444';
-                messageDiv.textContent = 'Unable to sign in. Please try again.';
+                messageDiv.textContent = 'Connection error. Please try again.';
             }
         }
+
+        // Allow pressing Enter key
+        document.getElementById('email').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                signIn();
+            }
+        });
     </script>
 </body>
 </html>
