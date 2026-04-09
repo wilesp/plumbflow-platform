@@ -38,18 +38,29 @@
         .step { text-align: center; margin: 0 20px; color: #64748b; }
         .step.active { color: #1e3a5f; font-weight: 600; }
         .form-container { padding: 40px; }
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 500; }
-        input, select {
+        .form-group {
+            margin-bottom: 24px;
+        }
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #334155;
+        }
+        input, select, textarea {
             width: 100%;
-            padding: 12px;
-            border: 2px solid #e5e7eb;
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
             border-radius: 8px;
             font-size: 1rem;
         }
-        button {
+        input:focus, select:focus {
+            outline: none;
+            border-color: #1e3a5f;
+        }
+        .submit-btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             background: #1e3a5f;
             color: white;
             border: none;
@@ -57,37 +68,34 @@
             font-size: 1.1rem;
             font-weight: 600;
             cursor: pointer;
-            margin-top: 10px;
         }
-        button:hover { background: #0f172a; }
-        button:disabled {
-            background: #6b7280;
+        .submit-btn:disabled {
+            background: #94a3b8;
             cursor: not-allowed;
         }
         .success-section {
             display: none;
             text-align: center;
-            padding: 60px 20px;
+            padding: 40px 20px;
+            background: #f0fdf4;
+            color: #166534;
         }
-        .success-section h2 { color: #10b981; margin-bottom: 15px; }
         .close-btn {
             background: #1e3a5f;
             color: white;
-            padding: 12px 30px;
             border: none;
+            padding: 12px 24px;
             border-radius: 8px;
-            font-size: 1rem;
             cursor: pointer;
-            margin-top: 25px;
+            margin-top: 20px;
         }
-        .close-btn:hover { background: #0f172a; }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>Join Best Trade</h1>
-            <p>Start receiving customer jobs today</p>
+            <h1>Join as a Tradesperson</h1>
+            <p>Get more jobs in your local area</p>
         </div>
 
         <div class="step-indicator">
@@ -95,111 +103,161 @@
             <div class="step">2. Payment</div>
         </div>
 
-        <div class="form-container">
-            <!-- Step 1 -->
-            <div id="step1">
+        <div class="form-container" id="step1">
+            <form id="registerForm">
                 <div class="form-group">
-                    <label>Business / Trading Name *</label>
-                    <input type="text" id="trading_name" placeholder="e.g. Dave Trader3">
+                    <label>Trading / Business Name <span style="color:red">*</span></label>
+                    <input type="text" id="trading_name" required placeholder="e.g. Wiles Plumbing Ltd">
                 </div>
+
                 <div class="form-group">
-                    <label>Your Full Name *</label>
-                    <input type="text" id="name" placeholder="Dave Smith">
+                    <label>Contact Name <span style="color:red">*</span></label>
+                    <input type="text" id="contact_name" required placeholder="e.g. Dave Smith">
                 </div>
+
                 <div class="form-group">
-                    <label>Email Address *</label>
-                    <input type="email" id="email" placeholder="dave.trader3@test.com">
-                </div>
-                <div class="form-group">
-                    <label>Phone Number *</label>
-                    <input type="tel" id="phone" placeholder="07812 899000">
-                </div>
-                <div class="form-group">
-                    <label>Postcode *</label>
-                    <input type="text" id="postcode" placeholder="HP1 5TT" style="text-transform: uppercase;">
-                </div>
-                <div class="form-group">
-                    <label>Trade Category *</label>
-                    <select id="trade_category">
-                        <option value="">Select your trade</option>
-                        <option value="plumber">Plumber</option>
-                        <option value="electrician">Electrician</option>
-                        <option value="carpenter">Carpenter</option>
-                        <option value="gas engineer">Gas Engineer</option>
-                        <option value="builder">Builder</option>
+                    <label>Trade Category <span style="color:red">*</span></label>
+                    <select id="trade_category" name="trade_category" required>
+                        <option value="">Select your main trade...</option>
+                        
+                        <optgroup label="Emergency & Core Trades">
+                            <option value="plumber">Plumber</option>
+                            <option value="electrician">Electrician</option>
+                            <option value="gas-engineer">Gas Engineer</option>
+                            <option value="heating-engineer">Heating Engineer</option>
+                            <option value="boiler-installer">Boiler Installer</option>
+                            <option value="drainage">Drainage Specialist</option>
+                            <option value="locksmith">Locksmith</option>
+                        </optgroup>
+
+                        <optgroup label="Building & Construction">
+                            <option value="builder">Builder</option>
+                            <option value="carpenter">Carpenter</option>
+                            <option value="roofer">Roofer</option>
+                            <option value="plasterer">Plasterer</option>
+                        </optgroup>
+
+                        <optgroup label="Interior & Finishing">
+                            <option value="painter-decorator">Painter & Decorator</option>
+                            <option value="tiler">Tiler</option>
+                            <option value="kitchen-fitter">Kitchen Fitter</option>
+                            <option value="bathroom-fitter">Bathroom Fitter</option>
+                            <option value="flooring">Flooring Specialist</option>
+                            <option value="window-fitter">Window Fitter</option>
+                        </optgroup>
+
+                        <optgroup label="Other Services">
+                            <option value="handyman">Handyman</option>
+                            <option value="landscaper">Landscaper / Gardener</option>
+                            <option value="hvac">HVAC Engineer</option>
+                        </optgroup>
                     </select>
                 </div>
-                <button onclick="nextStep()">Continue to Payment</button>
-            </div>
 
-            <!-- Step 2: Payment -->
-            <div id="step2" style="display: none;">
-                <div id="card-element" style="border: 2px solid #e5e7eb; padding: 15px; border-radius: 8px; margin-bottom: 20px;"></div>
-                <button id="payButton" onclick="createSubscription()">Complete Registration & Pay</button>
-                <p style="text-align: center; margin-top: 15px; color: #64748b; font-size: 0.9rem;">
-                    Test Mode • Use card 4242 4242 4242 4242
-                </p>
-            </div>
+                <div class="form-group">
+                    <label>Email Address <span style="color:red">*</span></label>
+                    <input type="email" id="email" required placeholder="e.g. dave@wilestrade.co.uk">
+                </div>
 
-            <!-- Success -->
-            <div id="successSection" class="success-section">
-                <div id="successMessage"></div>
-                <button class="close-btn" onclick="closeWindow()">Close Window</button>
-            </div>
+                <div class="form-group">
+                    <label>Phone Number <span style="color:red">*</span></label>
+                    <input type="tel" id="phone" required placeholder="e.g. 07812 345678">
+                </div>
+
+                <div class="form-group">
+                    <label>Postcode <span style="color:red">*</span></label>
+                    <input type="text" id="postcode" required placeholder="e.g. HP1 1TT" style="text-transform: uppercase;">
+                </div>
+
+                <button type="button" onclick="goToPayment()" class="submit-btn" id="continueBtn">
+                    Continue to Payment
+                </button>
+            </form>
+        </div>
+
+        <!-- Step 2: Payment -->
+        <div class="form-container" id="step2" style="display:none;">
+            <h2 style="text-align:center; margin-bottom:20px;">Complete Registration & Pay</h2>
+            <div id="card-element"></div>
+            <div id="card-errors" style="color:red; margin-top:10px;"></div>
+
+            <button onclick="createSubscription()" class="submit-btn" id="payButton" style="margin-top:30px;">
+                Make Payment & Complete Registration
+            </button>
+        </div>
+
+        <!-- Success Section -->
+        <div class="success-section" id="successSection">
+            <h2>✅ Registration Successful!</h2>
+            <p id="successMessage">Your subscription has been activated.</p>
+            <button onclick="window.location.href='/'" class="close-btn">
+                Close Window
+            </button>
         </div>
     </div>
 
     <script>
-        const stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi'); 
-        let elements, cardElement;
+        let stripe = Stripe('pk_test_YOUR_TEST_PUBLISHABLE_KEY_HERE'); // ← Replace with your test key
+        let elements;
+        let cardElement;
         let currentTier = 'pro';
 
-        function initializeStripe() {
+        async function goToPayment() {
+            const form = document.getElementById('registerForm');
+            if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+            }
+
+            document.getElementById('step1').style.display = 'none';
+            document.getElementById('step2').style.display = 'block';
+
+            // Initialize Stripe Elements
             elements = stripe.elements();
-            cardElement = elements.create('card', { hidePostalCode: true });
+            cardElement = elements.create('card', { 
+                hidePostalCode: true   // UK business - no zip code
+            });
             cardElement.mount('#card-element');
         }
 
-        function nextStep() {
-            document.getElementById('step1').style.display = 'none';
-            document.getElementById('step2').style.display = 'block';
-            initializeStripe();
-        }
-
         async function createSubscription() {
-            const button = document.getElementById('payButton');
-            button.disabled = true;
-            button.textContent = 'Processing...';
+            const payButton = document.getElementById('payButton');
+            payButton.disabled = true;
+            payButton.textContent = 'Processing...';
 
             try {
+                // Step 1: Register tradesperson
+                const regData = {
+                    trading_name: document.getElementById('trading_name').value,
+                    contact_name: document.getElementById('contact_name').value,
+                    trade_category: document.getElementById('trade_category').value,
+                    email: document.getElementById('email').value,
+                    phone: document.getElementById('phone').value,
+                    postcode: document.getElementById('postcode').value.toUpperCase(),
+                    subscription_tier: currentTier
+                };
+
                 const regResponse = await fetch('/api/register-tradesperson', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        trading_name: document.getElementById('trading_name').value.trim(),
-                        name: document.getElementById('name').value.trim(),
-                        email: document.getElementById('email').value.trim(),
-                        phone: document.getElementById('phone').value.trim(),
-                        postcode: document.getElementById('postcode').value.trim().toUpperCase(),
-                        trade_category: document.getElementById('trade_category').value,
-                        subscription_tier: currentTier
-                    })
+                    body: JSON.stringify(regData)
                 });
 
-                const regData = await regResponse.json();
+                const regResult = await regResponse.json();
+                if (!regResponse.ok) throw new Error(regResult.detail || 'Registration failed');
 
-                if (!regResponse.ok) throw new Error(regData.detail || 'Registration failed');
+                const tradesperson_id = regResult.tradesperson_id;
 
-                const tradesperson_id = regData.tradesperson_id;
-
+                // Step 2: Create Stripe Payment Method
                 const { paymentMethod, error } = await stripe.createPaymentMethod({
                     type: 'card',
-                    card: cardElement
+                    card: cardElement,
                 });
 
-                if (error) throw new Error(error.message);
+                if (error) throw error;
 
-                await fetch('/api/subscription/create', {
+                // Step 3: Create Subscription
+                const subResponse = await fetch('/api/subscription/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -209,40 +267,30 @@
                     })
                 });
 
-                // SUCCESS
+                if (!subResponse.ok) {
+                    const err = await subResponse.json();
+                    throw new Error(err.detail || 'Subscription failed');
+                }
+
+                // Success
+                document.getElementById('step2').style.display = 'none';
                 const successSection = document.getElementById('successSection');
-                const successMessage = document.getElementById('successMessage');
-
                 successSection.style.display = 'block';
-                successMessage.innerHTML = `
-                    <h2>✅ Registration Successful!</h2>
-                    <p>Your ${currentTier.toUpperCase()} subscription has been activated.</p>
-                    <p>You can now sign in using the "Trade Sign In" button on the home page whenever you want.</p>
-                `;
-
-                // Update button to Complete
-                button.textContent = '✓ Complete';
-                button.style.background = '#10b981';
-                button.disabled = true;
 
             } catch (err) {
                 console.error(err);
-                alert('Error during registration: ' + err.message);
-                button.disabled = false;
-                button.textContent = 'Complete Registration & Pay';
+                alert('Error: ' + err.message);
+                payButton.disabled = false;
+                payButton.textContent = 'Make Payment & Complete Registration';
             }
         }
 
-        function closeWindow() {
-            if (confirm("Close this window?")) {
-                window.close();
-            }
-            window.location.href = '/';
-        }
-
+        // Get tier from URL if coming from pricing page
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('tier')) currentTier = urlParams.get('tier');
+            if (urlParams.get('tier')) {
+                currentTier = urlParams.get('tier');
+            }
         };
     </script>
 </body>
