@@ -3,182 +3,94 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Job Submitted Successfully - PlumberFlow</title>
+    <title>Job Submitted Successfully - Best Trade</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, rgba(30, 58, 95, 0.95), rgba(44, 82, 130, 0.95));
+            background: linear-gradient(135deg, rgba(30, 58, 95, 0.95), rgba(15, 23, 42, 0.95));
             min-height: 100vh;
             padding: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
         }
-
         .success-container {
-            max-width: 600px;
+            max-width: 620px;
             background: white;
             border-radius: 16px;
             padding: 60px 40px;
             text-align: center;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.25);
         }
-
         .success-icon {
-            width: 80px;
-            height: 80px;
+            width: 90px;
+            height: 90px;
             background: #22c55e;
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             margin: 0 auto 30px;
-            animation: scaleIn 0.5s ease-out;
         }
-
-        @keyframes scaleIn {
-            0% {
-                transform: scale(0);
-            }
-            50% {
-                transform: scale(1.1);
-            }
-            100% {
-                transform: scale(1);
-            }
-        }
-
         .checkmark {
-            width: 40px;
-            height: 40px;
-            border: 4px solid white;
+            width: 45px;
+            height: 45px;
+            border: 5px solid white;
             border-top: none;
             border-left: none;
             transform: rotate(45deg);
-            margin-top: -10px;
         }
-
         h1 {
             color: #1e3a5f;
             font-size: 32px;
             margin-bottom: 15px;
         }
-
         .message {
-            color: #64748b;
-            line-height: 1.8;
-            margin: 30px 0;
-            font-size: 16px;
+            color: #475569;
+            line-height: 1.7;
+            font-size: 17px;
+            margin: 25px 0 35px;
         }
-
         .next-steps {
             background: #f8fafc;
-            border-left: 4px solid #22c55e;
-            padding: 20px;
-            border-radius: 8px;
+            border-left: 5px solid #22c55e;
+            padding: 25px;
+            border-radius: 10px;
             text-align: left;
             margin: 30px 0;
         }
-
         .next-steps h3 {
             color: #1e3a5f;
             margin-bottom: 15px;
-            font-size: 18px;
         }
-
         .next-steps ul {
             list-style: none;
-            padding: 0;
         }
-
         .next-steps li {
             padding: 10px 0;
-            padding-left: 30px;
+            padding-left: 28px;
             position: relative;
-            color: #475569;
-            line-height: 1.6;
         }
-
         .next-steps li:before {
             content: "✓";
             position: absolute;
             left: 0;
             color: #22c55e;
             font-weight: bold;
-            font-size: 18px;
         }
-
-        .estimate-box {
-            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
-            border: 2px solid #0ea5e9;
-            border-radius: 12px;
-            padding: 20px;
-            margin: 25px 0;
-        }
-
-        .estimate-box h3 {
-            color: #0c4a6e;
-            margin-bottom: 10px;
-            font-size: 16px;
-        }
-
-        .estimate-box .price {
-            font-size: 28px;
-            font-weight: bold;
-            color: #0369a1;
-            margin: 10px 0;
-        }
-
-        .estimate-box .disclaimer {
-            font-size: 13px;
-            color: #64748b;
-            margin-top: 10px;
-        }
-
         .btn {
             display: inline-block;
-            padding: 15px 40px;
+            padding: 14px 36px;
             background: #1e3a5f;
             color: white;
             text-decoration: none;
             border-radius: 8px;
             font-weight: 600;
             margin-top: 20px;
-            transition: all 0.3s;
         }
-
         .btn:hover {
-            background: #2c5282;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(30, 58, 95, 0.3);
-        }
-
-        .contact-info {
-            margin-top: 30px;
-            padding-top: 30px;
-            border-top: 2px solid #e2e8f0;
-            color: #64748b;
-            font-size: 14px;
-        }
-
-        .contact-info strong {
-            color: #1e3a5f;
-        }
-
-        @media (max-width: 768px) {
-            .success-container {
-                padding: 40px 25px;
-            }
-
-            h1 {
-                font-size: 24px;
-            }
+            background: #0f172a;
         }
     </style>
 </head>
@@ -188,56 +100,24 @@
             <div class="checkmark"></div>
         </div>
 
-        <h1>Job Received! 🎉</h1>
+        <h1>Job Submitted Successfully!</h1>
 
         <p class="message">
-            We're matching you with qualified local plumbers right now. A plumber will call you shortly to discuss your job.
+            Thank you. Your job has been posted and is now being matched with qualified local tradespeople in your area.<br><br>
+            You should receive calls or messages from interested tradespeople shortly.
         </p>
 
-        <div class="estimate-box">
-            <h3>📊 Estimated Cost Range</h3>
-            <div class="price" id="estimateRange">£-- - £--</div>
-            <div class="disclaimer">
-                ⚠️ This is an estimate. Your plumber will inspect and provide an exact quote before starting work.
-            </div>
-        </div>
-
         <div class="next-steps">
-            <h3>🔔 What Happens Next:</h3>
+            <h3>What happens next:</h3>
             <ul>
-                <li><strong>A local plumber will call you within 1-2 hours</strong></li>
-                <li><strong>They'll discuss the job details with you</strong></li>
-                <li><strong>They'll provide a free quote and availability</strong></li>
-                <li><strong>You decide if you want to hire them</strong></li>
+                <li>Local tradespeople will see your job in their dashboard</li>
+                <li>They will contact you directly with quotes and availability</li>
+                <li>You can compare offers and choose the best tradesperson</li>
+                <li>All communication happens directly between you and the tradesperson</li>
             </ul>
         </div>
 
-        <div class="contact-info">
-            <strong>📱 Keep your phone nearby!</strong><br>
-            The plumber will call: <strong id="customerPhone">Your number</strong>
-        </div>
-
-        <a href="/" class="btn">← Back to Homepage</a>
+        <a href="/" class="btn">← Return to Homepage</a>
     </div>
-
-    <script>
-        // Try to get stored estimate from sessionStorage (if saved during submission)
-        const storedEstimate = sessionStorage.getItem('lastEstimate');
-        if (storedEstimate) {
-            try {
-                const estimate = JSON.parse(storedEstimate);
-                document.getElementById('estimateRange').textContent = 
-                    `£${estimate.low} - £${estimate.high}`;
-            } catch (e) {
-                // If parsing fails, keep the default
-            }
-        }
-
-        // Try to get customer phone from sessionStorage
-        const storedPhone = sessionStorage.getItem('customerPhone');
-        if (storedPhone) {
-            document.getElementById('customerPhone').textContent = storedPhone;
-        }
-    </script>
 </body>
 </html>
