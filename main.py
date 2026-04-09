@@ -105,17 +105,13 @@ async def register_tradesperson(request: Request):
         print(f"Registration error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ====================== SIGN IN - THIS WAS MISSING ======================
+# ====================== SIGN IN ======================
 @app.post("/api/auth/signin")
 async def simple_signin(request: Request):
     try:
         data = await request.json()
         email = data.get('email', '').strip().lower()
-        
         print(f"Signin attempt for email: '{email}'")
-
-        if not email:
-            raise HTTPException(status_code=400, detail="Email is required")
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -135,9 +131,8 @@ async def simple_signin(request: Request):
             raise HTTPException(status_code=404, detail="Email not found. Please register first.")
 
         tradesperson_id = user['id']
-        print(f"User found - ID: {tradesperson_id}, Name: {user.get('trading_name')}")
+        print(f"User found - ID: {tradesperson_id}")
 
-        # Create fresh session
         session_token = secrets.token_urlsafe(32)
         cursor.execute("""
             INSERT INTO tradesperson_sessions (tradesperson_id, session_token, expires_at)
@@ -149,13 +144,7 @@ async def simple_signin(request: Request):
         conn.close()
 
         response = Response(content='{"success": true}', media_type="application/json")
-        response.set_cookie(
-            key="session_token", 
-            value=session_token, 
-            max_age=30*24*60*60, 
-            httponly=True, 
-            samesite="lax"
-        )
+        response.set_cookie(key="session_token", value=session_token, max_age=30*24*60*60, httponly=True, samesite="lax")
         return response
 
     except Exception as e:
@@ -189,9 +178,9 @@ async def get_current_tradesperson(request: Request):
 
         return {
             "success": True,
-            "trading_name": user["trading_name"] or "Trader",
-            "subscription_tier": user["subscription_tier"],
-            "subscription_status": user["subscription_status"]
+            "trading_name": user.get("trading_name") or "Trader",
+            "subscription_tier": user.get("subscription_tier"),
+            "subscription_status": user.get("subscription_status")
         }
 
     except Exception as e:
@@ -259,6 +248,65 @@ async def create_subscription(request: Request):
 
     except Exception as e:
         print(f"Subscription error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ====================== POST JOB - FIXED ======================
+@app.post("/api/customer/post-job")
+async def post_job(request: Request):
+    try:
+        data = await request.json()
+
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        # Insert the job
+        cursor.execute("""
+            INSERT INTO jobs (
+                trade_category, job_type, description, urgency,
+                postcode, address, customer_name, customer_phone, customer_email, status
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'active')
+            RETURNING id
+        """, (
+            data.get('trade_category'),
+            data.get('job_type'),
+            data.get('description'),
+            data.get('urgency'),
+            data.get('postcode'),
+            data.get('address'),
+            data.get('customer_name'),
+            data.get('phone'),
+            data.get('email')
+        ))
+
+        job = cursor.fetchone()
+        job_id = job['id']
+
+        # Match to all active tradespeople for now (we'll add distance later)
+        cursor.execute("""
+            SELECT id FROM tradespeople 
+            WHERE can_receive_jobs = true 
+              AND subscription_status = 'active'
+        """)
+        trades = cursor.fetchall()
+
+        inserted = 0
+        for t in trades:
+            cursor.execute("""
+                INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
+                VALUES (%s, %s, NOW(), 'dashboard')
+            """, (job_id, t['id']))
+            inserted += 1
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        print(f"Job {job_id} posted and matched to {inserted} tradespeople")
+
+        return {"success": True, "job_id": job_id, "matched": inserted}
+
+    except Exception as e:
+        print(f"Post job error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
