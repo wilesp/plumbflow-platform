@@ -59,7 +59,7 @@ async def health():
 # ====================== DISTANCE HELPER ======================
 def calculate_distance_miles(lat1, lon1, lat2, lon2):
     if not all([lat1, lon1, lat2, lon2]):
-        return 9999  # fallback
+        return 9999  # fallback if coordinates missing
     R = 3958.8
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
@@ -106,20 +106,29 @@ async def register_tradesperson(request: Request):
         cursor.close()
         conn.close()
 
-        response = Response(content='{"success": true, "tradesperson_id": ' + str(tradesperson_id) + '}', media_type="application/json")
-        response.set_cookie(key="session_token", value=session_token, max_age=30*24*60*60, httponly=True, samesite="lax")
+        response = Response(
+            content=f'{{"success": true, "tradesperson_id": "{tradesperson_id}"}}', 
+            media_type="application/json"
+        )
+        response.set_cookie(
+            key="session_token", 
+            value=session_token, 
+            max_age=30*24*60*60, 
+            httponly=True, 
+            samesite="lax"
+        )
         return response
 
     except Exception as e:
         print(f"Registration error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ====================== SUBSCRIPTION CREATE (FIXED) ======================
+# ====================== SUBSCRIPTION CREATE (FIXED TYPE CAST) ======================
 @app.post("/api/subscription/create")
 async def create_subscription(request: Request):
     try:
         data = await request.json()
-        tradesperson_id = data.get('tradesperson_id')
+        tradesperson_id = str(data.get('tradesperson_id'))   # Force as string to match varchar column
         tier = data.get('tier')
         payment_method_id = data.get('payment_method_id')
 
@@ -147,7 +156,7 @@ async def create_subscription(request: Request):
             expand=['latest_invoice.payment_intent']
         )
 
-        # Update database
+        # Update database with explicit string cast
         conn = db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
@@ -158,6 +167,7 @@ async def create_subscription(request: Request):
                 subscription_start_date = NOW()
             WHERE id = %s
         """, (customer.id, subscription.id, tradesperson_id))
+
         conn.commit()
         cursor.close()
         conn.close()
@@ -165,6 +175,7 @@ async def create_subscription(request: Request):
         return {"success": True}
 
     except stripe.error.StripeError as e:
+        print(f"Stripe error: {e}")
         raise HTTPException(status_code=400, detail=str(e))
     except Exception as e:
         print(f"Subscription error: {e}")
@@ -200,7 +211,7 @@ async def post_job(request: Request):
 
         job_id = cursor.fetchone()['id']
 
-        # Match to eligible tradespeople (temporary simple logic - will improve with real coords)
+        # Match to eligible tradespeople (temporary simple logic)
         cursor.execute("""
             SELECT id FROM tradespeople 
             WHERE can_receive_jobs = true 
