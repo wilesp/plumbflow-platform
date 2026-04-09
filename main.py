@@ -56,17 +56,6 @@ async def job_submitted():
 async def health():
     return {"status": "healthy"}
 
-# ====================== DISTANCE HELPER ======================
-def calculate_distance_miles(lat1, lon1, lat2, lon2):
-    if not all([lat1, lon1, lat2, lon2]):
-        return 9999  # fallback if coordinates missing
-    R = 3958.8
-    dlat = math.radians(lat2 - lat1)
-    dlon = math.radians(lon2 - lon1)
-    a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon/2)**2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
-    return R * c
-
 # ====================== REGISTRATION ======================
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
@@ -95,7 +84,6 @@ async def register_tradesperson(request: Request):
         
         tradesperson_id = cursor.fetchone()['id']
 
-        # Create session
         session_token = secrets.token_urlsafe(32)
         cursor.execute("""
             INSERT INTO tradesperson_sessions (tradesperson_id, session_token, expires_at)
@@ -110,33 +98,44 @@ async def register_tradesperson(request: Request):
             content=f'{{"success": true, "tradesperson_id": "{tradesperson_id}"}}', 
             media_type="application/json"
         )
-        response.set_cookie(
-            key="session_token", 
-            value=session_token, 
-            max_age=30*24*60*60, 
-            httponly=True, 
-            samesite="lax"
-        )
+        response.set_cookie(key="session_token", value=session_token, max_age=30*24*60*60, httponly=True, samesite="lax")
         return response
 
     except Exception as e:
         print(f"Registration error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ====================== SUBSCRIPTION CREATE (FIXED TYPE CAST) ======================
+# ====================== SUBSCRIPTION CREATE - FIXED (with name & email) ======================
 @app.post("/api/subscription/create")
 async def create_subscription(request: Request):
     try:
         data = await request.json()
-        tradesperson_id = str(data.get('tradesperson_id'))   # Force as string to match varchar column
+        tradesperson_id = str(data.get('tradesperson_id'))
         tier = data.get('tier')
         payment_method_id = data.get('payment_method_id')
 
         if not all([tradesperson_id, tier, payment_method_id]):
             raise HTTPException(status_code=400, detail="Missing required fields")
 
-        # Create Stripe Customer + Subscription
+        # Get tradesperson details for Stripe Customer
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("""
+            SELECT trading_name, email 
+            FROM tradespeople 
+            WHERE id = %s
+        """, (tradesperson_id,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if not user:
+            raise HTTPException(status_code=404, detail="Tradesperson not found")
+
+        # Create Stripe Customer with proper name and email
         customer = stripe.Customer.create(
+            name=user['trading_name'],
+            email=user['email'],
             payment_method=payment_method_id,
             invoice_settings={'default_payment_method': payment_method_id}
         )
@@ -156,7 +155,7 @@ async def create_subscription(request: Request):
             expand=['latest_invoice.payment_intent']
         )
 
-        # Update database with explicit string cast
+        # Update database
         conn = db.get_connection()
         cursor = conn.cursor()
         cursor.execute("""
@@ -181,7 +180,7 @@ async def create_subscription(request: Request):
         print(f"Subscription error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ====================== POST JOB WITH LEAD MATCHING ======================
+# ====================== POST JOB ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -190,7 +189,6 @@ async def post_job(request: Request):
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-        # Insert job
         cursor.execute("""
             INSERT INTO jobs (
                 trade_category, job_type, description, urgency,
@@ -211,7 +209,7 @@ async def post_job(request: Request):
 
         job_id = cursor.fetchone()['id']
 
-        # Match to eligible tradespeople (temporary simple logic)
+        # Simple matching for now
         cursor.execute("""
             SELECT id FROM tradespeople 
             WHERE can_receive_jobs = true 
