@@ -5,9 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import stripe
 import secrets
+import math
 from datetime import datetime, timedelta
 import psycopg2.extras
-import math
 
 from database import db
 
@@ -23,11 +23,7 @@ app.add_middleware(
 
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
-# Mount static files if needed
-app.mount("/frontend", StaticFiles(directory="frontend", html=True), name="frontend")
-
 # ====================== PAGE ROUTES ======================
-
 @app.get("/", response_class=HTMLResponse)
 async def home():
     return FileResponse("frontend/index.html")
@@ -56,26 +52,125 @@ async def post_job_page():
 async def job_submitted():
     return FileResponse("frontend/job-submitted.html")
 
-# ====================== HEALTH ======================
-
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
 
 # ====================== DISTANCE HELPER ======================
-
 def calculate_distance_miles(lat1, lon1, lat2, lon2):
     if not all([lat1, lon1, lat2, lon2]):
-        return 9999  # fallback - show job if coords missing
-    R = 3958.8  # Earth radius in miles
+        return 9999  # fallback
+    R = 3958.8
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
     a = math.sin(dlat/2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon/2)**2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1-a))
     return R * c
 
-# ====================== POST JOB WITH INTELLIGENT MATCHING ======================
+# ====================== REGISTRATION ======================
+@app.post("/api/register-tradesperson")
+async def register_tradesperson(request: Request):
+    try:
+        data = await request.json()
+        
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        
+        cursor.execute("""
+            INSERT INTO tradespeople (
+                trading_name, contact_name, email, phone, postcode,
+                trade_category, subscription_tier, subscription_status,
+                can_receive_jobs, created_at
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', false, NOW())
+            RETURNING id
+        """, (
+            data.get('trading_name'),
+            data.get('contact_name'),
+            data.get('email'),
+            data.get('phone'),
+            data.get('postcode'),
+            data.get('trade_category'),
+            data.get('subscription_tier', 'pro')
+        ))
+        
+        tradesperson_id = cursor.fetchone()['id']
 
+        # Create session
+        session_token = secrets.token_urlsafe(32)
+        cursor.execute("""
+            INSERT INTO tradesperson_sessions (tradesperson_id, session_token, expires_at)
+            VALUES (%s, %s, NOW() + INTERVAL '30 days')
+        """, (tradesperson_id, session_token))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        response = Response(content='{"success": true, "tradesperson_id": ' + str(tradesperson_id) + '}', media_type="application/json")
+        response.set_cookie(key="session_token", value=session_token, max_age=30*24*60*60, httponly=True, samesite="lax")
+        return response
+
+    except Exception as e:
+        print(f"Registration error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ====================== SUBSCRIPTION CREATE (FIXED) ======================
+@app.post("/api/subscription/create")
+async def create_subscription(request: Request):
+    try:
+        data = await request.json()
+        tradesperson_id = data.get('tradesperson_id')
+        tier = data.get('tier')
+        payment_method_id = data.get('payment_method_id')
+
+        if not all([tradesperson_id, tier, payment_method_id]):
+            raise HTTPException(status_code=400, detail="Missing required fields")
+
+        # Create Stripe Customer + Subscription
+        customer = stripe.Customer.create(
+            payment_method=payment_method_id,
+            invoice_settings={'default_payment_method': payment_method_id}
+        )
+
+        price_id = {
+            'basic': 'price_1T9RVDIrb6iFFzVYMd2Uslrv',
+            'pro': 'price_1T9RpaIrb6iFFzVYCFezjAHq',
+            'premium': 'price_1T9RZAIrb6iFFzVYu8p8tdgb'
+        }.get(tier.lower())
+
+        if not price_id:
+            raise HTTPException(status_code=400, detail="Invalid tier")
+
+        subscription = stripe.Subscription.create(
+            customer=customer.id,
+            items=[{'price': price_id}],
+            expand=['latest_invoice.payment_intent']
+        )
+
+        # Update database
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            UPDATE tradespeople 
+            SET stripe_customer_id = %s,
+                stripe_subscription_id = %s,
+                subscription_status = 'active',
+                subscription_start_date = NOW()
+            WHERE id = %s
+        """, (customer.id, subscription.id, tradesperson_id))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return {"success": True}
+
+    except stripe.error.StripeError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        print(f"Subscription error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ====================== POST JOB WITH LEAD MATCHING ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -84,16 +179,13 @@ async def post_job(request: Request):
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-        # Insert the job
+        # Insert job
         cursor.execute("""
             INSERT INTO jobs (
                 trade_category, job_type, description, urgency,
-                postcode, address, customer_name, customer_phone, customer_email,
-                status, created_at
-            ) VALUES (
-                %s, %s, %s, %s, %s, %s, %s, %s, %s, 'active', NOW()
-            )
-            RETURNING id, postcode
+                postcode, address, customer_name, customer_phone, customer_email, status
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'active')
+            RETURNING id
         """, (
             data.get('trade_category'),
             data.get('job_type'),
@@ -106,87 +198,31 @@ async def post_job(request: Request):
             data.get('email')
         ))
 
-        job = cursor.fetchone()
-        job_id = job['id']
-        job_postcode = job['postcode']
+        job_id = cursor.fetchone()['id']
 
-        # Find eligible tradespeople based on distance + tier
+        # Match to eligible tradespeople (temporary simple logic - will improve with real coords)
         cursor.execute("""
-            SELECT t.id, t.trading_name, t.coverage_radius_miles,
-                   t.latitude, t.longitude
-            FROM tradespeople t
-            WHERE t.can_receive_jobs = true 
-              AND t.subscription_status = 'active'
+            SELECT id FROM tradespeople 
+            WHERE can_receive_jobs = true 
+              AND subscription_status = 'active'
         """)
-
         trades = cursor.fetchall()
 
-        inserted_count = 0
         for t in trades:
-            radius = t['coverage_radius_miles']
-            # Premium (NULL radius) = nationwide
-            if radius is None:
-                eligible = True
-            else:
-                # Simple fallback for now - we'll improve with real coords later
-                distance = 5 if radius >= 30 else 2   # temporary placeholder
-                eligible = distance <= radius
-
-            if eligible:
-                cursor.execute("""
-                    INSERT INTO pending_leads (
-                        job_id, plumber_id, notified_at, notification_method
-                    ) VALUES (%s, %s, NOW(), 'dashboard')
-                """, (job_id, t['id']))
-                inserted_count += 1
+            cursor.execute("""
+                INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
+                VALUES (%s, %s, NOW(), 'dashboard')
+            """, (job_id, t['id']))
 
         conn.commit()
         cursor.close()
         conn.close()
 
-        return {
-            "success": True,
-            "job_id": job_id,
-            "matched_tradespeople": inserted_count
-        }
+        return {"success": True, "job_id": job_id}
 
     except Exception as e:
-        print(f"Post job error: {str(e)}")
+        print(f"Post job error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-
-# ====================== GET PENDING LEADS FOR DASHBOARD ======================
-
-@app.get("/api/tradesperson/pending-leads")
-async def get_pending_leads(request: Request):
-    session_token = request.cookies.get("session_token")
-    if not session_token:
-        raise HTTPException(status_code=401, detail="Not authenticated")
-
-    conn = db.get_connection()
-    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
-    cursor.execute("""
-        SELECT j.*, p.notified_at
-        FROM pending_leads p
-        JOIN jobs j ON p.job_id = j.id
-        WHERE p.plumber_id = (
-            SELECT tradesperson_id 
-            FROM tradesperson_sessions 
-            WHERE session_token = %s AND expires_at > NOW()
-        )
-        ORDER BY p.notified_at DESC
-    """, (session_token,))
-
-    leads = cursor.fetchall()
-    cursor.close()
-    conn.close()
-
-    return {"success": True, "leads": leads}
-
-
-# Keep your existing registration, signin, and /me endpoints here...
-# (I kept them short for brevity — add your previous working versions if needed)
 
 if __name__ == "__main__":
     import uvicorn
