@@ -1,5 +1,6 @@
 from fastapi import FastAPI, HTTPException, Request, Response
 from fastapi.responses import HTMLResponse, FileResponse
+from fastapi.middleware.cors import CORSMiddleware
 import os
 import stripe
 import secrets
@@ -9,7 +10,6 @@ from database import db
 
 app = FastAPI(title="Best Trade")
 
-# Basic CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -25,6 +25,22 @@ stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 async def home():
     return FileResponse("frontend/index.html")
 
+@app.get("/tradesperson-register.html", response_class=HTMLResponse)
+async def register_page():
+    return FileResponse("frontend/tradesperson-register.html")
+
+@app.get("/tradesperson-dashboard.html", response_class=HTMLResponse)
+async def dashboard_page():
+    return FileResponse("frontend/tradesperson-dashboard.html")
+
+@app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)
+async def signin_page():
+    return FileResponse("frontend/tradesperson-sign-in.html")
+
+@app.get("/pricing.html", response_class=HTMLResponse)
+async def pricing_page():
+    return FileResponse("frontend/pricing.html")
+
 @app.get("/customer-post-job.html", response_class=HTMLResponse)
 async def post_job_page():
     return FileResponse("frontend/customer-post-job.html")
@@ -33,87 +49,73 @@ async def post_job_page():
 async def job_submitted():
     return FileResponse("frontend/job-submitted.html")
 
-@app.get("/tradesperson-sign-in.html", response_class=HTMLResponse)
-async def signin_page():
-    return FileResponse("frontend/tradesperson-sign-in.html")
-
-@app.get("/tradesperson-dashboard.html", response_class=HTMLResponse)
-async def dashboard_page():
-    return FileResponse("frontend/tradesperson-dashboard.html")
-
-@app.get("/tradesperson-register.html", response_class=HTMLResponse)
-async def register_page():
-    return FileResponse("frontend/tradesperson-register.html")
-
-@app.get("/pricing.html", response_class=HTMLResponse)
-async def pricing_page():
-    return FileResponse("frontend/pricing.html")
-
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
 
-# ====================== POST JOB - SUPER SIMPLE ======================
-@app.post("/api/customer/post-job")
-async def post_job(request: Request):
+# ====================== REGISTRATION ======================
+@app.post("/api/register-tradesperson")
+async def register_tradesperson(request: Request):
     try:
         data = await request.json()
-
+        
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
-        # Insert the job
+        
         cursor.execute("""
-            INSERT INTO jobs (
-                trade_category, job_type, description, urgency,
-                postcode, address, customer_name, customer_phone, customer_email, status
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'active')
+            INSERT INTO tradespeople (
+                trading_name, contact_name, email, phone, postcode,
+                trade_category, subscription_tier, subscription_status,
+                can_receive_jobs, created_at
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', true, NOW())
             RETURNING id
         """, (
-            data.get('trade_category'),
-            data.get('job_type'),
-            data.get('description'),
-            data.get('urgency'),
-            data.get('postcode'),
-            data.get('address'),
-            data.get('customer_name'),
+            data.get('trading_name'),
+            data.get('contact_name'),
+            data.get('email'),
             data.get('phone'),
-            data.get('email')
+            data.get('postcode'),
+            data.get('trade_category'),
+            data.get('subscription_tier', 'pro')
         ))
+        
+        tradesperson_id = cursor.fetchone()['id']
 
-        job_id = cursor.fetchone()['id']
-
-        # Hard-coded pending lead for your tiler account (ID 76)
+        session_token = secrets.token_urlsafe(32)
         cursor.execute("""
-            INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
-            VALUES (%s, '76', NOW(), 'dashboard')
-            ON CONFLICT DO NOTHING
-        """, (job_id,))
+            INSERT INTO tradesperson_sessions (tradesperson_id, session_token, expires_at)
+            VALUES (%s, %s, NOW() + INTERVAL '30 days')
+        """, (tradesperson_id, session_token))
 
         conn.commit()
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted successfully. Pending lead created for tiler ID 76.")
-
-        return {"success": True, "job_id": job_id}
+        response = Response(
+            content=f'{{"success": true, "tradesperson_id": "{tradesperson_id}"}}', 
+            media_type="application/json"
+        )
+        response.set_cookie(key="session_token", value=session_token, max_age=30*24*60*60, httponly=True, samesite="lax")
+        return response
 
     except Exception as e:
-        print(f"Post job error: {e}")
-        raise HTTPException(status_code=500, detail="Failed to submit job. Please try again.")
+        print(f"Registration error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
 
-# Keep basic sign in and me for dashboard access
+# ====================== SIGN IN ======================
 @app.post("/api/auth/signin")
 async def simple_signin(request: Request):
     try:
         data = await request.json()
         email = data.get('email', '').strip().lower()
+        print(f"Signin attempt for email: '{email}'")
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
         cursor.execute("""
-            SELECT id FROM tradespeople 
+            SELECT id, trading_name 
+            FROM tradespeople 
             WHERE LOWER(email) = %s
         """, (email,))
 
@@ -122,11 +124,13 @@ async def simple_signin(request: Request):
         if not user:
             cursor.close()
             conn.close()
-            raise HTTPException(status_code=404, detail="Email not found")
+            print(f"User not found for email: {email}")
+            raise HTTPException(status_code=404, detail="Email not found. Please register first.")
 
         tradesperson_id = user['id']
-        session_token = secrets.token_urlsafe(32)
+        print(f"User found - ID: {tradesperson_id}")
 
+        session_token = secrets.token_urlsafe(32)
         cursor.execute("""
             INSERT INTO tradesperson_sessions (tradesperson_id, session_token, expires_at)
             VALUES (%s, %s, NOW() + INTERVAL '30 days')
@@ -144,6 +148,7 @@ async def simple_signin(request: Request):
         print(f"Signin error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# ====================== DASHBOARD ME ======================
 @app.get("/api/tradesperson/me")
 async def get_current_tradesperson(request: Request):
     try:
@@ -178,6 +183,55 @@ async def get_current_tradesperson(request: Request):
     except Exception as e:
         print(f"Dashboard me error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
+
+# ====================== POST JOB - MINIMAL ======================
+@app.post("/api/customer/post-job")
+async def post_job(request: Request):
+    try:
+        data = await request.json()
+
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        # Insert the job
+        cursor.execute("""
+            INSERT INTO jobs (
+                trade_category, job_type, description, urgency,
+                postcode, address, customer_name, customer_phone, customer_email, status
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'active')
+            RETURNING id
+        """, (
+            data.get('trade_category'),
+            data.get('job_type'),
+            data.get('description'),
+            data.get('urgency'),
+            data.get('postcode'),
+            data.get('address'),
+            data.get('customer_name'),
+            data.get('phone'),
+            data.get('email')
+        ))
+
+        job_id = cursor.fetchone()['id']
+
+        # Hard-coded pending lead for tiler ID 76
+        cursor.execute("""
+            INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
+            VALUES (%s, '76', NOW(), 'dashboard')
+            ON CONFLICT (job_id, plumber_id) DO NOTHING
+        """, (job_id,))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        print(f"Job {job_id} posted successfully. Pending lead created for tiler ID 76.")
+
+        return {"success": True, "job_id": job_id}
+
+    except Exception as e:
+        print(f"Post job error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to submit job. Please try again.")
 
 if __name__ == "__main__":
     import uvicorn
