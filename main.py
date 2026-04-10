@@ -250,7 +250,7 @@ async def create_subscription(request: Request):
         print(f"Subscription error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ====================== POST JOB - FIXED FOR PENDING STATUS ======================
+# ====================== POST JOB - IMPROVED ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -280,7 +280,7 @@ async def post_job(request: Request):
 
         job_id = cursor.fetchone()['id']
 
-        # Match to tradespeople with 'pending' OR 'active' status (for testing)
+        # Insert pending leads - now properly matching active + pending with can_receive_jobs = true
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             SELECT %s, t.id, NOW(), 'dashboard'
