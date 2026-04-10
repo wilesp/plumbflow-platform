@@ -248,7 +248,7 @@ async def create_subscription(request: Request):
         print(f"Subscription error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ====================== POST JOB - SIMPLE & RELIABLE ======================
+# ====================== POST JOB - MINIMAL DEBUG VERSION ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -276,33 +276,26 @@ async def post_job(request: Request):
             data.get('email')
         ))
 
-        job_id = cursor.fetchone()['id']
+        job = cursor.fetchone()
+        job_id = job['id']
 
-        # Insert pending leads for all tradespeople with can_receive_jobs = true
+        # Very simple insert - insert for the specific tiler account (ID 76)
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
-            SELECT %s, t.id, NOW(), 'dashboard'
-            FROM tradespeople t
-            WHERE t.can_receive_jobs = true
+            VALUES (%s, '76', NOW(), 'dashboard')
             ON CONFLICT (job_id, plumber_id) DO NOTHING
         """, (job_id,))
-
-        inserted_count = cursor.rowcount
 
         conn.commit()
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted successfully. Inserted {inserted_count} pending leads.")
+        print(f"Job {job_id} posted. Hard-coded pending lead for tiler (ID 76).")
 
-        return {
-            "success": True, 
-            "job_id": job_id, 
-            "matched_tradespeople": inserted_count
-        }
+        return {"success": True, "job_id": job_id}
 
     except Exception as e:
-        print(f"Post job error: {e}")
+        print(f"Post job error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to submit job. Please try again.")
 
 if __name__ == "__main__":
