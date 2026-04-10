@@ -21,7 +21,7 @@ app.add_middleware(
 
 stripe.api_key = os.getenv('STRIPE_SECRET_KEY')
 
-# Page Routes
+# ====================== PAGE ROUTES ======================
 @app.get("/", response_class=HTMLResponse)
 async def home():
     return FileResponse("frontend/index.html")
@@ -184,7 +184,48 @@ async def get_current_tradesperson(request: Request):
         print(f"Dashboard me error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-# SUBSCRIPTION CREATE
+# ====================== PENDING LEADS ENDPOINT ======================
+@app.get("/api/tradesperson/pending-leads")
+async def get_pending_leads(request: Request):
+    try:
+        session_token = request.cookies.get("session_token")
+        if not session_token:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        cursor.execute("""
+            SELECT 
+                j.id,
+                j.trade_category,
+                j.job_type,
+                j.description,
+                j.postcode,
+                j.urgency,
+                j.created_at,
+                p.notified_at
+            FROM pending_leads p
+            JOIN jobs j ON p.job_id = j.id
+            WHERE p.plumber_id = (
+                SELECT tradesperson_id 
+                FROM tradesperson_sessions 
+                WHERE session_token = %s AND expires_at > NOW()
+            )
+            ORDER BY p.notified_at DESC
+        """, (session_token,))
+
+        leads = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        return {"success": True, "leads": leads}
+
+    except Exception as e:
+        print(f"Pending leads error: {e}")
+        return {"success": True, "leads": []}   # Return empty list instead of error
+
+# Subscription Create
 @app.post("/api/subscription/create")
 async def create_subscription(request: Request):
     try:
@@ -246,55 +287,6 @@ async def create_subscription(request: Request):
     except Exception as e:
         print(f"Subscription error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-# ====================== POST JOB - MINIMAL WORKING VERSION ======================
-@app.post("/api/customer/post-job")
-async def post_job(request: Request):
-    try:
-        data = await request.json()
-
-        conn = db.get_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-
-        # Insert the job
-        cursor.execute("""
-            INSERT INTO jobs (
-                trade_category, job_type, description, urgency,
-                postcode, address, customer_name, customer_phone, customer_email, status
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, 'active')
-            RETURNING id
-        """, (
-            data.get('trade_category'),
-            data.get('job_type'),
-            data.get('description'),
-            data.get('urgency'),
-            data.get('postcode'),
-            data.get('address'),
-            data.get('customer_name'),
-            data.get('phone'),
-            data.get('email')
-        ))
-
-        job_id = cursor.fetchone()['id']
-
-        # Hard-coded insert for your tiler account (ID 76)
-        cursor.execute("""
-            INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
-            VALUES (%s, '76', NOW(), 'dashboard')
-            ON CONFLICT (job_id, plumber_id) DO NOTHING
-        """, (job_id,))
-
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-        print(f"Job {job_id} posted successfully. Pending lead created for tiler ID 76.")
-
-        return {"success": True, "job_id": job_id}
-
-    except Exception as e:
-        print(f"Post job error: {e}")
-        raise HTTPException(status_code=500, detail="Failed to submit job. Please try again.")
 
 if __name__ == "__main__":
     import uvicorn
