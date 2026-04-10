@@ -5,8 +5,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import stripe
 import secrets
-import math
-from datetime import datetime, timedelta
 import psycopg2.extras
 
 from database import db
@@ -70,7 +68,7 @@ async def register_tradesperson(request: Request):
                 trading_name, contact_name, email, phone, postcode,
                 trade_category, subscription_tier, subscription_status,
                 can_receive_jobs, created_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', false, NOW())
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', true, NOW())
             RETURNING id
         """, (
             data.get('trading_name'),
@@ -250,7 +248,7 @@ async def create_subscription(request: Request):
         print(f"Subscription error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ====================== POST JOB - IMPROVED ======================
+# ====================== POST JOB - SIMPLE & RELIABLE ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -280,13 +278,12 @@ async def post_job(request: Request):
 
         job_id = cursor.fetchone()['id']
 
-        # Insert pending leads - now properly matching active + pending with can_receive_jobs = true
+        # Insert pending leads for all tradespeople with can_receive_jobs = true
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             SELECT %s, t.id, NOW(), 'dashboard'
             FROM tradespeople t
-            WHERE t.can_receive_jobs = true 
-              AND t.subscription_status IN ('pending', 'active')
+            WHERE t.can_receive_jobs = true
             ON CONFLICT (job_id, plumber_id) DO NOTHING
         """, (job_id,))
 
@@ -306,7 +303,7 @@ async def post_job(request: Request):
 
     except Exception as e:
         print(f"Post job error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail="Failed to submit job. Please try again.")
 
 if __name__ == "__main__":
     import uvicorn
