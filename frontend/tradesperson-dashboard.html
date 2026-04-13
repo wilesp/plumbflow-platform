@@ -10,7 +10,6 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             background: #f8fafc;
             color: #1e293b;
-            line-height: 1.6;
         }
         .navbar {
             background: white;
@@ -27,12 +26,7 @@
             justify-content: space-between;
             align-items: center;
         }
-        .logo {
-            font-size: 22px;
-            font-weight: 700;
-            color: #1e293b;
-            text-decoration: none;
-        }
+        .logo { font-size: 22px; font-weight: 700; color: #1e293b; text-decoration: none; }
         .main-container {
             max-width: 1200px;
             margin: 40px auto;
@@ -58,21 +52,26 @@
             margin-bottom: 16px;
             font-weight: 600;
         }
+        .lead-card {
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: #f8fafc;
+        }
         .empty-state {
             text-align: center;
             padding: 40px 20px;
             color: #64748b;
             font-style: italic;
         }
-        .btn {
-            background: #1e3a5f;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            text-decoration: none;
-            display: inline-block;
+        .debug {
+            background: #fee2e2;
+            padding: 10px;
+            font-family: monospace;
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
         }
     </style>
 </head>
@@ -82,7 +81,7 @@
             <a href="/" class="logo">BestTrade</a>
             <div>
                 <span id="userName" style="margin-right: 20px; font-weight: 500;">Loading...</span>
-                <button onclick="logout()" class="btn" style="background:#ef4444;">Sign Out</button>
+                <button onclick="logout()" style="background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Sign Out</button>
             </div>
         </div>
     </nav>
@@ -90,7 +89,7 @@
     <div class="main-container">
         <div class="welcome">
             <h1>Welcome back, <span id="welcomeName">Trader</span>!</h1>
-            <p>Your personal dashboard • Let's find you more work today</p>
+            <p>Your personal dashboard</p>
         </div>
 
         <div class="card">
@@ -101,15 +100,15 @@
 
         <div class="card">
             <h2 class="section-title">Pending Leads</h2>
-            <div class="empty-state">
-                No pending leads yet.<br>New customer jobs will appear here.
+            <div id="pendingLeads">
+                <div class="empty-state">Loading leads...</div>
             </div>
         </div>
 
         <div class="card">
             <h2 class="section-title">Jobs You're Managing</h2>
             <div class="empty-state">
-                No active jobs yet.<br>Accepted leads will appear here.
+                No active jobs yet.
             </div>
         </div>
     </div>
@@ -117,13 +116,8 @@
     <script>
         async function loadDashboard() {
             try {
-                const response = await fetch('/api/tradesperson/me', {
-                    credentials: 'include'
-                });
-
-                if (!response.ok) {
-                    throw new Error('Session invalid');
-                }
+                const response = await fetch('/api/tradesperson/me', { credentials: 'include' });
+                if (!response.ok) throw new Error('Not authenticated');
 
                 const user = await response.json();
 
@@ -133,19 +127,66 @@
 
                 document.getElementById('planName').textContent = 
                     (user.subscription_tier || 'Basic').toUpperCase() + " Plan";
-                
                 document.getElementById('planStatus').textContent = 
-                    user.subscription_status === 'active' ? 'Active' : 'Pending';
+                    (user.subscription_status || 'pending').toUpperCase();
+
+                // Load Pending Leads
+                await loadPendingLeads();
 
             } catch (err) {
-                console.error("Dashboard load error:", err);
+                console.error(err);
                 document.getElementById('welcomeName').textContent = "Trader";
-                document.getElementById('userName').textContent = "Trader";
             }
         }
 
+        async function loadPendingLeads() {
+            try {
+                const res = await fetch('/api/tradesperson/pending-leads', { 
+                    credentials: 'include',
+                    cache: 'no-store'
+                });
+
+                const data = await res.json();
+                const container = document.getElementById('pendingLeads');
+
+                if (!data.leads || data.leads.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            No pending leads yet.<br>
+                            New customer jobs will appear here.
+                        </div>`;
+                    return;
+                }
+
+                let html = '';
+                data.leads.forEach(lead => {
+                    html += `
+                        <div class="lead-card">
+                            <strong>${lead.trade_category || ''} — ${lead.job_type || ''}</strong><br>
+                            <small>Postcode: ${lead.postcode} • ${lead.urgency || ''}</small><br>
+                            <p>${lead.description ? lead.description.substring(0, 100) + '...' : 'No description'}</p>
+                            <button onclick="acceptLead('${lead.job_id}')" style="background:#10b981; color:white; border:none; padding:8px 16px; border-radius:6px; margin-top:8px; cursor:pointer;">
+                                Accept Lead
+                            </button>
+                        </div>`;
+                });
+                container.innerHTML = html;
+
+            } catch (e) {
+                console.error("Failed to load leads", e);
+                document.getElementById('pendingLeads').innerHTML = `
+                    <div class="empty-state">
+                        Error loading leads. Please refresh the page.
+                    </div>`;
+            }
+        }
+
+        function acceptLead(jobId) {
+            alert(`Lead ${jobId} accepted! (Feature coming soon)`);
+        }
+
         function logout() {
-            if (confirm("Sign out of your account?")) {
+            if (confirm("Sign out?")) {
                 document.cookie = "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
                 window.location.href = '/tradesperson-sign-in.html';
             }
