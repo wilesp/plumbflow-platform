@@ -17,13 +17,58 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ====================== HEALTH CHECK (required by Railway) ======================
+# ====================== HEALTH CHECK (Railway) ======================
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
 
-# ====================== API ENDPOINTS ======================
+# ====================== SIGN IN ======================
+@app.post("/api/auth/signin")
+async def simple_signin(request: Request):
+    try:
+        data = await request.json()
+        email = data.get('email', '').strip().lower()
+        print(f"Signin attempt for email: '{email}'")
 
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        
+        cursor.execute("""
+            SELECT id, trading_name 
+            FROM tradespeople 
+            WHERE LOWER(email) = %s
+        """, (email,))
+        user = cursor.fetchone()
+        
+        if not user:
+            cursor.close()
+            conn.close()
+            print(f"User not found for email: {email}")
+            raise HTTPException(status_code=404, detail="User not found")
+
+        tradesperson_id = user['id']
+        trading_name = user['trading_name']
+        print(f"User found - ID: {tradesperson_id}, Name: {trading_name}")
+
+        session_token = secrets.token_urlsafe(32)
+        cursor.execute("""
+            INSERT INTO tradesperson_sessions (tradesperson_id, session_token, expires_at)
+            VALUES (%s, %s, NOW() + INTERVAL '30 days')
+        """, (tradesperson_id, session_token))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        response = Response(content='{"success": true}', media_type="application/json")
+        response.set_cookie(key="session_token", value=session_token, max_age=30*24*60*60, httponly=True, samesite="lax")
+        return response
+
+    except Exception as e:
+        print(f"Signin error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ====================== API ENDPOINTS ======================
 @app.get("/api/tradesperson/me")
 async def get_current_tradesperson(request: Request):
     session_token = request.cookies.get("session_token")
