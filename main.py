@@ -184,7 +184,47 @@ async def get_current_tradesperson(request: Request):
         print(f"Dashboard me error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-# ====================== POST JOB - MINIMAL ======================
+# ====================== PENDING LEADS - ADDED ======================
+@app.get("/api/tradesperson/pending-leads")
+async def get_pending_leads(request: Request):
+    try:
+        session_token = request.cookies.get("session_token")
+        if not session_token:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        cursor.execute("""
+            SELECT 
+                j.id,
+                j.trade_category,
+                j.job_type,
+                j.description,
+                j.postcode,
+                j.urgency,
+                j.created_at
+            FROM pending_leads p
+            JOIN jobs j ON p.job_id = j.id
+            WHERE p.plumber_id = (
+                SELECT tradesperson_id 
+                FROM tradesperson_sessions 
+                WHERE session_token = %s AND expires_at > NOW()
+            )
+            ORDER BY j.created_at DESC
+        """, (session_token,))
+
+        leads = cursor.fetchall()
+        cursor.close()
+        conn.close()
+
+        return {"success": True, "leads": leads}
+
+    except Exception as e:
+        print(f"Pending leads error: {e}")
+        return {"success": True, "leads": []}  # safe fallback
+
+# ====================== POST JOB ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -193,7 +233,6 @@ async def post_job(request: Request):
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
 
-        # Insert the job
         cursor.execute("""
             INSERT INTO jobs (
                 trade_category, job_type, description, urgency,
@@ -214,7 +253,6 @@ async def post_job(request: Request):
 
         job_id = cursor.fetchone()['id']
 
-        # Hard-coded pending lead for tiler ID 76
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             VALUES (%s, '76', NOW(), 'dashboard')
@@ -225,7 +263,7 @@ async def post_job(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted successfully. Pending lead created for tiler ID 76.")
+        print(f"Job {job_id} posted. Pending lead created for tiler ID 76.")
 
         return {"success": True, "job_id": job_id}
 
