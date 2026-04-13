@@ -58,7 +58,6 @@ async def health():
 async def register_tradesperson(request: Request):
     try:
         data = await request.json()
-        
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
@@ -66,8 +65,8 @@ async def register_tradesperson(request: Request):
             INSERT INTO tradespeople (
                 trading_name, contact_name, email, phone, postcode,
                 trade_category, subscription_tier, subscription_status,
-                can_receive_jobs, created_at
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', true, NOW())
+                can_receive_jobs, created_at, postcode_area
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', true, NOW(), UPPER(SPLIT_PART(%s, ' ', 1)))
             RETURNING id
         """, (
             data.get('trading_name'),
@@ -76,7 +75,8 @@ async def register_tradesperson(request: Request):
             data.get('phone'),
             data.get('postcode'),
             data.get('trade_category'),
-            data.get('subscription_tier', 'pro')
+            data.get('subscription_tier', 'pro'),
+            data.get('postcode')
         ))
         
         tradesperson_id = cursor.fetchone()['id']
@@ -184,7 +184,7 @@ async def get_current_tradesperson(request: Request):
         print(f"Dashboard me error: {e}")
         raise HTTPException(status_code=500, detail="Internal server error")
 
-# ====================== PENDING LEADS - ADDED ======================
+# ====================== PENDING LEADS ======================
 @app.get("/api/tradesperson/pending-leads")
 async def get_pending_leads(request: Request):
     try:
@@ -222,13 +222,52 @@ async def get_pending_leads(request: Request):
 
     except Exception as e:
         print(f"Pending leads error: {e}")
-        return {"success": True, "leads": []}  # safe fallback
+        return {"success": True, "leads": []}
 
-# ====================== POST JOB ======================
+# ====================== ACCEPT LEAD ======================
+@app.post("/api/tradesperson/accept-lead")
+async def accept_lead(request: Request):
+    try:
+        data = await request.json()
+        job_id = data.get('job_id')
+
+        session_token = request.cookies.get("session_token")
+        if not session_token:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        # Get tradesperson ID from session
+        cursor.execute("""
+            SELECT tradesperson_id 
+            FROM tradesperson_sessions 
+            WHERE session_token = %s AND expires_at > NOW()
+        """, (session_token,))
+        session = cursor.fetchone()
+        if not session:
+            raise HTTPException(status_code=401, detail="Session expired")
+
+        tradesperson_id = session['tradesperson_id']
+
+        # Move to accepted (for now we just log it - we can create accepted_leads table later)
+        print(f"Lead {job_id} accepted by tradesperson {tradesperson_id}")
+
+        cursor.close()
+        conn.close()
+
+        return {"success": True, "message": "Lead accepted successfully"}
+
+    except Exception as e:
+        print(f"Accept lead error: {e}")
+        raise HTTPException(status_code=500, detail="Failed to accept lead")
+
+# ====================== POST JOB WITH SIMPLE POSTCODE MATCHING ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
         data = await request.json()
+        job_postcode_area = data.get('postcode', '').strip().upper().split()[0] if data.get('postcode') else ''
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -253,19 +292,30 @@ async def post_job(request: Request):
 
         job_id = cursor.fetchone()['id']
 
+        # Simple postcode area matching
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
-            VALUES (%s, '76', NOW(), 'dashboard')
+            SELECT %s, t.id, NOW(), 'dashboard'
+            FROM tradespeople t
+            WHERE t.can_receive_jobs = true 
+              AND t.subscription_status IN ('pending', 'active')
+              AND (
+                  t.subscription_tier = 'premium' 
+                  OR t.postcode_area = %s
+                  OR (t.subscription_tier = 'pro' AND t.postcode_area LIKE %s)
+              )
             ON CONFLICT (job_id, plumber_id) DO NOTHING
-        """, (job_id,))
+        """, (job_id, job_postcode_area, job_postcode_area + '%'))
+
+        inserted_count = cursor.rowcount
 
         conn.commit()
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted. Pending lead created for tiler ID 76.")
+        print(f"Job {job_id} posted. Inserted {inserted_count} pending leads.")
 
-        return {"success": True, "job_id": job_id}
+        return {"success": True, "job_id": job_id, "matched": inserted_count}
 
     except Exception as e:
         print(f"Post job error: {e}")
