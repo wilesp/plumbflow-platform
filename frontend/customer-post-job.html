@@ -8,7 +8,7 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Helvetica', Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
             color: #1e293b;
             background: linear-gradient(135deg, #f8fafc 0%, #e0e7ff 100%);
             min-height: 100vh;
@@ -40,24 +40,6 @@
             display: flex;
             align-items: center;
             gap: 12px;
-        }
-        
-        .logo:hover { opacity: 0.8; }
-        
-        .logo-tick {
-            width: 32px;
-            height: 32px;
-            background: #ef4444;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .logo-tick svg {
-            width: 18px;
-            height: 18px;
-            fill: white;
         }
         
         .nav-links {
@@ -144,7 +126,6 @@
             border: 2px solid #e2e8f0;
             border-radius: 8px;
             font-size: 1rem;
-            font-family: inherit;
         }
         
         .form-group input:focus,
@@ -166,28 +147,43 @@
             color: #64748b;
             font-size: 0.875rem;
         }
-        
+
+        /* Urgency Buttons - Single Line */
         .urgency-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            display: flex;
             gap: 12px;
+            flex-wrap: nowrap;
+        }
+        
+        .urgency-option {
+            flex: 1;
         }
         
         .urgency-option label {
             display: block;
-            padding: 16px;
+            padding: 20px 12px;
             border: 2px solid #e2e8f0;
-            border-radius: 8px;
+            border-radius: 10px;
             text-align: center;
             cursor: pointer;
-            font-weight: 500;
+            font-weight: 600;
+            transition: all 0.2s;
+            height: 100%;
+            min-height: 90px;
+            font-size: 1.05rem;
         }
         
         .urgency-option input[type="radio"]:checked + label {
             border-color: #1e3a5f;
-            background: #f0f4f8;
-            color: #1e3a5f;
+            box-shadow: 0 0 0 4px rgba(30, 58, 95, 0.15);
+            transform: scale(1.02);
         }
+        
+        /* Colour-coded urgency */
+        #emergency + label { background: #fee2e2; border-color: #ef4444; color: #991b1b; }
+        #urgent + label { background: #fef3c7; border-color: #f59e0b; color: #b45309; }
+        #week + label { background: #dbeafe; border-color: #3b82f6; color: #1e40af; }
+        #flexible + label { background: #ecfdf5; border-color: #10b981; color: #166534; }
         
         .submit-button {
             width: 100%;
@@ -200,16 +196,12 @@
             font-weight: 600;
             cursor: pointer;
             transition: all 0.2s;
+            margin-top: 30px;
         }
         
         .submit-button:hover {
             background: #2d4a70;
             transform: translateY(-2px);
-        }
-        
-        .submit-button:disabled {
-            background: #cbd5e1;
-            cursor: not-allowed;
         }
         
         .error-message {
@@ -231,6 +223,12 @@
         }
         
         @media (max-width: 768px) {
+            .urgency-options {
+                flex-wrap: wrap;
+            }
+            .urgency-option {
+                flex: 1 1 48%;
+            }
             .header-section h1 { font-size: 2rem; }
             .form-container { padding: 24px; }
         }
@@ -251,7 +249,7 @@
             <div class="nav-links">
                 <a href="/pricing.html">Pricing</a>
                 <a href="/about.html">About</a>
-                <a href="/dashboard">Sign In</a>
+                <a href="/tradesperson-sign-in.html">Sign In</a>
             </div>
         </div>
     </nav>
@@ -326,24 +324,25 @@
                         <small>Include any relevant details, measurements, or specific requirements</small>
                     </div>
 
+                    <!-- Urgency Buttons - 4 on one line -->
                     <div class="form-group">
                         <label>When do you need this done?<span class="required">*</span></label>
                         <div class="urgency-options">
-                            <div class="urgency-option urgency-emergency">
+                            <div class="urgency-option">
                                 <input type="radio" id="emergency" name="urgency" value="emergency" required>
-                                <label for="emergency">Emergency <span class="urgency-badge">Today</span></label>
+                                <label for="emergency">Emergency<br><span style="font-size:0.9rem;">Today</span></label>
                             </div>
-                            <div class="urgency-option urgency-urgent">
+                            <div class="urgency-option">
                                 <input type="radio" id="urgent" name="urgency" value="urgent">
-                                <label for="urgent">Urgent <span class="urgency-badge">This Week</span></label>
+                                <label for="urgent">Urgent<br><span style="font-size:0.9rem;">This Week</span></label>
                             </div>
-                            <div class="urgency-option urgency-week">
+                            <div class="urgency-option">
                                 <input type="radio" id="week" name="urgency" value="week">
-                                <label for="week">Soon <span class="urgency-badge">2-4 Weeks</span></label>
+                                <label for="week">Soon<br><span style="font-size:0.9rem;">2-4 Weeks</span></label>
                             </div>
-                            <div class="urgency-option urgency-flexible">
+                            <div class="urgency-option">
                                 <input type="radio" id="flexible" name="urgency" value="flexible">
-                                <label for="flexible">Flexible <span class="urgency-badge">No Rush</span></label>
+                                <label for="flexible">Flexible<br><span style="font-size:0.9rem;">No Rush</span></label>
                             </div>
                         </div>
                     </div>
@@ -392,7 +391,7 @@
     </div>
 
     <script>
-        // Full Job Type Options - Restored completely
+        // Job Type Options
         const jobTypeOptions = {
             'plumber': ['Leak Repair','Boiler Repair','Bathroom Installation','Tap Installation / Repair','Toilet Installation / Repair','Pipe Work / Replacement','Radiator Installation','Water Heater Installation','Drain Unblocking','Emergency Plumbing','Shower Installation','Other Plumbing'],
             'electrician': ['Fault Finding / Repair','Rewiring','Socket Installation','Light Fitting','Fuse Box / Consumer Unit Replacement','Electric Shower Installation','EV Charger Installation','Electrical Testing / Certificate','Security Lighting','Emergency Electrical','Outdoor Electrical Work','Other Electrical'],
@@ -416,7 +415,7 @@
             'hvac': ['Air Conditioning Installation','Air Conditioning Repair','Ventilation System','Heat Pump Installation','HVAC Maintenance','Other HVAC Work']
         };
 
-        // Update Job Type dropdown when Trade Category changes
+        // Update Job Type dropdown
         document.getElementById('tradeCategory').addEventListener('change', function() {
             const jobTypeSelect = document.getElementById('jobType');
             const selectedTrade = this.value;
@@ -436,7 +435,7 @@
             }
         });
 
-        // Form Submission - Matches your database columns
+        // Form Submission
         document.getElementById('jobForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -480,7 +479,7 @@
 
                     setTimeout(() => {
                         window.location.href = '/job-submitted.html';
-                    }, 2000);
+                    }, 1500);
                 } else {
                     throw new Error(result.error || 'Failed to submit job');
                 }
