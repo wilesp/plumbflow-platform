@@ -17,7 +17,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ====================== API ENDPOINTS FIRST ======================
+# ====================== HEALTH CHECK (required by Railway) ======================
+@app.get("/health")
+async def health():
+    return {"status": "healthy"}
+
+# ====================== API ENDPOINTS ======================
 
 @app.get("/api/tradesperson/me")
 async def get_current_tradesperson(request: Request):
