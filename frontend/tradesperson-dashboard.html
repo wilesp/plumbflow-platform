@@ -26,7 +26,7 @@
             margin-bottom: 30px;
             box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .lead-card {
+        .lead-card, .managed-card {
             border: 1px solid #e2e8f0;
             border-radius: 10px;
             padding: 18px;
@@ -56,6 +56,7 @@
             </div>
         </header>
 
+        <!-- Pending Leads -->
         <div class="section">
             <h2>Pending Leads</h2>
             <div id="pendingLeadsContainer">
@@ -63,21 +64,27 @@
             </div>
         </div>
 
+        <!-- Jobs You're Managing -->
         <div class="section">
             <h2>Jobs You're Managing</h2>
             <div id="managedJobsContainer">
-                <p class="empty">No active jobs yet.</p>
+                <p class="loading">Loading managed jobs...</p>
             </div>
         </div>
     </div>
 
     <script>
         async function loadDashboard() {
-            const container = document.getElementById('pendingLeadsContainer');
-            container.innerHTML = '<p class="loading">Loading leads...</p>';
+            // Load Pending Leads
+            const pendingContainer = document.getElementById('pendingLeadsContainer');
+            pendingContainer.innerHTML = '<p class="loading">Loading leads...</p>';
+
+            // Load Managed Jobs
+            const managedContainer = document.getElementById('managedJobsContainer');
+            managedContainer.innerHTML = '<p class="loading">Loading managed jobs...</p>';
 
             try {
-                // Load user info
+                // User info
                 const meRes = await fetch('/api/tradesperson/me', { credentials: 'include' });
                 if (meRes.ok) {
                     const user = await meRes.json();
@@ -88,14 +95,14 @@
                     }
                 }
 
-                // Load pending leads
+                // Pending Leads
                 const leadsRes = await fetch('/api/tradesperson/pending-leads', { credentials: 'include' });
-                const data = await leadsRes.json();
+                const leadsData = await leadsRes.json();
 
-                if (data.success && data.leads && data.leads.length > 0) {
-                    container.innerHTML = '';
-                    data.leads.forEach(lead => {
-                        const jobId = lead.id || lead.job_id;   // safety check
+                if (leadsData.success && leadsData.leads && leadsData.leads.length > 0) {
+                    pendingContainer.innerHTML = '';
+                    leadsData.leads.forEach(lead => {
+                        const jobId = lead.id || lead.job_id;
                         const card = document.createElement('div');
                         card.className = 'lead-card';
                         card.innerHTML = `
@@ -105,23 +112,32 @@
                             <p>${lead.description || ''}</p>
                             <button class="btn" onclick="acceptLead('${jobId}')">Accept Lead</button>
                         `;
-                        container.appendChild(card);
+                        pendingContainer.appendChild(card);
                     });
                 } else {
-                    container.innerHTML = '<p class="empty">No pending leads at the moment.</p>';
+                    pendingContainer.innerHTML = '<p class="empty">No pending leads at the moment.</p>';
                 }
+
+                // TODO: For now we show a placeholder. We'll add real managed jobs endpoint later.
+                managedContainer.innerHTML = `
+                    <p class="empty">
+                        Accepted leads will appear here once we add the managed jobs table.<br>
+                        <small>Lead ${jobId || ''} was accepted successfully.</small>
+                    </p>
+                `;
+
             } catch (err) {
-                console.error("Load error:", err);
-                container.innerHTML = '<p class="empty">Error loading leads. Please refresh the page.</p>';
+                console.error(err);
+                pendingContainer.innerHTML = '<p class="empty">Error loading leads. Please refresh.</p>';
+                managedContainer.innerHTML = '<p class="empty">Error loading managed jobs.</p>';
             }
         }
 
         async function acceptLead(jobId) {
-            if (!jobId || jobId === "undefined") {
-                alert("Error: Job ID is missing. Please refresh the dashboard and try again.");
+            if (!jobId) {
+                alert("Error: Job ID is missing");
                 return;
             }
-
             if (!confirm(`Accept this lead (Job ${jobId})?`)) return;
 
             try {
@@ -133,8 +149,9 @@
                 });
 
                 if (res.ok) {
-                    alert(`✅ Lead ${jobId} accepted successfully!`);
-                    loadDashboard();   // Refresh the list
+                    const result = await res.json();
+                    alert(result.message || `✅ Lead ${jobId} accepted successfully!`);
+                    loadDashboard();
                 } else {
                     alert('Failed to accept lead');
                 }
@@ -143,7 +160,6 @@
             }
         }
 
-        // Load the dashboard when the page opens
         window.onload = loadDashboard;
     </script>
 </body>
