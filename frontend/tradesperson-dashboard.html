@@ -95,6 +95,7 @@
                 if (data.success && data.leads && data.leads.length > 0) {
                     container.innerHTML = '';
                     data.leads.forEach(lead => {
+                        const jobId = lead.id || lead.job_id;   // safety check
                         const card = document.createElement('div');
                         card.className = 'lead-card';
                         card.innerHTML = `
@@ -102,7 +103,7 @@
                             <p><strong>Postcode:</strong> ${lead.postcode || ''}</p>
                             <p><strong>Urgency:</strong> ${lead.urgency || ''}</p>
                             <p>${lead.description || ''}</p>
-                            <button class="btn" onclick="acceptLead('${lead.id}')">Accept Lead</button>
+                            <button class="btn" onclick="acceptLead('${jobId}')">Accept Lead</button>
                         `;
                         container.appendChild(card);
                     });
@@ -110,16 +111,17 @@
                     container.innerHTML = '<p class="empty">No pending leads at the moment.</p>';
                 }
             } catch (err) {
-                console.error(err);
-                container.innerHTML = '<p class="empty">Error loading leads. Please refresh.</p>';
+                console.error("Load error:", err);
+                container.innerHTML = '<p class="empty">Error loading leads. Please refresh the page.</p>';
             }
         }
 
         async function acceptLead(jobId) {
-            if (!jobId) {
-                alert("Error: Job ID not found");
+            if (!jobId || jobId === "undefined") {
+                alert("Error: Job ID is missing. Please refresh the dashboard and try again.");
                 return;
             }
+
             if (!confirm(`Accept this lead (Job ${jobId})?`)) return;
 
             try {
@@ -141,6 +143,7 @@
             }
         }
 
+        // Load the dashboard when the page opens
         window.onload = loadDashboard;
     </script>
 </body>
