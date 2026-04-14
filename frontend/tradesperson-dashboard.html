@@ -3,192 +3,146 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Dashboard - Best Trade</title>
+    <title>Dashboard - Best Trade</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8fafc;
-            color: #1e293b;
-        }
-        .navbar {
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; }
+        .container { max-width: 1100px; margin: 0 auto; padding: 20px; }
+        header {
             background: white;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-            position: sticky;
-            top: 0;
-            z-index: 1000;
-        }
-        .nav-container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 15px 20px;
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        .logo { font-size: 22px; font-weight: 700; color: #1e293b; text-decoration: none; }
-        .main-container {
-            max-width: 1200px;
-            margin: 40px auto;
-            padding: 0 20px;
-        }
-        .welcome {
-            background: #1e3a5f;
-            color: white;
-            padding: 30px;
-            border-radius: 12px;
-            margin-bottom: 30px;
-        }
-        .card {
+        h1 { font-size: 2rem; color: #1e3a5f; }
+        .section {
             background: white;
             border-radius: 12px;
-            padding: 24px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-            margin-bottom: 24px;
+            padding: 25px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .section-title {
-            font-size: 1.4rem;
-            color: #1e3a5f;
-            margin-bottom: 16px;
-            font-weight: 600;
-        }
-        .lead-card {
+        .lead-card, .managed-card {
             border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 18px;
+            margin-bottom: 15px;
+            background: #fafcff;
+        }
+        .btn {
+            padding: 10px 20px;
+            background: #1e3a5f;
+            color: white;
+            border: none;
             border-radius: 8px;
-            padding: 16px;
-            margin-bottom: 12px;
-            background: #f8fafc;
+            cursor: pointer;
+            font-weight: 600;
+            margin-right: 10px;
         }
-        .empty-state {
-            text-align: center;
-            padding: 40px 20px;
-            color: #64748b;
-            font-style: italic;
-        }
-        .debug {
-            background: #fee2e2;
-            padding: 10px;
-            font-family: monospace;
-            font-size: 12px;
-            margin-top: 10px;
-            display: none;
-        }
+        .btn:hover { background: #2d4a70; }
+        .btn-accept { background: #10b981; }
+        .btn-accept:hover { background: #059669; }
+        .empty, .loading { color: #64748b; font-style: italic; padding: 20px 0; text-align: center; }
+        .error { color: #ef4444; background: #fee2e2; padding: 12px; border-radius: 8px; }
     </style>
 </head>
 <body>
-    <nav class="navbar">
-        <div class="nav-container">
-            <a href="/" class="logo">BestTrade</a>
+    <div class="container">
+        <header>
+            <h1>Welcome back, <span id="tradingName">Loading...</span>!</h1>
             <div>
-                <span id="userName" style="margin-right: 20px; font-weight: 500;">Loading...</span>
-                <button onclick="logout()" style="background:#ef4444; color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer;">Sign Out</button>
+                Plan: <strong><span id="subscriptionTier">...</span></strong><br>
+                Status: <strong><span id="subscriptionStatus">...</span></strong>
             </div>
-        </div>
-    </nav>
+        </header>
 
-    <div class="main-container">
-        <div class="welcome">
-            <h1>Welcome back, <span id="welcomeName">Trader</span>!</h1>
-            <p>Your personal dashboard</p>
-        </div>
-
-        <div class="card">
-            <h2 class="section-title">Your Subscription</h2>
-            <p><strong>Plan:</strong> <span id="planName">Loading...</span></p>
-            <p><strong>Status:</strong> <span id="planStatus">Loading...</span></p>
-        </div>
-
-        <div class="card">
-            <h2 class="section-title">Pending Leads</h2>
-            <div id="pendingLeads">
-                <div class="empty-state">Loading leads...</div>
+        <!-- Pending Leads -->
+        <div class="section">
+            <h2>Pending Leads</h2>
+            <div id="pendingLeadsContainer">
+                <p class="loading">Loading leads...</p>
             </div>
         </div>
 
-        <div class="card">
-            <h2 class="section-title">Jobs You're Managing</h2>
-            <div class="empty-state">
-                No active jobs yet.
+        <!-- Jobs You're Managing -->
+        <div class="section">
+            <h2>Jobs You're Managing</h2>
+            <div id="managedJobsContainer">
+                <p class="empty">No active jobs yet. Accepted leads will appear here.</p>
             </div>
         </div>
     </div>
 
     <script>
         async function loadDashboard() {
+            const pendingContainer = document.getElementById('pendingLeadsContainer');
+            const managedContainer = document.getElementById('managedJobsContainer');
+
+            pendingContainer.innerHTML = '<p class="loading">Loading leads...</p>';
+
             try {
-                const response = await fetch('/api/tradesperson/me', { credentials: 'include' });
-                if (!response.ok) throw new Error('Not authenticated');
+                // Load user info
+                const meRes = await fetch('/api/tradesperson/me', { credentials: 'include' });
+                if (meRes.ok) {
+                    const user = await meRes.json();
+                    if (user.success) {
+                        document.getElementById('tradingName').textContent = user.trading_name || 'Trader';
+                        document.getElementById('subscriptionTier').textContent = (user.subscription_tier || '').toUpperCase();
+                        document.getElementById('subscriptionStatus').textContent = user.subscription_status || 'Active';
+                    }
+                }
 
-                const user = await response.json();
+                // Load pending leads
+                const leadsRes = await fetch('/api/tradesperson/pending-leads', { credentials: 'include' });
+                const data = await leadsRes.json();
 
-                const displayName = user.trading_name || "Trader";
-                document.getElementById('welcomeName').textContent = displayName;
-                document.getElementById('userName').textContent = displayName;
-
-                document.getElementById('planName').textContent = 
-                    (user.subscription_tier || 'Basic').toUpperCase() + " Plan";
-                document.getElementById('planStatus').textContent = 
-                    (user.subscription_status || 'pending').toUpperCase();
-
-                // Load Pending Leads
-                await loadPendingLeads();
+                if (data.success && data.leads && data.leads.length > 0) {
+                    pendingContainer.innerHTML = '';
+                    data.leads.forEach(lead => {
+                        const card = document.createElement('div');
+                        card.className = 'lead-card';
+                        card.innerHTML = `
+                            <h3>${lead.trade_category} — ${lead.job_type}</h3>
+                            <p><strong>Postcode:</strong> ${lead.postcode}</p>
+                            <p><strong>Urgency:</strong> ${lead.urgency}</p>
+                            <p>${lead.description}</p>
+                            <button class="btn btn-accept" onclick="acceptLead('${lead.id}')">Accept Lead</button>
+                        `;
+                        pendingContainer.appendChild(card);
+                    });
+                } else {
+                    pendingContainer.innerHTML = '<p class="empty">No pending leads at the moment.</p>';
+                }
 
             } catch (err) {
                 console.error(err);
-                document.getElementById('welcomeName').textContent = "Trader";
+                pendingContainer.innerHTML = `<p class="error">Error loading leads: ${err.message}</p>`;
             }
         }
 
-        async function loadPendingLeads() {
+        async function acceptLead(jobId) {
+            if (!confirm(`Accept this lead (Job ${jobId})?`)) return;
+
             try {
-                const res = await fetch('/api/tradesperson/pending-leads', { 
-                    credentials: 'include',
-                    cache: 'no-store'
+                const res = await fetch('/api/tradesperson/accept-lead', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ job_id: jobId }),
+                    credentials: 'include'
                 });
 
-                const data = await res.json();
-                const container = document.getElementById('pendingLeads');
-
-                if (!data.leads || data.leads.length === 0) {
-                    container.innerHTML = `
-                        <div class="empty-state">
-                            No pending leads yet.<br>
-                            New customer jobs will appear here.
-                        </div>`;
-                    return;
+                if (res.ok) {
+                    alert(`✅ Lead ${jobId} accepted and moved to "Jobs You're Managing"`);
+                    loadDashboard();   // Refresh both sections
+                } else {
+                    alert('Failed to accept lead');
                 }
-
-                let html = '';
-                data.leads.forEach(lead => {
-                    html += `
-                        <div class="lead-card">
-                            <strong>${lead.trade_category || ''} — ${lead.job_type || ''}</strong><br>
-                            <small>Postcode: ${lead.postcode} • ${lead.urgency || ''}</small><br>
-                            <p>${lead.description ? lead.description.substring(0, 100) + '...' : 'No description'}</p>
-                            <button onclick="acceptLead('${lead.job_id}')" style="background:#10b981; color:white; border:none; padding:8px 16px; border-radius:6px; margin-top:8px; cursor:pointer;">
-                                Accept Lead
-                            </button>
-                        </div>`;
-                });
-                container.innerHTML = html;
-
-            } catch (e) {
-                console.error("Failed to load leads", e);
-                document.getElementById('pendingLeads').innerHTML = `
-                    <div class="empty-state">
-                        Error loading leads. Please refresh the page.
-                    </div>`;
-            }
-        }
-
-        function acceptLead(jobId) {
-            alert(`Lead ${jobId} accepted! (Feature coming soon)`);
-        }
-
-        function logout() {
-            if (confirm("Sign out?")) {
-                document.cookie = "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-                window.location.href = '/tradesperson-sign-in.html';
+            } catch (err) {
+                alert('Error accepting lead');
             }
         }
 
