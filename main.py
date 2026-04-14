@@ -42,7 +42,7 @@ async def simple_signin(request: Request):
             print(f"User not found for email: {email}")
             raise HTTPException(status_code=404, detail="User not found")
 
-        tradesperson_id = str(user['id'])  # Ensure string
+        tradesperson_id = str(user['id'])
         print(f"User found - ID: {tradesperson_id}, Name: {user['trading_name']}")
 
         session_token = secrets.token_urlsafe(32)
@@ -120,7 +120,7 @@ async def get_pending_leads(request: Request):
         print(f"Pending leads error: {e}")
         return {"success": True, "leads": []}
 
-# ====================== ACCEPT LEAD - FIXED & ROBUST ======================
+# ====================== ACCEPT LEAD - FINAL FIXED VERSION ======================
 @app.post("/api/tradesperson/accept-lead")
 async def accept_lead(request: Request):
     try:
@@ -137,21 +137,21 @@ async def accept_lead(request: Request):
         conn = db.get_connection()
         cursor = conn.cursor()
 
-        # Get tradesperson_id (as string)
+        # Get tradesperson_id (force as string)
         cursor.execute("""
-            SELECT tradesperson_id 
+            SELECT tradesperson_id::text as tradesperson_id
             FROM tradesperson_sessions 
             WHERE session_token = %s AND expires_at > NOW()
         """, (session_token,))
         session = cursor.fetchone()
-        if not session:
+
+        if not session or not session['tradesperson_id']:
             cursor.close()
             conn.close()
-            raise HTTPException(status_code=401, detail="Session expired")
+            raise HTTPException(status_code=401, detail="Session expired or invalid")
 
-        tradesperson_id = str(session[0])   # Force string to match DB type
-
-        print(f"Attempting to accept job {job_id} for tradesperson {tradesperson_id}")
+        tradesperson_id = session['tradesperson_id']
+        print(f"Accepting job {job_id} for tradesperson {tradesperson_id}")
 
         # Delete the pending lead
         cursor.execute("""
@@ -164,12 +164,12 @@ async def accept_lead(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"DELETE result - rows affected: {deleted} for job {job_id}")
+        print(f"DELETE result - rows affected: {deleted} for job {job_id} by tradesperson {tradesperson_id}")
 
         if deleted > 0:
             return {"success": True, "message": f"Lead {job_id} accepted successfully"}
         else:
-            return {"success": True, "message": "Lead not found or already accepted"}
+            return {"success": True, "message": "Lead not found or already accepted by you"}
 
     except Exception as e:
         print(f"Accept lead error: {str(e)}")
