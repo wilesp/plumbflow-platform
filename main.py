@@ -17,7 +17,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# ====================== HEALTH CHECK (Railway) ======================
+# ====================== HEALTH CHECK ======================
 @app.get("/health")
 async def health():
     return {"status": "healthy"}
@@ -33,11 +33,7 @@ async def simple_signin(request: Request):
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         
-        cursor.execute("""
-            SELECT id, trading_name 
-            FROM tradespeople 
-            WHERE LOWER(email) = %s
-        """, (email,))
+        cursor.execute("SELECT id, trading_name FROM tradespeople WHERE LOWER(email) = %s", (email,))
         user = cursor.fetchone()
         
         if not user:
@@ -46,9 +42,8 @@ async def simple_signin(request: Request):
             print(f"User not found for email: {email}")
             raise HTTPException(status_code=404, detail="User not found")
 
-        tradesperson_id = user['id']
-        trading_name = user['trading_name']
-        print(f"User found - ID: {tradesperson_id}, Name: {trading_name}")
+        tradesperson_id = str(user['id'])  # Ensure string
+        print(f"User found - ID: {tradesperson_id}, Name: {user['trading_name']}")
 
         session_token = secrets.token_urlsafe(32)
         cursor.execute("""
@@ -68,7 +63,7 @@ async def simple_signin(request: Request):
         print(f"Signin error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ====================== API ENDPOINTS ======================
+# ====================== ME & PENDING LEADS ======================
 @app.get("/api/tradesperson/me")
 async def get_current_tradesperson(request: Request):
     session_token = request.cookies.get("session_token")
@@ -107,14 +102,7 @@ async def get_pending_leads(request: Request):
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute("""
-            SELECT 
-                j.id, 
-                j.trade_category, 
-                j.job_type, 
-                j.description, 
-                j.postcode, 
-                j.urgency, 
-                j.created_at
+            SELECT j.id, j.trade_category, j.job_type, j.description, j.postcode, j.urgency, j.created_at
             FROM pending_leads p
             JOIN jobs j ON p.job_id = j.id
             WHERE p.plumber_id = (
@@ -132,7 +120,7 @@ async def get_pending_leads(request: Request):
         print(f"Pending leads error: {e}")
         return {"success": True, "leads": []}
 
-# ====================== ACCEPT LEAD - FIXED ======================
+# ====================== ACCEPT LEAD - FIXED & ROBUST ======================
 @app.post("/api/tradesperson/accept-lead")
 async def accept_lead(request: Request):
     try:
@@ -149,7 +137,7 @@ async def accept_lead(request: Request):
         conn = db.get_connection()
         cursor = conn.cursor()
 
-        # Get tradesperson ID from session
+        # Get tradesperson_id (as string)
         cursor.execute("""
             SELECT tradesperson_id 
             FROM tradesperson_sessions 
@@ -161,9 +149,11 @@ async def accept_lead(request: Request):
             conn.close()
             raise HTTPException(status_code=401, detail="Session expired")
 
-        tradesperson_id = session[0]
+        tradesperson_id = str(session[0])   # Force string to match DB type
 
-        # Remove the lead from pending_leads for this tradesperson only
+        print(f"Attempting to accept job {job_id} for tradesperson {tradesperson_id}")
+
+        # Delete the pending lead
         cursor.execute("""
             DELETE FROM pending_leads 
             WHERE job_id = %s AND plumber_id = %s
@@ -174,15 +164,15 @@ async def accept_lead(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"Lead delete result - rows affected: {deleted} for job {job_id} by tradesperson {tradesperson_id}")
+        print(f"DELETE result - rows affected: {deleted} for job {job_id}")
 
         if deleted > 0:
             return {"success": True, "message": f"Lead {job_id} accepted successfully"}
         else:
-            return {"success": True, "message": "Lead already accepted or not found"}
+            return {"success": True, "message": "Lead not found or already accepted"}
 
     except Exception as e:
-        print(f"Accept lead error: {e}")
+        print(f"Accept lead error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to accept lead")
 
 @app.post("/api/customer/post-job")
@@ -238,7 +228,7 @@ async def post_job(request: Request):
         print(f"Post job error: {e}")
         raise HTTPException(status_code=500, detail="Failed to submit job")
 
-# ====================== STATIC HTML PAGES ======================
+# ====================== STATIC PAGES ======================
 @app.get("/", response_class=HTMLResponse)
 @app.get("/tradesperson-register.html", response_class=HTMLResponse)
 @app.get("/tradesperson-dashboard.html", response_class=HTMLResponse)
