@@ -132,15 +132,50 @@ async def get_pending_leads(request: Request):
         print(f"Pending leads error: {e}")
         return {"success": True, "leads": []}
 
+# ====================== ACCEPT LEAD (UPDATED) ======================
 @app.post("/api/tradesperson/accept-lead")
 async def accept_lead(request: Request):
     try:
         data = await request.json()
-        print(f"Lead accepted: {data.get('job_id')}")
-        return {"success": True, "message": "Lead accepted"}
+        job_id = data.get('job_id')
+
+        session_token = request.cookies.get("session_token")
+        if not session_token:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        conn = db.get_connection()
+        cursor = conn.cursor()
+
+        # Get tradesperson ID from session
+        cursor.execute("""
+            SELECT tradesperson_id 
+            FROM tradesperson_sessions 
+            WHERE session_token = %s AND expires_at > NOW()
+        """, (session_token,))
+        session = cursor.fetchone()
+        if not session:
+            cursor.close()
+            conn.close()
+            raise HTTPException(status_code=401, detail="Session expired")
+
+        tradesperson_id = session[0]
+
+        # Remove the lead from pending_leads for this tradesperson
+        cursor.execute("""
+            DELETE FROM pending_leads 
+            WHERE job_id = %s AND plumber_id = %s
+        """, (job_id, tradesperson_id))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        print(f"✅ Lead {job_id} accepted and removed from pending by tradesperson {tradesperson_id}")
+        return {"success": True, "message": "Lead accepted successfully"}
+
     except Exception as e:
         print(f"Accept lead error: {e}")
-        return {"success": True, "message": "Lead accepted"}
+        raise HTTPException(status_code=500, detail="Failed to accept lead")
 
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
