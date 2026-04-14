@@ -132,12 +132,15 @@ async def get_pending_leads(request: Request):
         print(f"Pending leads error: {e}")
         return {"success": True, "leads": []}
 
-# ====================== ACCEPT LEAD (UPDATED) ======================
+# ====================== ACCEPT LEAD - FIXED ======================
 @app.post("/api/tradesperson/accept-lead")
 async def accept_lead(request: Request):
     try:
         data = await request.json()
         job_id = data.get('job_id')
+
+        if not job_id:
+            raise HTTPException(status_code=400, detail="Job ID is required")
 
         session_token = request.cookies.get("session_token")
         if not session_token:
@@ -160,18 +163,23 @@ async def accept_lead(request: Request):
 
         tradesperson_id = session[0]
 
-        # Remove the lead from pending_leads for this tradesperson
+        # Remove the lead from pending_leads for this tradesperson only
         cursor.execute("""
             DELETE FROM pending_leads 
             WHERE job_id = %s AND plumber_id = %s
         """, (job_id, tradesperson_id))
 
+        deleted = cursor.rowcount
         conn.commit()
         cursor.close()
         conn.close()
 
-        print(f"✅ Lead {job_id} accepted and removed from pending by tradesperson {tradesperson_id}")
-        return {"success": True, "message": "Lead accepted successfully"}
+        print(f"Lead delete result - rows affected: {deleted} for job {job_id} by tradesperson {tradesperson_id}")
+
+        if deleted > 0:
+            return {"success": True, "message": f"Lead {job_id} accepted successfully"}
+        else:
+            return {"success": True, "message": "Lead already accepted or not found"}
 
     except Exception as e:
         print(f"Accept lead error: {e}")
