@@ -69,7 +69,6 @@
             </div>
         </header>
 
-        <!-- Pending Leads -->
         <div class="section">
             <h2>Pending Leads</h2>
             <div id="pendingLeadsContainer">
@@ -77,11 +76,10 @@
             </div>
         </div>
 
-        <!-- Jobs You're Managing -->
         <div class="section">
             <h2>Jobs You're Managing</h2>
             <div id="managedJobsContainer">
-                <p class="empty">Accepted leads will appear here.<br><small>You have successfully accepted some leads.</small></p>
+                <p class="loading">Loading your managed jobs...</p>
             </div>
         </div>
     </div>
@@ -92,7 +90,7 @@
             const managedContainer = document.getElementById('managedJobsContainer');
 
             pendingContainer.innerHTML = '<p class="loading">Loading leads...</p>';
-            managedContainer.innerHTML = '<p class="loading">Loading managed jobs...</p>';
+            managedContainer.innerHTML = '<p class="loading">Loading your managed jobs...</p>';
 
             try {
                 // User info
@@ -129,24 +127,24 @@
                     pendingContainer.innerHTML = '<p class="empty">No pending leads at the moment.</p>';
                 }
 
-                // Managed Jobs - placeholder (we'll make this real next)
+                // Managed Jobs - Placeholder for now
                 managedContainer.innerHTML = `
                     <p class="empty">
-                        Accepted leads will appear here.<br>
-                        <small>You have successfully accepted leads. This section will show your active jobs soon.</small>
+                        You have not accepted any jobs yet.<br>
+                        <small>When you accept a lead from Pending Leads, it will move here.</small>
                     </p>
                 `;
 
             } catch (err) {
                 console.error(err);
-                pendingContainer.innerHTML = '<p class="empty">Error loading leads. Please refresh the page.</p>';
+                pendingContainer.innerHTML = '<p class="empty">Error loading leads. Please refresh.</p>';
                 managedContainer.innerHTML = '<p class="empty">Error loading managed jobs.</p>';
             }
         }
 
         async function acceptLead(jobId) {
             if (!jobId) {
-                alert("Error: Job ID is missing. Please refresh and try again.");
+                alert("Error: Job ID is missing. Please refresh the page.");
                 return;
             }
             if (!confirm(`Accept this lead (Job ${jobId})?`)) return;
@@ -162,7 +160,7 @@
                 if (res.ok) {
                     const result = await res.json();
                     alert(result.message || `✅ Lead ${jobId} accepted successfully!`);
-                    loadDashboard();
+                    loadDashboard();   // Refresh both sections
                 } else {
                     alert('Failed to accept lead');
                 }
