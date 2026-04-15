@@ -238,7 +238,7 @@
                 const subResult = await subRes.json();
                 if (!subRes.ok) throw new Error(subResult.detail || 'Subscription failed');
 
-                // 4. Confirm the payment (THIS WAS THE MISSING PART)
+                // 4. Confirm the payment - THIS IS THE CRITICAL LINE
                 const confirmRes = await stripe.confirmCardPayment(subResult.clientSecret, {
                     payment_method: paymentMethod.id
                 });
