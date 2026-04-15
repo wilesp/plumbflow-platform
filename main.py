@@ -24,7 +24,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 async def health():
     return {"status": "healthy"}
 
-# ====================== REGISTRATION (creates user first) ======================
+# ====================== REGISTRATION ======================
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
@@ -169,8 +169,6 @@ async def simple_signin(request: Request):
     except Exception as e:
         print(f"Signin error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
-
-# (Keep the rest of your endpoints: me, pending-leads, managed-jobs, accept-lead, post-job)
 
 # ====================== ME ======================
 @app.get("/api/tradesperson/me")
