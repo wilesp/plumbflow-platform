@@ -213,13 +213,17 @@ async def accept_lead(request: Request):
         print(f"Accept lead error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to accept lead")
 
-# ====================== POST JOB - CLEAN (no hard-coded ID) ======================
+# ====================== POST JOB - WITH TRADE CATEGORY MATCHING ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
         data = await request.json()
+        job_trade_category = data.get('trade_category')
         postcode = (data.get('postcode') or '').strip().upper()
         job_postcode_area = postcode.split()[0] if postcode else ''
+
+        if not job_trade_category:
+            raise HTTPException(status_code=400, detail="Trade category is required")
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -241,26 +245,27 @@ async def post_job(request: Request):
         ))
         job_id = cursor.fetchone()['id']
 
-        # Clean matching - no hard-coded tiler ID
+        # Proper matching: trade_category + postcode tier
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             SELECT %s, t.id, NOW(), 'dashboard'
             FROM tradespeople t
             WHERE t.can_receive_jobs = true 
               AND t.subscription_status IN ('pending', 'active')
+              AND t.trade_category = %s
               AND (
                   t.subscription_tier = 'premium'
                   OR COALESCE(t.postcode_area, '') = %s
                   OR (t.subscription_tier = 'pro' AND COALESCE(t.postcode_area, '') LIKE %s)
               )
             ON CONFLICT (job_id, plumber_id) DO NOTHING
-        """, (job_id, job_postcode_area, job_postcode_area + '%'))
+        """, (job_id, job_trade_category, job_postcode_area, job_postcode_area + '%'))
 
         conn.commit()
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted successfully.")
+        print(f"Job {job_id} posted with trade category '{job_trade_category}'.")
         return {"success": True, "job_id": job_id}
 
     except Exception as e:
