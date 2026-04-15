@@ -120,7 +120,7 @@ async def get_pending_leads(request: Request):
         print(f"Pending leads error: {e}")
         return {"success": True, "leads": []}
 
-# ====================== JOBS YOU'RE MANAGING ======================
+# ====================== MANAGED JOBS ======================
 @app.get("/api/tradesperson/managed-jobs")
 async def get_managed_jobs(request: Request):
     session_token = request.cookies.get("session_token")
@@ -195,7 +195,7 @@ async def accept_lead(request: Request):
             WHERE job_id = %s AND plumber_id = %s
         """, (job_id, tradesperson_id))
 
-        # Add to managed_jobs
+        # Add to managed jobs
         cursor.execute("""
             INSERT INTO managed_jobs (job_id, tradesperson_id, status)
             VALUES (%s, %s, 'active')
@@ -206,14 +206,14 @@ async def accept_lead(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"✅ Lead {job_id} accepted and moved to managed jobs by tradesperson {tradesperson_id}")
+        print(f"✅ Lead {job_id} accepted by tradesperson {tradesperson_id}")
         return {"success": True, "message": f"Lead {job_id} accepted successfully"}
 
     except Exception as e:
         print(f"Accept lead error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to accept lead")
 
-# ====================== POST JOB ======================
+# ====================== POST JOB - CLEAN (no hard-coded ID) ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -241,6 +241,7 @@ async def post_job(request: Request):
         ))
         job_id = cursor.fetchone()['id']
 
+        # Clean matching - no hard-coded tiler ID
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             SELECT %s, t.id, NOW(), 'dashboard'
