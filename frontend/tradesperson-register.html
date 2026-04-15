@@ -98,11 +98,11 @@
             <form id="registerForm">
                 <div class="form-group">
                     <label>Trading / Business Name <span style="color:red">*</span></label>
-                    <input type="text" id="trading_name" required placeholder="e.g. Wiles Plumbing Ltd">
+                    <input type="text" id="trading_name" required placeholder="e.g. Test Plumber Ltd">
                 </div>
                 <div class="form-group">
                     <label>Contact Name <span style="color:red">*</span></label>
-                    <input type="text" id="contact_name" required placeholder="e.g. Dave Smith">
+                    <input type="text" id="contact_name" required placeholder="e.g. Dan Smith">
                 </div>
                 <div class="form-group">
                     <label>Trade Category <span style="color:red">*</span></label>
@@ -113,7 +113,6 @@
                         <option value="electrician">Electrician</option>
                         <option value="builder">Builder</option>
                         <option value="roofer">Roofer</option>
-                        <option value="painter-decorator">Painter & Decorator</option>
                     </select>
                 </div>
                 <div class="form-group">
@@ -149,15 +148,15 @@
         <!-- Success -->
         <div class="success-section" id="successSection">
             <h2>✅ Registration & Payment Successful!</h2>
-            <p>Your account is now active.</p>
+            <p>Your account is now active and ready to receive jobs.</p>
             <button onclick="window.location.href='/tradesperson-dashboard.html'" class="submit-btn">
-                Go to Dashboard
+                Go to My Dashboard
             </button>
         </div>
     </div>
 
     <script>
-        let stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi'); // ← Use your actual test publishable key
+        let stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi'); // Your test key is already here
         let elements;
         let card;
         let tradespersonId;
@@ -183,16 +182,16 @@
         async function createSubscription() {
             const payButton = document.getElementById('payButton');
             payButton.disabled = true;
-            payButton.textContent = 'Processing payment...';
+            payButton.textContent = 'Processing...';
 
             try {
                 // 1. Register the tradesperson
                 const regData = {
-                    trading_name: document.getElementById('trading_name').value,
-                    contact_name: document.getElementById('contact_name').value,
-                    email: document.getElementById('email').value,
-                    phone: document.getElementById('phone').value,
-                    postcode: document.getElementById('postcode').value.toUpperCase(),
+                    trading_name: document.getElementById('trading_name').value.trim(),
+                    contact_name: document.getElementById('contact_name').value.trim(),
+                    email: document.getElementById('email').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    postcode: document.getElementById('postcode').value.trim().toUpperCase(),
                     trade_category: document.getElementById('trade_category').value,
                     subscription_tier: currentTier
                 };
@@ -204,7 +203,10 @@
                 });
 
                 const regResult = await regRes.json();
-                if (!regRes.ok) throw new Error(regResult.detail || 'Registration failed');
+
+                if (!regRes.ok || !regResult.success) {
+                    throw new Error(regResult.detail || 'Registration failed');
+                }
 
                 tradespersonId = regResult.tradesperson_id;
 
@@ -228,7 +230,10 @@
                 });
 
                 const subResult = await subRes.json();
-                if (!subRes.ok) throw new Error(subResult.detail || 'Subscription failed');
+
+                if (!subRes.ok) {
+                    throw new Error(subResult.detail || 'Subscription failed');
+                }
 
                 // Success
                 document.getElementById('step2').style.display = 'none';
@@ -236,7 +241,7 @@
 
             } catch (err) {
                 console.error(err);
-                alert('Error: ' + err.message);
+                alert('Error during registration: ' + err.message);
                 payButton.disabled = false;
                 payButton.textContent = 'Pay & Complete Registration';
             }
@@ -251,10 +256,12 @@
             return prices[tier] || prices['pro'];
         }
 
-        // Get tier from URL
+        // Get tier from URL if coming from pricing page
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('tier')) currentTier = urlParams.get('tier');
+            if (urlParams.get('tier')) {
+                currentTier = urlParams.get('tier');
+            }
         };
     </script>
 </body>
