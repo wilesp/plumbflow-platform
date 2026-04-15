@@ -4,6 +4,7 @@ from fastapi.middleware.cors import CORSMiddleware
 import os
 import secrets
 import psycopg2.extras
+import stripe
 
 from database import db
 
@@ -16,6 +17,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 
 @app.get("/health")
 async def health():
@@ -62,6 +65,69 @@ async def simple_signin(request: Request):
         print(f"Signin error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
+# ====================== SUBSCRIPTION CREATE (for registration) ======================
+@app.post("/api/subscription/create")
+async def create_subscription(request: Request):
+    try:
+        data = await request.json()
+        tradesperson_id = data.get("tradesperson_id")
+        price_id = data.get("price_id")
+        tier = data.get("tier")
+
+        if not tradesperson_id or not price_id:
+            raise HTTPException(status_code=400, detail="Missing tradesperson_id or price_id")
+
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+
+        # Get tradesperson details for Stripe customer
+        cursor.execute("SELECT trading_name, email FROM tradespeople WHERE id = %s", (tradesperson_id,))
+        tradesperson = cursor.fetchone()
+
+        if not tradesperson:
+            cursor.close()
+            conn.close()
+            raise HTTPException(status_code=404, detail="Tradesperson not found")
+
+        # Create Stripe customer if not exists
+        customer = stripe.Customer.create(
+            name=tradesperson["trading_name"],
+            email=tradesperson["email"],
+            metadata={"tradesperson_id": tradesperson_id}
+        )
+
+        # Create subscription
+        subscription = stripe.Subscription.create(
+            customer=customer.id,
+            items=[{"price": price_id}],
+            payment_behavior="default_incomplete",
+            expand=["latest_invoice.payment_intent"]
+        )
+
+        # Update tradesperson record
+        cursor.execute("""
+            UPDATE tradespeople 
+            SET stripe_customer_id = %s, 
+                stripe_subscription_id = %s, 
+                subscription_status = 'pending',
+                subscription_tier = %s
+            WHERE id = %s
+        """, (customer.id, subscription.id, tier, tradesperson_id))
+
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return {
+            "success": True,
+            "clientSecret": subscription.latest_invoice.payment_intent.client_secret,
+            "subscriptionId": subscription.id
+        }
+
+    except Exception as e:
+        print(f"Subscription create error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ====================== ME ======================
 @app.get("/api/tradesperson/me")
 async def get_current_tradesperson(request: Request):
@@ -90,6 +156,8 @@ async def get_current_tradesperson(request: Request):
         "subscription_tier": user.get("subscription_tier"),
         "subscription_status": user.get("subscription_status")
     }
+
+# (The rest of the endpoints - pending-leads, managed-jobs, accept-lead, post-job - remain the same as the last clean version I gave you)
 
 # ====================== PENDING LEADS ======================
 @app.get("/api/tradesperson/pending-leads")
@@ -132,15 +200,8 @@ async def get_managed_jobs(request: Request):
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute("""
             SELECT 
-                j.id, 
-                j.trade_category, 
-                j.job_type, 
-                j.description, 
-                j.postcode, 
-                j.urgency, 
-                j.created_at,
-                m.accepted_at,
-                m.status
+                j.id, j.trade_category, j.job_type, j.description, j.postcode, j.urgency, j.created_at,
+                m.accepted_at, m.status
             FROM managed_jobs m
             JOIN jobs j ON m.job_id = j.id
             WHERE m.tradesperson_id = (
@@ -189,13 +250,11 @@ async def accept_lead(request: Request):
 
         tradesperson_id = session['tradesperson_id']
 
-        # Remove from pending leads
         cursor.execute("""
             DELETE FROM pending_leads 
             WHERE job_id = %s AND plumber_id = %s
         """, (job_id, tradesperson_id))
 
-        # Add to managed jobs
         cursor.execute("""
             INSERT INTO managed_jobs (job_id, tradesperson_id, status)
             VALUES (%s, %s, 'active')
@@ -213,7 +272,7 @@ async def accept_lead(request: Request):
         print(f"Accept lead error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to accept lead")
 
-# ====================== POST JOB - WITH TRADE CATEGORY MATCHING ======================
+# ====================== POST JOB WITH TRADE CATEGORY MATCHING ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -245,7 +304,6 @@ async def post_job(request: Request):
         ))
         job_id = cursor.fetchone()['id']
 
-        # Proper matching: trade_category + postcode tier
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             SELECT %s, t.id, NOW(), 'dashboard'
@@ -265,7 +323,7 @@ async def post_job(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted with trade category '{job_trade_category}'.")
+        print(f"Job {job_id} posted with trade '{job_trade_category}'.")
         return {"success": True, "job_id": job_id}
 
     except Exception as e:
