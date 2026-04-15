@@ -24,7 +24,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 async def health():
     return {"status": "healthy"}
 
-# ====================== REGISTRATION ======================
+# ====================== REGISTRATION (creates user first) ======================
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
@@ -64,9 +64,7 @@ async def register_tradesperson(request: Request):
         cursor.close()
         conn.close()
 
-        response = Response(content=f'{{"success": true, "tradesperson_id": "{tradesperson_id}"}}', media_type="application/json")
-        response.set_cookie(key="session_token", value=session_token, max_age=30*24*60*60, httponly=True, samesite="lax")
-        return response
+        return {"success": True, "tradesperson_id": tradesperson_id}
 
     except Exception as e:
         print(f"Registration error: {e}")
@@ -172,7 +170,9 @@ async def simple_signin(request: Request):
         print(f"Signin error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ====================== ME, PENDING LEADS, MANAGED JOBS, ACCEPT LEAD, POST JOB ======================
+# (Keep the rest of your endpoints: me, pending-leads, managed-jobs, accept-lead, post-job)
+
+# ====================== ME ======================
 @app.get("/api/tradesperson/me")
 async def get_current_tradesperson(request: Request):
     session_token = request.cookies.get("session_token")
@@ -201,6 +201,7 @@ async def get_current_tradesperson(request: Request):
         "subscription_status": user.get("subscription_status")
     }
 
+# ====================== PENDING LEADS ======================
 @app.get("/api/tradesperson/pending-leads")
 async def get_pending_leads(request: Request):
     session_token = request.cookies.get("session_token")
@@ -229,6 +230,7 @@ async def get_pending_leads(request: Request):
         print(f"Pending leads error: {e}")
         return {"success": True, "leads": []}
 
+# ====================== MANAGED JOBS ======================
 @app.get("/api/tradesperson/managed-jobs")
 async def get_managed_jobs(request: Request):
     session_token = request.cookies.get("session_token")
@@ -257,6 +259,7 @@ async def get_managed_jobs(request: Request):
         print(f"Managed jobs error: {e}")
         return {"success": True, "jobs": []}
 
+# ====================== ACCEPT LEAD ======================
 @app.post("/api/tradesperson/accept-lead")
 async def accept_lead(request: Request):
     try:
@@ -309,6 +312,7 @@ async def accept_lead(request: Request):
         print(f"Accept lead error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to accept lead")
 
+# ====================== POST JOB WITH TRADE CATEGORY MATCHING ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
