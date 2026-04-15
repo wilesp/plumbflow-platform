@@ -108,11 +108,29 @@
                     <label>Trade Category <span style="color:red">*</span></label>
                     <select id="trade_category" required>
                         <option value="">Select your main trade...</option>
-                        <option value="plumber">Plumber</option>
-                        <option value="tiler">Tiler</option>
-                        <option value="electrician">Electrician</option>
-                        <option value="builder">Builder</option>
-                        <option value="roofer">Roofer</option>
+                        <optgroup label="Emergency & Core Trades">
+                            <option value="plumber">Plumber</option>
+                            <option value="electrician">Electrician</option>
+                            <option value="gas-engineer">Gas Engineer</option>
+                            <option value="heating-engineer">Heating Engineer</option>
+                        </optgroup>
+                        <optgroup label="Building & Construction">
+                            <option value="builder">Builder</option>
+                            <option value="carpenter">Carpenter</option>
+                            <option value="roofer">Roofer</option>
+                            <option value="plasterer">Plasterer</option>
+                        </optgroup>
+                        <optgroup label="Interior & Finishing">
+                            <option value="painter-decorator">Painter & Decorator</option>
+                            <option value="tiler">Tiler</option>
+                            <option value="kitchen-fitter">Kitchen Fitter</option>
+                            <option value="bathroom-fitter">Bathroom Fitter</option>
+                            <option value="flooring">Flooring Specialist</option>
+                        </optgroup>
+                        <optgroup label="Other Services">
+                            <option value="handyman">Handyman</option>
+                            <option value="landscaper">Landscaper / Gardener</option>
+                        </optgroup>
                     </select>
                 </div>
                 <div class="form-group">
@@ -149,14 +167,14 @@
         <div class="success-section" id="successSection">
             <h2>✅ Registration & Payment Successful!</h2>
             <p>Your account is now active and ready to receive jobs.</p>
-            <button onclick="window.location.href='/tradesperson-dashboard.html'" class="submit-btn">
-                Go to My Dashboard
+            <button onclick="window.location.href='/'" class="submit-btn">
+                Return to Home Page
             </button>
         </div>
     </div>
 
     <script>
-        let stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi'); // Your test key is already here
+        let stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi');
         let elements;
         let card;
         let tradespersonId;
@@ -185,7 +203,7 @@
             payButton.textContent = 'Processing...';
 
             try {
-                // 1. Register the tradesperson
+                // Register first
                 const regData = {
                     trading_name: document.getElementById('trading_name').value.trim(),
                     contact_name: document.getElementById('contact_name').value.trim(),
@@ -203,14 +221,13 @@
                 });
 
                 const regResult = await regRes.json();
-
                 if (!regRes.ok || !regResult.success) {
                     throw new Error(regResult.detail || 'Registration failed');
                 }
 
                 tradespersonId = regResult.tradesperson_id;
 
-                // 2. Create payment method
+                // Create payment method
                 const { paymentMethod, error } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: card
@@ -218,7 +235,7 @@
 
                 if (error) throw error;
 
-                // 3. Create subscription
+                // Create subscription
                 const subRes = await fetch('/api/subscription/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -230,10 +247,7 @@
                 });
 
                 const subResult = await subRes.json();
-
-                if (!subRes.ok) {
-                    throw new Error(subResult.detail || 'Subscription failed');
-                }
+                if (!subRes.ok) throw new Error(subResult.detail || 'Subscription failed');
 
                 // Success
                 document.getElementById('step2').style.display = 'none';
@@ -241,7 +255,7 @@
 
             } catch (err) {
                 console.error(err);
-                alert('Error during registration: ' + err.message);
+                alert('Error: ' + err.message);
                 payButton.disabled = false;
                 payButton.textContent = 'Pay & Complete Registration';
             }
@@ -256,12 +270,9 @@
             return prices[tier] || prices['pro'];
         }
 
-        // Get tier from URL if coming from pricing page
         window.onload = () => {
             const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.get('tier')) {
-                currentTier = urlParams.get('tier');
-            }
+            if (urlParams.get('tier')) currentTier = urlParams.get('tier');
         };
     </script>
 </body>
