@@ -93,7 +93,7 @@
             <div class="step" id="step2Indicator">2. Payment</div>
         </div>
 
-        <!-- Step 1: Registration Form -->
+        <!-- Step 1 -->
         <div class="form-container" id="step1">
             <form id="registerForm">
                 <div class="form-group">
@@ -203,7 +203,7 @@
             payButton.textContent = 'Processing...';
 
             try {
-                // Register first
+                // 1. Register tradesperson
                 const regData = {
                     trading_name: document.getElementById('trading_name').value.trim(),
                     contact_name: document.getElementById('contact_name').value.trim(),
@@ -227,7 +227,7 @@
 
                 tradespersonId = regResult.tradesperson_id;
 
-                // Create payment method
+                // 2. Create payment method
                 const { paymentMethod, error } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: card
@@ -235,7 +235,7 @@
 
                 if (error) throw error;
 
-                // Create subscription
+                // 3. Create subscription
                 const subRes = await fetch('/api/subscription/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
