@@ -249,7 +249,7 @@
                 const subResult = await subRes.json();
                 if (!subRes.ok) throw new Error(subResult.detail || 'Subscription failed');
 
-                // Success
+                // Success - payment should now show in Stripe
                 document.getElementById('step2').style.display = 'none';
                 document.getElementById('successSection').style.display = 'block';
 
