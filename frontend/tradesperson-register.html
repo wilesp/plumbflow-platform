@@ -238,10 +238,12 @@
                 const subResult = await subRes.json();
                 if (!subRes.ok) throw new Error(subResult.detail || 'Subscription failed');
 
-                // 4. Confirm the payment (THIS WAS MISSING)
-                const { error: confirmError } = await stripe.confirmCardPayment(subResult.clientSecret);
+                // 4. Confirm the payment (THIS WAS THE MISSING PART)
+                const confirmRes = await stripe.confirmCardPayment(subResult.clientSecret, {
+                    payment_method: paymentMethod.id
+                });
 
-                if (confirmError) throw confirmError;
+                if (confirmRes.error) throw confirmRes.error;
 
                 // SUCCESS
                 document.getElementById('step2').style.display = 'none';
