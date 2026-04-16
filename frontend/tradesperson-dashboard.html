@@ -3,167 +3,197 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard - Best Trade</title>
+    <title>Tradesperson Dashboard - Best Trade</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; 
-            background: #f8fafc; 
-            color: #1e293b; 
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            min-height: 100vh;
+            color: #333;
         }
-        .container { 
-            max-width: 1100px; 
-            margin: 0 auto; 
-            padding: 20px; 
-        }
-        header {
-            background: white;
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
             padding: 20px;
+        }
+        .header {
+            background: white;
             border-radius: 12px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
         }
-        h1 { font-size: 2rem; color: #1e3a5f; }
+        .welcome {
+            font-size: 1.8rem;
+            color: #1e3a5f;
+        }
+        .status {
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .active { background: #d1fae5; color: #166534; }
+        
         .section {
             background: white;
             border-radius: 12px;
-            padding: 25px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
             margin-bottom: 30px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
         }
-        .lead-card, .managed-card {
+        .section h2 {
+            margin-bottom: 20px;
+            color: #1e3a5f;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        .card {
             border: 1px solid #e2e8f0;
             border-radius: 10px;
-            padding: 18px;
+            padding: 20px;
             margin-bottom: 15px;
-            background: #fafcff;
+            background: #f8fafc;
+        }
+        .card h3 {
+            margin-bottom: 10px;
+            color: #1e3a5f;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-top: 15px;
+        }
+        .info-item {
+            font-size: 0.95rem;
+        }
+        .info-item strong {
+            color: #334155;
+        }
+        .contact-info {
+            background: #fef3c7;
+            padding: 12px;
+            border-radius: 8px;
+            margin-top: 15px;
         }
         .btn {
             padding: 10px 20px;
-            background: #10b981;
+            background: #1e3a5f;
             color: white;
             border: none;
             border-radius: 8px;
             cursor: pointer;
             font-weight: 600;
         }
-        .btn:hover { background: #059669; }
-        .empty, .loading { 
-            color: #64748b; 
-            font-style: italic; 
-            padding: 30px 0; 
-            text-align: center; 
+        .empty {
+            text-align: center;
+            color: #64748b;
+            padding: 40px 20px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <header>
-            <h1>Welcome back, <span id="tradingName">Loading...</span>!</h1>
+        <div class="header">
             <div>
-                Plan: <strong><span id="subscriptionTier">...</span></strong><br>
-                Status: <strong><span id="subscriptionStatus">...</span></strong>
+                <h1 class="welcome" id="welcomeText">Welcome back, Trader</h1>
+                <p id="planText">Plan: PRO • Status: Active</p>
             </div>
-        </header>
+            <button onclick="signOut()" class="btn">Sign Out</button>
+        </div>
 
         <!-- Pending Leads -->
         <div class="section">
             <h2>Pending Leads</h2>
-            <div id="pendingLeadsContainer">
-                <p class="loading">Loading leads...</p>
-            </div>
+            <div id="pendingLeads">Loading pending leads...</div>
         </div>
 
         <!-- Jobs You're Managing -->
         <div class="section">
             <h2>Jobs You're Managing</h2>
-            <div id="managedJobsContainer">
-                <p class="loading">Loading your managed jobs...</p>
-            </div>
+            <div id="managedJobs">Loading your managed jobs...</div>
         </div>
     </div>
 
     <script>
         async function loadDashboard() {
-            const pendingContainer = document.getElementById('pendingLeadsContainer');
-            const managedContainer = document.getElementById('managedJobsContainer');
-
-            pendingContainer.innerHTML = '<p class="loading">Loading leads...</p>';
-            managedContainer.innerHTML = '<p class="loading">Loading your managed jobs...</p>';
-
             try {
                 // Load user info
                 const meRes = await fetch('/api/tradesperson/me', { credentials: 'include' });
-                if (meRes.ok) {
-                    const user = await meRes.json();
-                    if (user.success) {
-                        document.getElementById('tradingName').textContent = user.trading_name || 'Trader';
-                        document.getElementById('subscriptionTier').textContent = (user.subscription_tier || '').toUpperCase();
-                        document.getElementById('subscriptionStatus').textContent = user.subscription_status || 'Active';
-                    }
+                const meData = await meRes.json();
+                if (meData.success) {
+                    document.getElementById('welcomeText').textContent = `Welcome back, ${meData.trading_name}`;
+                    document.getElementById('planText').innerHTML = `Plan: ${meData.subscription_tier.toUpperCase()} • Status: ${meData.subscription_status}`;
                 }
 
-                // Load Pending Leads
-                const leadsRes = await fetch('/api/tradesperson/pending-leads', { credentials: 'include' });
-                const leadsData = await leadsRes.json();
+                // Load pending leads
+                const pendingRes = await fetch('/api/tradesperson/pending-leads', { credentials: 'include' });
+                const pendingData = await pendingRes.json();
+                const pendingDiv = document.getElementById('pendingLeads');
+                pendingDiv.innerHTML = '';
 
-                if (leadsData.success && leadsData.leads && leadsData.leads.length > 0) {
-                    pendingContainer.innerHTML = '';
-                    leadsData.leads.forEach(lead => {
-                        const jobId = lead.id || lead.job_id || '';
+                if (pendingData.leads && pendingData.leads.length > 0) {
+                    pendingData.leads.forEach(lead => {
                         const card = document.createElement('div');
-                        card.className = 'lead-card';
+                        card.className = 'card';
                         card.innerHTML = `
-                            <h3>${lead.trade_category || ''} — ${lead.job_type || ''}</h3>
-                            <p><strong>Postcode:</strong> ${lead.postcode || ''}</p>
-                            <p><strong>Urgency:</strong> ${lead.urgency || ''}</p>
-                            <p>${lead.description || ''}</p>
-                            <button class="btn" onclick="acceptLead('${jobId}')">Accept Lead</button>
+                            <h3>${lead.trade_category} — ${lead.job_type}</h3>
+                            <p><strong>Description:</strong> ${lead.description}</p>
+                            <div class="info-grid">
+                                <div class="info-item"><strong>Postcode:</strong> ${lead.postcode}</div>
+                                <div class="info-item"><strong>Urgency:</strong> ${lead.urgency}</div>
+                            </div>
+                            <button onclick="acceptLead('${lead.id}')" class="btn" style="margin-top:15px;">Accept Lead</button>
                         `;
-                        pendingContainer.appendChild(card);
+                        pendingDiv.appendChild(card);
                     });
                 } else {
-                    pendingContainer.innerHTML = '<p class="empty">No pending leads at the moment.</p>';
+                    pendingDiv.innerHTML = '<div class="empty">No pending leads at the moment.<br>New jobs will appear here.</div>';
                 }
 
-                // Load Jobs You're Managing
+                // Load managed jobs with customer contact details
                 const managedRes = await fetch('/api/tradesperson/managed-jobs', { credentials: 'include' });
                 const managedData = await managedRes.json();
+                const managedDiv = document.getElementById('managedJobs');
+                managedDiv.innerHTML = '';
 
-                if (managedData.success && managedData.jobs && managedData.jobs.length > 0) {
-                    managedContainer.innerHTML = '';
+                if (managedData.jobs && managedData.jobs.length > 0) {
                     managedData.jobs.forEach(job => {
                         const card = document.createElement('div');
-                        card.className = 'managed-card';
+                        card.className = 'card';
                         card.innerHTML = `
-                            <h3>${job.trade_category || ''} — ${job.job_type || ''}</h3>
-                            <p><strong>Postcode:</strong> ${job.postcode || ''}</p>
-                            <p><strong>Urgency:</strong> ${job.urgency || ''}</p>
-                            <p>${job.description || ''}</p>
-                            <p><strong>Accepted:</strong> ${new Date(job.accepted_at).toLocaleDateString()}</p>
-                            <p><strong>Status:</strong> <span style="color:#10b981;">${job.status || 'active'}</span></p>
+                            <h3>${job.trade_category} — ${job.job_type}</h3>
+                            <p><strong>Description:</strong> ${job.description}</p>
+                            <div class="info-grid">
+                                <div class="info-item"><strong>Postcode:</strong> ${job.postcode}</div>
+                                <div class="info-item"><strong>Urgency:</strong> ${job.urgency}</div>
+                                <div class="info-item"><strong>Accepted:</strong> ${new Date(job.accepted_at).toLocaleDateString()}</div>
+                                <div class="info-item"><strong>Status:</strong> ${job.status}</div>
+                            </div>
+                            <div class="contact-info">
+                                <strong>Customer Contact:</strong><br>
+                                ${job.customer_name ? `Name: ${job.customer_name}<br>` : ''}
+                                ${job.customer_phone ? `Phone: ${job.customer_phone}<br>` : ''}
+                                ${job.customer_email ? `Email: ${job.customer_email}<br>` : ''}
+                                ${job.address ? `Address: ${job.address}` : ''}
+                            </div>
                         `;
-                        managedContainer.appendChild(card);
+                        managedDiv.appendChild(card);
                     });
                 } else {
-                    managedContainer.innerHTML = '<p class="empty">No active jobs yet.<br><small>Accepted leads will appear here.</small></p>';
+                    managedDiv.innerHTML = '<div class="empty">You have not accepted any jobs yet.<br>When you accept a lead from Pending Leads, it will move here.</div>';
                 }
-
             } catch (err) {
                 console.error(err);
-                pendingContainer.innerHTML = '<p class="empty">Error loading leads. Please refresh the page.</p>';
-                managedContainer.innerHTML = '<p class="empty">Error loading managed jobs.</p>';
+                document.getElementById('pendingLeads').innerHTML = '<div class="empty">Error loading data. Please refresh.</div>';
             }
         }
 
         async function acceptLead(jobId) {
-            if (!jobId) {
-                alert("Error: Job ID is missing. Please refresh the page.");
-                return;
-            }
             if (!confirm(`Accept this lead (Job ${jobId})?`)) return;
 
             try {
@@ -174,10 +204,10 @@
                     credentials: 'include'
                 });
 
-                if (res.ok) {
-                    const result = await res.json();
-                    alert(result.message || `✅ Lead ${jobId} accepted successfully!`);
-                    loadDashboard();   // Refresh both sections
+                const result = await res.json();
+                if (result.success) {
+                    alert(result.message || 'Lead accepted successfully!');
+                    loadDashboard(); // Refresh both sections
                 } else {
                     alert('Failed to accept lead');
                 }
@@ -187,6 +217,12 @@
             }
         }
 
+        function signOut() {
+            document.cookie = "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = '/';
+        }
+
+        // Load dashboard on page load
         window.onload = loadDashboard;
     </script>
 </body>
