@@ -97,24 +97,31 @@
                     <label>Trade Category <span style="color:red">*</span></label>
                     <select id="trade_category" required>
                         <option value="">Select your main trade...</option>
-                        <optgroup label="Emergency & Core Trades">
+                        <optgroup label="Emergency Services">
                             <option value="plumber">Plumber</option>
                             <option value="electrician">Electrician</option>
                             <option value="gas-engineer">Gas Engineer</option>
-                            <option value="heating-engineer">Heating Engineer</option>
+                            <option value="locksmith">Locksmith</option>
+                            <option value="drainage">Drainage Specialist</option>
                         </optgroup>
-                        <optgroup label="Building & Construction">
+                        <optgroup label="Heating & Boilers">
+                            <option value="heating-engineer">Heating Engineer</option>
+                            <option value="boiler-installer">Boiler Installer</option>
+                            <option value="hvac">HVAC Engineer</option>
+                        </optgroup>
+                        <optgroup label="Construction & Building">
                             <option value="builder">Builder</option>
                             <option value="carpenter">Carpenter</option>
                             <option value="roofer">Roofer</option>
                             <option value="plasterer">Plasterer</option>
                         </optgroup>
-                        <optgroup label="Interior & Finishing">
+                        <optgroup label="Interior & Fitting">
                             <option value="painter-decorator">Painter & Decorator</option>
                             <option value="tiler">Tiler</option>
                             <option value="kitchen-fitter">Kitchen Fitter</option>
                             <option value="bathroom-fitter">Bathroom Fitter</option>
                             <option value="flooring">Flooring Specialist</option>
+                            <option value="window-fitter">Window Fitter</option>
                         </optgroup>
                         <optgroup label="Other Services">
                             <option value="handyman">Handyman</option>
@@ -192,7 +199,6 @@
             payButton.textContent = 'Processing...';
 
             try {
-                // 1. Register tradesperson
                 const regData = {
                     trading_name: document.getElementById('trading_name').value.trim(),
                     contact_name: document.getElementById('contact_name').value.trim(),
@@ -216,7 +222,6 @@
 
                 tradespersonId = regResult.tradesperson_id;
 
-                // 2. Create payment method
                 const { paymentMethod, error } = await stripe.createPaymentMethod({
                     type: 'card',
                     card: card
@@ -224,7 +229,6 @@
 
                 if (error) throw error;
 
-                // 3. Create subscription
                 const subRes = await fetch('/api/subscription/create', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -238,14 +242,12 @@
                 const subResult = await subRes.json();
                 if (!subRes.ok) throw new Error(subResult.detail || 'Subscription failed');
 
-                // 4. Confirm the payment - THIS IS THE CRITICAL LINE
                 const confirmRes = await stripe.confirmCardPayment(subResult.clientSecret, {
                     payment_method: paymentMethod.id
                 });
 
                 if (confirmRes.error) throw confirmRes.error;
 
-                // SUCCESS
                 document.getElementById('step2').style.display = 'none';
                 document.getElementById('successSection').style.display = 'block';
 
