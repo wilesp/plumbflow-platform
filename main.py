@@ -38,7 +38,7 @@ async def register_tradesperson(request: Request):
                 trading_name, contact_name, email, phone, postcode,
                 trade_category, subscription_tier, subscription_status,
                 can_receive_jobs, created_at, postcode_area
-            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'pending', true, NOW(), UPPER(SPLIT_PART(%s, ' ', 1)))
+            ) VALUES (%s, %s, %s, %s, %s, %s, %s, 'active', true, NOW(), UPPER(SPLIT_PART(%s, ' ', 1)))
             RETURNING id
         """, (
             data.get('trading_name'),
@@ -110,7 +110,7 @@ async def create_subscription(request: Request):
             UPDATE tradespeople 
             SET stripe_customer_id = %s, 
                 stripe_subscription_id = %s, 
-                subscription_status = 'active',   -- Changed to active after payment
+                subscription_status = 'active',
                 subscription_tier = %s
             WHERE id = %s
         """, (customer.id, subscription.id, tier, tradesperson_id))
@@ -199,7 +199,7 @@ async def get_current_tradesperson(request: Request):
         "subscription_status": user.get("subscription_status")
     }
 
-# ====================== PENDING LEADS ======================
+# ====================== PENDING LEADS (with Trade Category Matching) ======================
 @app.get("/api/tradesperson/pending-leads")
 async def get_pending_leads(request: Request):
     session_token = request.cookies.get("session_token")
@@ -342,12 +342,13 @@ async def post_job(request: Request):
         ))
         job_id = cursor.fetchone()['id']
 
+        # Trade Category + Postcode Matching
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             SELECT %s, t.id, NOW(), 'dashboard'
             FROM tradespeople t
             WHERE t.can_receive_jobs = true 
-              AND t.subscription_status IN ('pending', 'active')
+              AND t.subscription_status = 'active'
               AND t.trade_category = %s
               AND (
                   t.subscription_tier = 'premium'
