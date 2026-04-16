@@ -70,7 +70,7 @@ async def register_tradesperson(request: Request):
         print(f"Registration error: {e}")
         raise HTTPException(status_code=500, detail="Registration failed")
 
-# ====================== SUBSCRIPTION CREATE ======================
+# ====================== SUBSCRIPTION ======================
 @app.post("/api/subscription/create")
 async def create_subscription(request: Request):
     try:
@@ -135,7 +135,6 @@ async def simple_signin(request: Request):
     try:
         data = await request.json()
         email = data.get('email', '').strip().lower()
-        print(f"Signin attempt for email: '{email}'")
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -146,11 +145,9 @@ async def simple_signin(request: Request):
         if not user:
             cursor.close()
             conn.close()
-            print(f"User not found for email: {email}")
             raise HTTPException(status_code=404, detail="User not found")
 
         tradesperson_id = str(user['id'])
-        print(f"User found - ID: {tradesperson_id}")
 
         session_token = secrets.token_urlsafe(32)
         cursor.execute("""
@@ -199,7 +196,7 @@ async def get_current_tradesperson(request: Request):
         "subscription_status": user.get("subscription_status")
     }
 
-# ====================== PENDING LEADS ======================
+# ====================== PENDING LEADS with Tier + Postcode Logic ======================
 @app.get("/api/tradesperson/pending-leads")
 async def get_pending_leads(request: Request):
     session_token = request.cookies.get("session_token")
@@ -228,7 +225,7 @@ async def get_pending_leads(request: Request):
         print(f"Pending leads error: {e}")
         return {"success": True, "leads": []}
 
-# ====================== MANAGED JOBS (Now includes Customer Contact Details) ======================
+# ====================== MANAGED JOBS (with Customer Contact) ======================
 @app.get("/api/tradesperson/managed-jobs")
 async def get_managed_jobs(request: Request):
     session_token = request.cookies.get("session_token")
@@ -270,7 +267,7 @@ async def get_managed_jobs(request: Request):
         print(f"Managed jobs error: {e}")
         return {"success": True, "jobs": []}
 
-# ====================== ACCEPT LEAD (Multiple Accepts) ======================
+# ====================== ACCEPT LEAD ======================
 @app.post("/api/tradesperson/accept-lead")
 async def accept_lead(request: Request):
     try:
@@ -323,7 +320,7 @@ async def accept_lead(request: Request):
         print(f"Accept lead error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to accept lead")
 
-# ====================== POST JOB ======================
+# ====================== POST JOB with Tier + Postcode Logic ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -355,6 +352,7 @@ async def post_job(request: Request):
         ))
         job_id = cursor.fetchone()['id']
 
+        # === TIER + POSTCODE MATCHING LOGIC ===
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             SELECT %s, t.id, NOW(), 'dashboard'
@@ -363,18 +361,21 @@ async def post_job(request: Request):
               AND t.subscription_status = 'active'
               AND t.trade_category = %s
               AND (
-                  t.subscription_tier = 'premium'
-                  OR COALESCE(t.postcode_area, '') = %s
-                  OR (t.subscription_tier = 'pro' AND COALESCE(t.postcode_area, '') LIKE %s)
+                    t.subscription_tier = 'premium'                                      -- Premium sees everything in the trade
+                OR (t.subscription_tier = 'pro' 
+                    AND (COALESCE(t.postcode_area, '') = %s 
+                         OR COALESCE(t.postcode_area, '') LIKE %s))                     -- Pro sees same area + nearby (HP1, HP2...)
+                OR (t.subscription_tier = 'basic' 
+                    AND COALESCE(t.postcode_area, '') = %s)                              -- Basic sees only exact same postcode area
               )
             ON CONFLICT (job_id, plumber_id) DO NOTHING
-        """, (job_id, job_trade_category, job_postcode_area, job_postcode_area + '%'))
+        """, (job_id, job_trade_category, job_postcode_area, job_postcode_area + '%', job_postcode_area))
 
         conn.commit()
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted successfully.")
+        print(f"Job {job_id} posted successfully with trade '{job_trade_category}'.")
         return {"success": True, "job_id": job_id}
 
     except Exception as e:
