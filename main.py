@@ -110,7 +110,7 @@ async def create_subscription(request: Request):
             UPDATE tradespeople 
             SET stripe_customer_id = %s, 
                 stripe_subscription_id = %s, 
-                subscription_status = 'pending',
+                subscription_status = 'active',   -- Changed to active after payment
                 subscription_tier = %s
             WHERE id = %s
         """, (customer.id, subscription.id, tier, tradesperson_id))
