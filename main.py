@@ -228,7 +228,7 @@ async def get_pending_leads(request: Request):
         print(f"Pending leads error: {e}")
         return {"success": True, "leads": []}
 
-# ====================== MANAGED JOBS ======================
+# ====================== MANAGED JOBS (Now includes Customer Contact Details) ======================
 @app.get("/api/tradesperson/managed-jobs")
 async def get_managed_jobs(request: Request):
     session_token = request.cookies.get("session_token")
@@ -239,7 +239,20 @@ async def get_managed_jobs(request: Request):
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute("""
-            SELECT j.id, j.trade_category, j.job_type, j.description, j.postcode, j.urgency, j.created_at, m.accepted_at, m.status
+            SELECT 
+                j.id, 
+                j.trade_category, 
+                j.job_type, 
+                j.description, 
+                j.postcode, 
+                j.urgency, 
+                j.created_at, 
+                j.customer_name,
+                j.customer_phone,
+                j.customer_email,
+                j.address,
+                m.accepted_at, 
+                m.status
             FROM managed_jobs m
             JOIN jobs j ON m.job_id = j.id
             WHERE m.tradesperson_id = (
@@ -257,7 +270,7 @@ async def get_managed_jobs(request: Request):
         print(f"Managed jobs error: {e}")
         return {"success": True, "jobs": []}
 
-# ====================== ACCEPT LEAD (Multiple Accepts Enabled) ======================
+# ====================== ACCEPT LEAD (Multiple Accepts) ======================
 @app.post("/api/tradesperson/accept-lead")
 async def accept_lead(request: Request):
     try:
@@ -288,13 +301,11 @@ async def accept_lead(request: Request):
 
         tradesperson_id = session['tradesperson_id']
 
-        # Remove ONLY from this tradesperson's pending leads (others can still see it)
         cursor.execute("""
             DELETE FROM pending_leads 
             WHERE job_id = %s AND plumber_id = %s
         """, (job_id, tradesperson_id))
 
-        # Add to their managed jobs
         cursor.execute("""
             INSERT INTO managed_jobs (job_id, tradesperson_id, status)
             VALUES (%s, %s, 'active')
@@ -305,7 +316,7 @@ async def accept_lead(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"✅ Lead {job_id} accepted by tradesperson {tradesperson_id} (multiple accepts allowed)")
+        print(f"✅ Lead {job_id} accepted by tradesperson {tradesperson_id}")
         return {"success": True, "message": f"Lead {job_id} accepted successfully"}
 
     except Exception as e:
@@ -344,7 +355,6 @@ async def post_job(request: Request):
         ))
         job_id = cursor.fetchone()['id']
 
-        # Trade Category + Postcode Matching
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             SELECT %s, t.id, NOW(), 'dashboard'
@@ -364,7 +374,7 @@ async def post_job(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted successfully with trade '{job_trade_category}'.")
+        print(f"Job {job_id} posted successfully.")
         return {"success": True, "job_id": job_id}
 
     except Exception as e:
