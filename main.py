@@ -199,7 +199,7 @@ async def get_current_tradesperson(request: Request):
         "subscription_status": user.get("subscription_status")
     }
 
-# ====================== PENDING LEADS (with Trade Category Matching) ======================
+# ====================== PENDING LEADS ======================
 @app.get("/api/tradesperson/pending-leads")
 async def get_pending_leads(request: Request):
     session_token = request.cookies.get("session_token")
@@ -257,7 +257,7 @@ async def get_managed_jobs(request: Request):
         print(f"Managed jobs error: {e}")
         return {"success": True, "jobs": []}
 
-# ====================== ACCEPT LEAD ======================
+# ====================== ACCEPT LEAD (Multiple Accepts Enabled) ======================
 @app.post("/api/tradesperson/accept-lead")
 async def accept_lead(request: Request):
     try:
@@ -288,11 +288,13 @@ async def accept_lead(request: Request):
 
         tradesperson_id = session['tradesperson_id']
 
+        # Remove ONLY from this tradesperson's pending leads (others can still see it)
         cursor.execute("""
             DELETE FROM pending_leads 
             WHERE job_id = %s AND plumber_id = %s
         """, (job_id, tradesperson_id))
 
+        # Add to their managed jobs
         cursor.execute("""
             INSERT INTO managed_jobs (job_id, tradesperson_id, status)
             VALUES (%s, %s, 'active')
@@ -303,14 +305,14 @@ async def accept_lead(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"✅ Lead {job_id} accepted by tradesperson {tradesperson_id}")
+        print(f"✅ Lead {job_id} accepted by tradesperson {tradesperson_id} (multiple accepts allowed)")
         return {"success": True, "message": f"Lead {job_id} accepted successfully"}
 
     except Exception as e:
         print(f"Accept lead error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to accept lead")
 
-# ====================== POST JOB WITH TRADE CATEGORY MATCHING ======================
+# ====================== POST JOB ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -362,7 +364,7 @@ async def post_job(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted with trade '{job_trade_category}'.")
+        print(f"Job {job_id} posted successfully with trade '{job_trade_category}'.")
         return {"success": True, "job_id": job_id}
 
     except Exception as e:
