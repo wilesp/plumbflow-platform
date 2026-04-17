@@ -24,11 +24,15 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 async def health():
     return {"status": "healthy"}
 
-# ====================== REGISTRATION ======================
+# ====================== REGISTRATION (Multi-Trade Support) ======================
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
         data = await request.json()
+
+        trade_categories = data.get('trade_categories', [])
+        if not isinstance(trade_categories, list) or len(trade_categories) == 0:
+            raise HTTPException(status_code=400, detail="At least one trade category is required")
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
@@ -46,7 +50,7 @@ async def register_tradesperson(request: Request):
             data.get('email'),
             data.get('phone'),
             data.get('postcode'),
-            data.get('trade_category'),
+            trade_categories,                    # Now an array
             data.get('subscription_tier', 'pro'),
             data.get('postcode')
         ))
@@ -70,7 +74,7 @@ async def register_tradesperson(request: Request):
         print(f"Registration error: {e}")
         raise HTTPException(status_code=500, detail="Registration failed")
 
-# ====================== SUBSCRIPTION ======================
+# ====================== SUBSCRIPTION CREATE ======================
 @app.post("/api/subscription/create")
 async def create_subscription(request: Request):
     try:
@@ -196,7 +200,7 @@ async def get_current_tradesperson(request: Request):
         "subscription_status": user.get("subscription_status")
     }
 
-# ====================== PENDING LEADS with Tier + Postcode Logic ======================
+# ====================== PENDING LEADS (Multi-Trade Support) ======================
 @app.get("/api/tradesperson/pending-leads")
 async def get_pending_leads(request: Request):
     session_token = request.cookies.get("session_token")
@@ -225,7 +229,7 @@ async def get_pending_leads(request: Request):
         print(f"Pending leads error: {e}")
         return {"success": True, "leads": []}
 
-# ====================== MANAGED JOBS (with Customer Contact) ======================
+# ====================== MANAGED JOBS ======================
 @app.get("/api/tradesperson/managed-jobs")
 async def get_managed_jobs(request: Request):
     session_token = request.cookies.get("session_token")
@@ -320,7 +324,7 @@ async def accept_lead(request: Request):
         print(f"Accept lead error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to accept lead")
 
-# ====================== POST JOB with Tier + Postcode Logic ======================
+# ====================== POST JOB (Multi-Trade Matching) ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -352,21 +356,21 @@ async def post_job(request: Request):
         ))
         job_id = cursor.fetchone()['id']
 
-        # === TIER + POSTCODE MATCHING LOGIC ===
+        # Multi-Trade Matching: any of the company's trades matches the job
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             SELECT %s, t.id, NOW(), 'dashboard'
             FROM tradespeople t
             WHERE t.can_receive_jobs = true 
               AND t.subscription_status = 'active'
-              AND t.trade_category = %s
+              AND %s = ANY(t.trade_category)        -- Matches if job trade is in any of the company's trades
               AND (
-                    t.subscription_tier = 'premium'                                      -- Premium sees everything in the trade
+                    t.subscription_tier = 'premium'
                 OR (t.subscription_tier = 'pro' 
                     AND (COALESCE(t.postcode_area, '') = %s 
-                         OR COALESCE(t.postcode_area, '') LIKE %s))                     -- Pro sees same area + nearby (HP1, HP2...)
+                         OR COALESCE(t.postcode_area, '') LIKE %s))
                 OR (t.subscription_tier = 'basic' 
-                    AND COALESCE(t.postcode_area, '') = %s)                              -- Basic sees only exact same postcode area
+                    AND COALESCE(t.postcode_area, '') = %s)
               )
             ON CONFLICT (job_id, plumber_id) DO NOTHING
         """, (job_id, job_trade_category, job_postcode_area, job_postcode_area + '%', job_postcode_area))
@@ -375,7 +379,7 @@ async def post_job(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted successfully with trade '{job_trade_category}'.")
+        print(f"Job {job_id} posted successfully.")
         return {"success": True, "job_id": job_id}
 
     except Exception as e:
