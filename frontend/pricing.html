@@ -19,15 +19,28 @@
             justify-content: space-between;
             align-items: center;
         }
-        .logo { font-size: 22px; font-weight: 700; color: #1e293b; text-decoration: none; }
+        .logo { 
+            font-size: 22px; 
+            font-weight: 700; 
+            color: #1e293b; 
+            text-decoration: none; 
+        }
         .main {
             max-width: 1200px;
             margin: 60px auto;
             padding: 0 20px;
             text-align: center;
         }
-        h1 { font-size: 2.8rem; margin-bottom: 10px; color: #1e3a5f; }
-        p.subtitle { font-size: 1.2rem; color: #64748b; margin-bottom: 50px; }
+        h1 { 
+            font-size: 2.8rem; 
+            margin-bottom: 10px; 
+            color: #1e3a5f; 
+        }
+        p.subtitle { 
+            font-size: 1.2rem; 
+            color: #64748b; 
+            margin-bottom: 50px; 
+        }
         .pricing-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
@@ -68,7 +81,12 @@
         .plan-price {
             font-size: 2.8rem;
             font-weight: 700;
-            margin-bottom: 20px;
+            margin-bottom: 8px;
+        }
+        .plan-price span {
+            font-size: 1rem;
+            font-weight: 400;
+            color: #64748b;
         }
         .plan-description {
             color: #64748b;
@@ -101,6 +119,7 @@
             border-radius: 8px;
             font-weight: 600;
             font-size: 1.1rem;
+            margin-top: 10px;
         }
         .btn:hover { background: #0f172a; }
         .btn.basic { background: #64748b; }
@@ -120,7 +139,7 @@
             <!-- Basic -->
             <div class="plan-card">
                 <div class="plan-name">Basic</div>
-                <div class="plan-price">£20<span style="font-size:1rem; font-weight:400;">/month</span></div>
+                <div class="plan-price">£20<span>/month</span></div>
                 <div class="plan-description">
                     Perfect for new traders or those starting locally.<br>
                     <strong>15-mile radius</strong> coverage.
@@ -140,7 +159,7 @@
             <div class="plan-card popular">
                 <div class="popular-badge">Most Popular</div>
                 <div class="plan-name">Pro</div>
-                <div class="plan-price">£30<span style="font-size:1rem; font-weight:400;">/month</span></div>
+                <div class="plan-price">£30<span>/month</span></div>
                 <div class="plan-description">
                     Ideal for growing businesses.<br>
                     <strong>30-mile radius</strong> coverage.
@@ -160,7 +179,7 @@
             <!-- Premium -->
             <div class="plan-card">
                 <div class="plan-name">Premium</div>
-                <div class="plan-price">£200<span style="font-size:1rem; font-weight:400;">/month</span></div>
+                <div class="plan-price">£200<span>/year</span></div>
                 <div class="plan-description">
                     Maximum reach for busy traders.<br>
                     <strong>Nationwide</strong> coverage.
@@ -173,6 +192,7 @@
                         <li>Priority customer matching</li>
                         <li>Dedicated account manager</li>
                         <li>Advanced analytics</li>
+                        <li><strong>1 year free featured advertising</strong></li>
                     </ul>
                 </div>
                 <a href="/tradesperson-register.html?tier=premium" class="btn">Choose Premium</a>
