@@ -48,6 +48,23 @@
             font-size: 1rem;
         }
         input:focus, select:focus { outline: none; border-color: #1e3a5f; }
+        .multi-select {
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 10px;
+            max-height: 240px;
+            overflow-y: auto;
+            background: #f8fafc;
+        }
+        .multi-select label {
+            display: block;
+            padding: 8px 10px;
+            margin: 4px 0;
+            cursor: pointer;
+        }
+        .multi-select input[type="checkbox"] {
+            margin-right: 8px;
+        }
         .submit-btn {
             width: 100%;
             padding: 16px;
@@ -94,40 +111,10 @@
                     <input type="text" id="contact_name" required placeholder="e.g. Dan Smith">
                 </div>
                 <div class="form-group">
-                    <label>Trade Category <span style="color:red">*</span></label>
-                    <select id="trade_category" required>
-                        <option value="">Select your main trade...</option>
-                        <optgroup label="Emergency Services">
-                            <option value="plumber">Plumber</option>
-                            <option value="electrician">Electrician</option>
-                            <option value="gas-engineer">Gas Engineer</option>
-                            <option value="locksmith">Locksmith</option>
-                            <option value="drainage">Drainage Specialist</option>
-                        </optgroup>
-                        <optgroup label="Heating & Boilers">
-                            <option value="heating-engineer">Heating Engineer</option>
-                            <option value="boiler-installer">Boiler Installer</option>
-                            <option value="hvac">HVAC Engineer</option>
-                        </optgroup>
-                        <optgroup label="Construction & Building">
-                            <option value="builder">Builder</option>
-                            <option value="carpenter">Carpenter</option>
-                            <option value="roofer">Roofer</option>
-                            <option value="plasterer">Plasterer</option>
-                        </optgroup>
-                        <optgroup label="Interior & Fitting">
-                            <option value="painter-decorator">Painter & Decorator</option>
-                            <option value="tiler">Tiler</option>
-                            <option value="kitchen-fitter">Kitchen Fitter</option>
-                            <option value="bathroom-fitter">Bathroom Fitter</option>
-                            <option value="flooring">Flooring Specialist</option>
-                            <option value="window-fitter">Window Fitter</option>
-                        </optgroup>
-                        <optgroup label="Other Services">
-                            <option value="handyman">Handyman</option>
-                            <option value="landscaper">Landscaper / Gardener</option>
-                        </optgroup>
-                    </select>
+                    <label>Trade Categories <span style="color:red">*</span> (select all that apply)</label>
+                    <div class="multi-select" id="trade_categories">
+                        <!-- Populated by JavaScript -->
+                    </div>
                 </div>
                 <div class="form-group">
                     <label>Email Address <span style="color:red">*</span></label>
@@ -162,7 +149,7 @@
         <!-- Success -->
         <div class="success-section" id="successSection">
             <h2>✅ Registration & Payment Successful!</h2>
-            <p>Your account is now active and ready to receive jobs.</p>
+            <p>Your account is now active and ready to receive jobs from all your selected trades.</p>
             <button onclick="window.location.href='/'" class="submit-btn">
                 Return to Home Page
             </button>
@@ -176,7 +163,52 @@
         let tradespersonId;
         let currentTier = 'pro';
 
+        // Full list of trades - aligned with customer post job form
+        const tradeOptions = [
+            {value: "plumber", label: "Plumber"},
+            {value: "electrician", label: "Electrician"},
+            {value: "gas-engineer", label: "Gas Engineer"},
+            {value: "heating-engineer", label: "Heating Engineer"},
+            {value: "boiler-installer", label: "Boiler Installer"},
+            {value: "hvac", label: "HVAC Engineer"},
+            {value: "builder", label: "Builder"},
+            {value: "carpenter", label: "Carpenter"},
+            {value: "roofer", label: "Roofer"},
+            {value: "plasterer", label: "Plasterer"},
+            {value: "painter-decorator", label: "Painter & Decorator"},
+            {value: "tiler", label: "Tiler"},
+            {value: "kitchen-fitter", label: "Kitchen Fitter"},
+            {value: "bathroom-fitter", label: "Bathroom Fitter"},
+            {value: "flooring", label: "Flooring Specialist"},
+            {value: "window-fitter", label: "Window Fitter"},
+            {value: "handyman", label: "Handyman"},
+            {value: "landscaper", label: "Landscaper / Gardener"},
+            {value: "drainage", label: "Drainage Specialist"},
+            {value: "locksmith", label: "Locksmith"}
+        ];
+
+        // Populate multi-select checkboxes
+        function populateTradeOptions() {
+            const container = document.getElementById('trade_categories');
+            container.innerHTML = '';
+            tradeOptions.forEach(trade => {
+                const label = document.createElement('label');
+                label.innerHTML = `
+                    <input type="checkbox" name="trade_categories" value="${trade.value}"> ${trade.label}
+                `;
+                container.appendChild(label);
+            });
+        }
+
         async function goToPayment() {
+            const selectedTrades = Array.from(document.querySelectorAll('input[name="trade_categories"]:checked'))
+                                      .map(cb => cb.value);
+
+            if (selectedTrades.length === 0) {
+                alert("Please select at least one trade category");
+                return;
+            }
+
             const form = document.getElementById('registerForm');
             if (!form.checkValidity()) {
                 form.reportValidity();
@@ -199,13 +231,16 @@
             payButton.textContent = 'Processing...';
 
             try {
+                const selectedTrades = Array.from(document.querySelectorAll('input[name="trade_categories"]:checked'))
+                                          .map(cb => cb.value);
+
                 const regData = {
                     trading_name: document.getElementById('trading_name').value.trim(),
                     contact_name: document.getElementById('contact_name').value.trim(),
                     email: document.getElementById('email').value.trim(),
                     phone: document.getElementById('phone').value.trim(),
                     postcode: document.getElementById('postcode').value.trim().toUpperCase(),
-                    trade_category: document.getElementById('trade_category').value,
+                    trade_categories: selectedTrades,
                     subscription_tier: currentTier
                 };
 
@@ -269,6 +304,7 @@
         }
 
         window.onload = () => {
+            populateTradeOptions();
             const urlParams = new URLSearchParams(window.location.search);
             if (urlParams.get('tier')) currentTier = urlParams.get('tier');
         };
