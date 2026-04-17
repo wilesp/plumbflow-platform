@@ -57,28 +57,30 @@
             border-color: #1e3a5f; 
         }
 
-        /* Clean & Simple Multi-Select */
+        /* Simple & Clean Multi-Select */
         .multi-select {
             border: 2px solid #e2e8f0;
             border-radius: 8px;
             padding: 16px;
-            max-height: 280px;
+            max-height: 300px;
             overflow-y: auto;
             background: #f8fafc;
-            column-count: 2;
-            column-gap: 40px;
         }
         .multi-select label {
             display: flex;
             align-items: center;
-            padding: 6px 0;
-            font-size: 1rem;
-            break-inside: avoid;
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            border-radius: 6px;
+            transition: background 0.2s;
+        }
+        .multi-select label:hover {
+            background: #e0e7ff;
         }
         .multi-select input[type="checkbox"] {
             margin-right: 12px;
             accent-color: #1e3a5f;
-            transform: scale(1.15);
+            transform: scale(1.2);
         }
 
         .submit-btn {
