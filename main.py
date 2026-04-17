@@ -24,7 +24,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 async def health():
     return {"status": "healthy"}
 
-# ====================== REGISTRATION (Multi-Trade Support) ======================
+# ====================== REGISTRATION (Multi-Trade) ======================
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
@@ -50,7 +50,7 @@ async def register_tradesperson(request: Request):
             data.get('email'),
             data.get('phone'),
             data.get('postcode'),
-            trade_categories,                    # Now an array
+            trade_categories,
             data.get('subscription_tier', 'pro'),
             data.get('postcode')
         ))
@@ -200,7 +200,7 @@ async def get_current_tradesperson(request: Request):
         "subscription_status": user.get("subscription_status")
     }
 
-# ====================== PENDING LEADS (Multi-Trade Support) ======================
+# ====================== PENDING LEADS (Multi-Trade) ======================
 @app.get("/api/tradesperson/pending-leads")
 async def get_pending_leads(request: Request):
     session_token = request.cookies.get("session_token")
@@ -356,14 +356,14 @@ async def post_job(request: Request):
         ))
         job_id = cursor.fetchone()['id']
 
-        # Multi-Trade Matching: any of the company's trades matches the job
+        # Multi-Trade Matching: ANY of the company's trades matches the job
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             SELECT %s, t.id, NOW(), 'dashboard'
             FROM tradespeople t
             WHERE t.can_receive_jobs = true 
               AND t.subscription_status = 'active'
-              AND %s = ANY(t.trade_category)        -- Matches if job trade is in any of the company's trades
+              AND %s = ANY(t.trade_category)
               AND (
                     t.subscription_tier = 'premium'
                 OR (t.subscription_tier = 'pro' 
@@ -379,7 +379,7 @@ async def post_job(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted successfully.")
+        print(f"Job {job_id} posted successfully with trade '{job_trade_category}'.")
         return {"success": True, "job_id": job_id}
 
     except Exception as e:
