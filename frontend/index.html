@@ -77,7 +77,7 @@
         .hero {
             background: #1e3a5f;
             color: white;
-            padding: 100px 30px;
+            padding: 110px 30px;
             text-align: center;
         }
         
@@ -88,7 +88,7 @@
         }
         
         .hero p {
-            font-size: 1.4rem;
+            font-size: 1.35rem;
             margin-bottom: 40px;
             opacity: 0.95;
         }
@@ -132,6 +132,24 @@
             grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 30px;
             text-align: center;
+        }
+        
+        .trust-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .trust-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1e3a5f;
+            margin-bottom: 5px;
+        }
+        
+        .trust-label {
+            color: #666;
+            font-size: 0.95rem;
         }
         
         /* Services */
@@ -242,23 +260,35 @@
             margin: 0 auto 20px;
         }
         
-        /* Testimonials */
+        /* Testimonials Carousel */
         .testimonials-section {
             padding: 80px 30px;
             background: #f9fafb;
         }
         
+        .carousel-container {
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .carousel-track {
+            display: flex;
+            gap: 25px;
+            transition: transform 0.6s ease-in-out;
+        }
+        
         .testimonial-card {
+            min-width: 320px;
             background: white;
             padding: 25px;
             border-radius: 12px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            margin-bottom: 20px;
         }
         
         .stars {
             color: #fbbf24;
-            font-size: 1.2rem;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
         }
         
         /* CTA */
@@ -309,13 +339,39 @@
         </div>
     </section>
     
-    <!-- Services with Featured Ads -->
+    <!-- Trust Bar -->
+    <div class="trust-bar">
+        <div class="trust-container">
+            <div class="trust-item">
+                <div class="trust-number">1,000+</div>
+                <div class="trust-label">Verified Tradespeople</div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-number">5,000+</div>
+                <div class="trust-label">Jobs Completed</div>
+            </div>
+            <div class="trust-item">
+                <div class="trustpilot-badge">
+                    <span class="trustpilot-stars">★★★★★</span>
+                    <div>
+                        <div class="trust-number" style="font-size: 1.8rem; margin: 0;">4.8</div>
+                        <div class="trust-label">Trustpilot Rating</div>
+                    </div>
+                </div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-number">24hrs</div>
+                <div class="trust-label">Average Response Time</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Services -->
     <section class="services-section">
         <div class="section-header">
             <h2>All Trades in One Place</h2>
             <p>Click on a trade to see available professionals</p>
         </div>
-        
         <div class="services-grid" id="servicesGrid">
             <!-- Populated by JavaScript -->
         </div>
@@ -346,27 +402,45 @@
         </div>
     </section>
     
-    <!-- Testimonials -->
+    <!-- Testimonials Carousel -->
     <section class="testimonials-section">
         <div class="section-header">
             <h2>What People Say About Us</h2>
             <p>Real reviews from homeowners and tradespeople</p>
         </div>
-        <div class="testimonials-grid">
-            <div class="testimonial-card">
-                <div class="stars">★★★★★</div>
-                <p>"Found a fantastic plumber within hours. Fixed my emergency leak the same day. Couldn't be happier!"</p>
-                <strong>Sarah Johnson, Clapham</strong>
-            </div>
-            <div class="testimonial-card">
-                <div class="stars">★★★★★</div>
-                <p>"As a roofer, I've got more leads in the last month than the whole previous year. The platform is excellent."</p>
-                <strong>Mark Thompson, Roofer, Watford</strong>
-            </div>
-            <div class="testimonial-card">
-                <div class="stars">★★★★★</div>
-                <p>"Easy to use. Got three quotes for my bathroom renovation within 24 hours. Highly recommended."</p>
-                <strong>David Patel, London</strong>
+        <div class="carousel-container">
+            <div class="carousel-track" id="carouselTrack">
+                <!-- 6+ examples - you can add up to 30 later -->
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"Found a fantastic plumber within hours. Fixed my emergency leak the same day. Couldn't be happier!"</p>
+                    <strong>Sarah Johnson, Clapham</strong>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"As a roofer, I've got more leads in the last month than the whole previous year. The platform is excellent."</p>
+                    <strong>Mark Thompson, Roofer, Watford</strong>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"Easy to use. Got three quotes for my bathroom renovation within 24 hours. Highly recommended."</p>
+                    <strong>David Patel, London</strong>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"The tiler they recommended was professional and finished on time. Great service!"</p>
+                    <strong>Emma Wilson, Hemel Hempstead</strong>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"As an electrician, this platform has doubled my workload. Very happy with the quality of leads."</p>
+                    <strong>James Carter, Electrician, Luton</strong>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"Posted a kitchen fitting job and had 5 quotes the same day. Saved me so much time."</p>
+                    <strong>Rebecca Thompson, St Albans</strong>
+                </div>
             </div>
         </div>
     </section>
@@ -382,6 +456,22 @@
     </section>
     
     <script>
+        // Auto-scrolling testimonials carousel
+        const track = document.getElementById('carouselTrack');
+        let scrollPosition = 0;
+        const cardWidth = 340; // approximate card width + gap
+
+        function autoScrollTestimonials() {
+            scrollPosition += cardWidth;
+            if (scrollPosition > track.scrollWidth - track.clientWidth) {
+                scrollPosition = 0;
+            }
+            track.style.transform = `translateX(-${scrollPosition}px)`;
+        }
+
+        setInterval(autoScrollTestimonials, 3000); // scroll every 3 seconds
+
+        // Services with featured ads
         const trades = [
             { icon: "🔧", name: "Plumbers", category: "plumber" },
             { icon: "⚡", name: "Electricians", category: "electrician" },
@@ -437,7 +527,9 @@
             }
         }
 
-        window.onload = renderServices;
+        window.onload = () => {
+            renderServices();
+        };
     </script>
 </body>
 </html>
