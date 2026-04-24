@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Best Trade - UK's #1 Trade Marketplace | Find Trusted Tradespeople</title>
+    <meta name="description" content="Best Trade connects you with verified plumbers, electricians, builders and more. Get quotes from trusted local professionals across the UK.">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        
+        /* Navigation */
+        .navbar {
+            background: white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1e293b;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .logo-tick {
+            width: 32px;
+            height: 32px;
+            background: #ef4444;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .nav-links {
+            display: flex;
+            gap: 5px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: #64748b;
+            text-decoration: none;
+            font-weight: 500;
+            font-size: 15px;
+            padding: 10px 16px;
+            border-radius: 6px;
+            transition: color 0.2s;
+        }
+        
+        .nav-links a:hover {
+            color: #1e3a5f;
+            background: #f8fafc;
+        }
+
+        /* Dropdown Navigation */
+        .nav-item {
+            position: relative;
+        }
+
+        .nav-item.has-dropdown {
+            display: inline-block;
+        }
+
+        .dropdown-arrow {
+            font-size: 10px;
+            margin-left: 4px;
+            transition: transform 0.2s;
+        }
+
+        .nav-item:hover .dropdown-arrow {
+            transform: rotate(180deg);
+        }
+
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+            border-radius: 8px;
+            min-width: 200px;
+            padding: 8px 0;
+            margin-top: 8px;
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.2s;
+            z-index: 1000;
+        }
+
+        .nav-item:hover .dropdown-menu {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+
+        .dropdown-link {
+            display: block;
+            padding: 12px 20px !important;
+            color: #64748b !important;
+            text-decoration: none;
+            font-size: 14px !important;
+            font-weight: 500;
+            transition: all 0.2s;
+            border-radius: 0 !important;
+        }
+
+        .dropdown-link:hover {
+            background: #f8fafc !important;
+            color: #1e3a5f !important;
+            padding-left: 24px !important;
+        }
+        
+        .nav-links .nav-btn {
+            background: #ef4444;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-weight: 600;
+        }
+        
+        /* Hero */
+        .hero {
+            background: #1e3a5f;
+            color: white;
+            padding: 110px 30px;
+            text-align: center;
+        }
+        
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 20px;
+            font-weight: 800;
+        }
+        
+        .hero p {
+            font-size: 1.35rem;
+            margin-bottom: 40px;
+            opacity: 0.95;
+        }
+        
+        .hero-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 14px 32px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        
+        .btn-primary {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-outline {
+            border: 2px solid white;
+            color: white;
+        }
+        
+        /* Trust Bar */
+        .trust-bar {
+            background: white;
+            padding: 30px;
+            box-shadow: 0 -5px 20px rgba(0,0,0,0.05);
+        }
+        
+        .trust-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 30px;
+            text-align: center;
+        }
+        
+        .trust-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .trust-number {
+            font-size: 2.5rem;
+            font-weight: 800;
+            color: #1e3a5f;
+            margin-bottom: 5px;
+        }
+        
+        .trust-label {
+            color: #666;
+            font-size: 0.95rem;
+        }
+        
+        /* Services */
+        .services-section {
+            padding: 80px 30px;
+            background: #f9fafb;
+        }
+        
+        .section-header {
+            text-align: center;
+            margin-bottom: 50px;
+        }
+        
+        .section-header h2 {
+            font-size: 2.6rem;
+            color: #1e3a5f;
+        }
+        
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .service-card {
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-8px);
+        }
+        
+        .service-icon {
+            height: 110px;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3.5rem;
+        }
+        
+        .service-content {
+            padding: 15px 20px;
+            text-align: center;
+        }
+        
+        .service-content h3 {
+            font-size: 1.5rem;
+            margin-bottom: 12px;
+            color: #1e3a5f;
+        }
+        
+        /* Featured Ads */
+        .featured-ads {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f0f9ff;
+            border-radius: 8px;
+            border-left: 4px solid #1e3a5f;
+        }
+        
+        .featured-ads h4 {
+            margin-bottom: 10px;
+            color: #1e3a5f;
+        }
+        
+        .ad-item {
+            background: white;
+            padding: 12px 15px;
+            margin-bottom: 8px;
+            border-radius: 6px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        /* How It Works */
+        .how-it-works {
+            padding: 80px 30px;
+        }
+        
+        .steps-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+        }
+        
+        .step-card {
+            text-align: center;
+            padding: 30px;
+        }
+        
+        .step-number {
+            width: 60px;
+            height: 60px;
+            background: #1e3a5f;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin: 0 auto 20px;
+        }
+        
+        /* Testimonials Carousel */
+        .testimonials-section {
+            padding: 80px 30px;
+            background: #f9fafb;
+        }
+        
+        .carousel-container {
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .carousel-track {
+            display: flex;
+            gap: 25px;
+            transition: transform 0.6s ease-in-out;
+        }
+        
+        .testimonial-card {
+            min-width: 320px;
+            background: white;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        }
+        
+        .stars {
+            color: #fbbf24;
+            font-size: 1.3rem;
+            margin-bottom: 12px;
+        }
+        
+        /* CTA */
+        .cta-section {
+            background: #1e3a5f;
+            color: white;
+            padding: 80px 30px;
+            text-align: center;
+        }
+        
+        /* Footer */
+        .footer {
+            background: #1e3a5f;
+            color: white;
+            padding: 60px 30px 30px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <span class="logo-tick">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="white"/>
+                    </svg>
+                </span>
+                BestTrade
+            </a>
+            <div class="nav-links">
+                <div class="nav-item has-dropdown">
+                    <a href="/" class="nav-link">
+                        Home <span class="dropdown-arrow">▼</span>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="/how-it-works.html" class="dropdown-link">How It Works</a>
+                        <a href="/why-choose-us.html" class="dropdown-link">Why Choose Us</a>
+                        <a href="/trust-and-safety.html" class="dropdown-link">Trust & Safety</a>
+                        <a href="/contact.html" class="dropdown-link">Contact Us</a>
+                    </div>
+                </div>
+                <a href="/customer-post-job.html" class="nav-link">For Homeowners</a>
+                <div class="nav-item has-dropdown">
+                    <a href="/pricing.html" class="nav-link">
+                        For Tradespeople <span class="dropdown-arrow">▼</span>
+                    </a>
+                    <div class="dropdown-menu">
+                        <a href="/pricing.html" class="dropdown-link">Join Now / Sign Up</a>
+                        <a href="/pricing.html" class="dropdown-link">View Pricing</a>
+                    </div>
+                </div>
+                <a href="/tradesperson-sign-in.html" class="nav-btn">Trade Sign In</a>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <h1>UK's #1 Trade Marketplace</h1>
+            <p>Connect with verified local tradespeople. Get quotes fast.</p>
+            <div class="hero-buttons">
+                <a href="/customer-post-job.html" class="btn btn-primary">Post Your Job Free</a>
+                <a href="/pricing.html" class="btn btn-outline">Join as Tradesperson</a>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Trust Bar -->
+    <div class="trust-bar">
+        <div class="trust-container">
+            <div class="trust-item">
+                <div class="trust-number">1,000+</div>
+                <div class="trust-label">Verified Tradespeople</div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-number">5,000+</div>
+                <div class="trust-label">Jobs Completed</div>
+            </div>
+            <div class="trust-item">
+                <div class="trustpilot-badge">
+                    <span class="trustpilot-stars">★★★★★</span>
+                    <div>
+                        <div class="trust-number" style="font-size: 1.8rem; margin: 0;">4.8</div>
+                        <div class="trust-label">Trustpilot Rating</div>
+                    </div>
+                </div>
+            </div>
+            <div class="trust-item">
+                <div class="trust-number">24hrs</div>
+                <div class="trust-label">Average Response Time</div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Services -->
+    <section class="services-section">
+        <div class="section-header">
+            <h2>All Trades in One Place</h2>
+            <p>Click on a trade to see available professionals</p>
+        </div>
+        <div class="services-grid" id="servicesGrid">
+            <!-- Populated by JavaScript -->
+        </div>
+    </section>
+    
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="section-header">
+            <h2>How It Works</h2>
+            <p>Get your job done in three simple steps</p>
+        </div>
+        <div class="steps-grid">
+            <div class="step-card">
+                <div class="step-number">1</div>
+                <h3>Post Your Job</h3>
+                <p>Tell us what you need done. It's free and takes less than 2 minutes.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">2</div>
+                <h3>Get Quotes</h3>
+                <p>Receive quotes from local verified tradespeople ready to help.</p>
+            </div>
+            <div class="step-card">
+                <div class="step-number">3</div>
+                <h3>Hire & Review</h3>
+                <p>Choose your tradesperson and leave a review when the job's done.</p>
+            </div>
+        </div>
+    </section>
+    
+    <!-- Testimonials Carousel -->
+    <section class="testimonials-section">
+        <div class="section-header">
+            <h2>What People Say About Us</h2>
+            <p>Real reviews from homeowners and tradespeople</p>
+        </div>
+        <div class="carousel-container">
+            <div class="carousel-track" id="carouselTrack">
+                <!-- 6+ examples - you can add up to 30 later -->
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"Found a fantastic plumber within hours. Fixed my emergency leak the same day. Couldn't be happier!"</p>
+                    <strong>Sarah Johnson, Clapham</strong>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"As a roofer, I've got more leads in the last month than the whole previous year. The platform is excellent."</p>
+                    <strong>Mark Thompson, Roofer, Watford</strong>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"Easy to use. Got three quotes for my bathroom renovation within 24 hours. Highly recommended."</p>
+                    <strong>David Patel, London</strong>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"The tiler they recommended was professional and finished on time. Great service!"</p>
+                    <strong>Emma Wilson, Hemel Hempstead</strong>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"As an electrician, this platform has doubled my workload. Very happy with the quality of leads."</p>
+                    <strong>James Carter, Electrician, Luton</strong>
+                </div>
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"Posted a kitchen fitting job and had 5 quotes the same day. Saved me so much time."</p>
+                    <strong>Rebecca Thompson, St Albans</strong>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    <!-- CTA -->
+    <section class="cta-section">
+        <h2>Ready to Get Started?</h2>
+        <p>Post your job for free or join as a tradesperson today</p>
+        <div class="hero-buttons">
+            <a href="/customer-post-job.html" class="btn btn-primary">Post a Job Free</a>
+            <a href="/pricing.html" class="btn btn-outline">Join as Tradesperson</a>
+        </div>
+    </section>
+    
+    <script>
+        // Auto-scrolling testimonials carousel
+        const track = document.getElementById('carouselTrack');
+        let scrollPosition = 0;
+        const cardWidth = 340; // approximate card width + gap
+
+        function autoScrollTestimonials() {
+            scrollPosition += cardWidth;
+            if (scrollPosition > track.scrollWidth - track.clientWidth) {
+                scrollPosition = 0;
+            }
+            track.style.transform = `translateX(-${scrollPosition}px)`;
+        }
+
+        setInterval(autoScrollTestimonials, 3000); // scroll every 3 seconds
+
+        // Services with featured ads
+        const trades = [
+            { icon: "🔧", name: "Plumbers", category: "plumber" },
+            { icon: "⚡", name: "Electricians", category: "electrician" },
+            { icon: "🏗️", name: "Builders", category: "builder" },
+            { icon: `<svg viewBox="0 0 64 64" width="72" height="72" xmlns="http://www.w3.org/2000/svg"><g fill="none" stroke="#1e3a5f" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="24" width="44" height="16" rx="4" fill="#e2e8f0" stroke="#1e3a5f"/><path d="M48 28 L56 20 L60 24 L52 32" fill="#cbd5e1" stroke="#1e3a5f"/><line x1="12" y1="24" x2="12" y2="40"/><line x1="20" y1="24" x2="20" y2="40"/><line x1="28" y1="24" x2="28" y2="40"/><line x1="36" y1="24" x2="36" y2="40"/><rect x="4" y="26" width="14" height="12" rx="2" fill="#94a3b8" stroke="#1e3a5f"/></g></svg>`, name: "Carpenters", category: "carpenter" },
+            { icon: "🧱", name: "Plasterers", category: "plasterer" },
+            { icon: "🎨", name: "Decorators", category: "painter-decorator" },
+            { icon: "🧱", name: "Tilers", category: "tiler" },
+            { icon: "🏠", name: "Roofers", category: "roofer" }
+        ];
+
+        async function loadFeaturedAds(category) {
+            try {
+                const res = await fetch(`/api/featured-ads/${category}`);
+                const data = await res.json();
+                if (data.ads && data.ads.length > 0) {
+                    let html = `<div class="featured-ads"><h4>Featured Companies</h4>`;
+                    data.ads.forEach(ad => {
+                        html += `
+                            <div class="ad-item">
+                                <div class="ad-name">${ad.company_name}</div>
+                                <div class="ad-desc">${ad.short_description}</div>
+                            </div>`;
+                    });
+                    html += `</div>`;
+                    return html;
+                }
+                return '';
+            } catch (e) {
+                return '';
+            }
+        }
+
+        async function renderServices() {
+            const grid = document.getElementById('servicesGrid');
+            grid.innerHTML = '';
+
+            for (let trade of trades) {
+                const featuredHTML = await loadFeaturedAds(trade.category);
+                
+                const cardHTML = `
+                    <div class="service-card">
+                        <div class="service-icon">${trade.icon}</div>
+                        <div class="service-content">
+                            <h3>${trade.name}</h3>
+                            <p>Find reliable local professionals</p>
+                            ${featuredHTML}
+                            <a href="#" class="btn" onclick="alert('Opening ${trade.name} section... (coming soon)')">Browse ${trade.name}</a>
+                        </div>
+                    </div>
+                `;
+                grid.innerHTML += cardHTML;
+            }
+        }
+
+        window.onload = () => {
+            renderServices();
+        };
+    </script>
+</body>
+</html>
