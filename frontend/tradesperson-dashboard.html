@@ -94,6 +94,13 @@
             color: #64748b;
             padding: 40px 20px;
         }
+        .ad-section {
+            background: #f0f9ff;
+            border: 2px dashed #1e3a5f;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+        }
     </style>
 </head>
 <body>
@@ -116,6 +123,17 @@
         <div class="section">
             <h2>Jobs You're Managing</h2>
             <div id="managedJobs">Loading your managed jobs...</div>
+        </div>
+
+        <!-- My Featured Advertising -->
+        <div class="section">
+            <h2>My Featured Advertising</h2>
+            <div class="ad-section" id="adSection">
+                <p>You currently have no active featured ads.</p>
+                <button onclick="alert('Advertising purchase coming soon - Premium users get 1 year free!')" class="btn">
+                    Purchase Featured Ad (£25/year)
+                </button>
+            </div>
         </div>
     </div>
 
@@ -155,7 +173,7 @@
                     pendingDiv.innerHTML = '<div class="empty">No pending leads at the moment.<br>New jobs will appear here.</div>';
                 }
 
-                // Load managed jobs with customer contact details
+                // Load managed jobs
                 const managedRes = await fetch('/api/tradesperson/managed-jobs', { credentials: 'include' });
                 const managedData = await managedRes.json();
                 const managedDiv = document.getElementById('managedJobs');
@@ -207,7 +225,7 @@
                 const result = await res.json();
                 if (result.success) {
                     alert(result.message || 'Lead accepted successfully!');
-                    loadDashboard(); // Refresh both sections
+                    loadDashboard();
                 } else {
                     alert('Failed to accept lead');
                 }
@@ -222,7 +240,6 @@
             window.location.href = '/';
         }
 
-        // Load dashboard on page load
         window.onload = loadDashboard;
     </script>
 </body>
