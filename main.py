@@ -5,6 +5,7 @@ import os
 import secrets
 import psycopg2.extras
 import stripe
+from datetime import date, timedelta
 
 from database import db
 
@@ -200,7 +201,7 @@ async def get_current_tradesperson(request: Request):
         "subscription_status": user.get("subscription_status")
     }
 
-# ====================== PENDING LEADS (Multi-Trade) ======================
+# ====================== PENDING LEADS ======================
 @app.get("/api/tradesperson/pending-leads")
 async def get_pending_leads(request: Request):
     session_token = request.cookies.get("session_token")
@@ -324,7 +325,7 @@ async def accept_lead(request: Request):
         print(f"Accept lead error: {str(e)}")
         raise HTTPException(status_code=500, detail="Failed to accept lead")
 
-# ====================== POST JOB (Multi-Trade Matching) ======================
+# ====================== POST JOB (Multi-Trade) ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -356,7 +357,6 @@ async def post_job(request: Request):
         ))
         job_id = cursor.fetchone()['id']
 
-        # Multi-Trade Matching: ANY of the company's trades matches the job
         cursor.execute("""
             INSERT INTO pending_leads (job_id, plumber_id, notified_at, notification_method)
             SELECT %s, t.id, NOW(), 'dashboard'
@@ -379,12 +379,36 @@ async def post_job(request: Request):
         cursor.close()
         conn.close()
 
-        print(f"Job {job_id} posted successfully with trade '{job_trade_category}'.")
+        print(f"Job {job_id} posted successfully.")
         return {"success": True, "job_id": job_id}
 
     except Exception as e:
         print(f"Post job error: {e}")
         raise HTTPException(status_code=500, detail="Failed to submit job")
+
+# ====================== FEATURED ADS ENDPOINTS ======================
+# Get featured ads for a specific trade category (used by homepage)
+@app.get("/api/featured-ads/{trade_category}")
+async def get_featured_ads(trade_category: str):
+    try:
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("""
+            SELECT id, tradesperson_id, company_name, short_description, postcode_area
+            FROM featured_ads
+            WHERE trade_category = %s 
+              AND status = 'active' 
+              AND end_date >= CURRENT_DATE
+            ORDER BY created_at DESC
+            LIMIT 6
+        """, (trade_category,))
+        ads = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return {"success": True, "ads": ads}
+    except Exception as e:
+        print(f"Featured ads error: {e}")
+        return {"success": True, "ads": []}
 
 # ====================== STATIC PAGES ======================
 @app.get("/", response_class=HTMLResponse)
