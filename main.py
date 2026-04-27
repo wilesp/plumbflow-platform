@@ -163,7 +163,7 @@ async def get_current_tradesperson(request: Request):
     conn = db.get_connection()
     cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
     cursor.execute("""
-        SELECT trading_name, subscription_tier, subscription_status 
+        SELECT t.trading_name, t.subscription_tier, t.subscription_status 
         FROM tradesperson_sessions s 
         JOIN tradespeople t ON s.tradesperson_id = t.id 
         WHERE s.session_token = %s AND s.expires_at > NOW()
@@ -351,7 +351,7 @@ async def purchase_featured_ad(request: Request):
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute("""
-            SELECT id, trading_name, email 
+            SELECT t.id, t.trading_name, t.email 
             FROM tradesperson_sessions s 
             JOIN tradespeople t ON s.tradesperson_id = t.id 
             WHERE s.session_token = %s AND s.expires_at > NOW()
@@ -363,7 +363,7 @@ async def purchase_featured_ad(request: Request):
         if not user:
             raise HTTPException(status_code=401, detail="Not authenticated")
 
-        # £25 charge
+        # £25 charge (2500 pence)
         payment_intent = stripe.PaymentIntent.create(
             amount=2500,
             currency="gbp",
