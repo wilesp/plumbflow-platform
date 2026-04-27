@@ -125,7 +125,7 @@
                 
                 <div class="form-group">
                     <label>Trade Category</label>
-                    <select id="adTradeCategory" style="width:100%; padding:12px; border-radius:8px;">
+                    <select id="adTradeCategory">
                         <option value="plumber">Plumber</option>
                         <option value="electrician">Electrician</option>
                         <option value="gas-engineer">Gas Engineer</option>
@@ -141,11 +141,11 @@
                 <div class="form-group">
                     <label>Short Description (max 80 chars)</label>
                     <input type="text" id="adDescription" maxlength="80" 
-                           placeholder="e.g. Reliable local plumber with 15+ years experience">
+                           placeholder="e.g. Reliable local tiler with 15+ years experience">
                 </div>
 
                 <div id="cardSection">
-                    <label>Card Details (Test Mode)</label>
+                    <label>Card Details (Test Mode - UK)</label>
                     <div id="card-element"></div>
                     <div id="card-errors" style="color:red; margin-top:8px;"></div>
                 </div>
@@ -173,7 +173,6 @@
                         document.getElementById('purchaseBtn').textContent = 'Activate Free Featured Ad (1 Year)';
                     }
                 }
-
                 await loadPendingLeads();
                 await loadManagedJobs();
             } catch (err) {
@@ -292,14 +291,17 @@
             window.location.href = '/';
         }
 
-        // Initialize Stripe
+        // Initialize Stripe - Hide ZIP for UK
         window.onload = async () => {
             await loadDashboard();
 
-            stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi');  // Your test key is already here
+            stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi'); // your test key
 
             const elements = stripe.elements();
-            cardElement = elements.create('card', { style: { base: { fontSize: '16px' } } });
+            cardElement = elements.create('card', {
+                style: { base: { fontSize: '16px' } },
+                hidePostalCode: true   // ← This hides the ZIP field
+            });
             cardElement.mount('#card-element');
         };
     </script>
