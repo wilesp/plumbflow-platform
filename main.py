@@ -25,7 +25,7 @@ stripe.api_key = os.getenv("STRIPE_SECRET_KEY")
 async def health():
     return {"status": "healthy"}
 
-# ====================== REGISTRATION (Multi-Trade) ======================
+# ====================== REGISTRATION ======================
 @app.post("/api/register-tradesperson")
 async def register_tradesperson(request: Request):
     try:
@@ -333,7 +333,7 @@ async def post_job(request: Request):
         print(f"Post job error: {e}")
         raise HTTPException(status_code=500, detail="Failed to submit job")
 
-# ====================== FEATURED AD PURCHASE (£25 real charge) ======================
+# ====================== FEATURED AD PURCHASE (£25) ======================
 @app.post("/api/featured-ad/purchase")
 async def purchase_featured_ad(request: Request):
     try:
@@ -348,3 +348,89 @@ async def purchase_featured_ad(request: Request):
         if not session_token:
             raise HTTPException(status_code=401, detail="Not authenticated")
 
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("""
+            SELECT id, trading_name, email 
+            FROM tradesperson_sessions s 
+            JOIN tradespeople t ON s.tradesperson_id = t.id 
+            WHERE s.session_token = %s AND s.expires_at > NOW()
+        """, (session_token,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if not user:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        # £25 charge
+        payment_intent = stripe.PaymentIntent.create(
+            amount=2500,
+            currency="gbp",
+            payment_method_types=["card"],
+            metadata={
+                "tradesperson_id": str(user["id"]),
+                "trade_category": trade_category,
+                "type": "featured_ad"
+            }
+        )
+
+        # Save to DB
+        conn = db.get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+            INSERT INTO featured_ads (tradesperson_id, trade_category, company_name, short_description, 
+                                      postcode_area, status, start_date, end_date)
+            VALUES (%s, %s, %s, %s, %s, 'pending', NOW(), NOW() + INTERVAL '1 year')
+        """, (user["id"], trade_category, user["trading_name"], short_description, None))
+        conn.commit()
+        cursor.close()
+        conn.close()
+
+        return {
+            "success": True,
+            "clientSecret": payment_intent.client_secret
+        }
+
+    except Exception as e:
+        print(f"Featured ad purchase error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# ====================== GET FEATURED ADS ======================
+@app.get("/api/featured-ads/{trade_category}")
+async def get_featured_ads(trade_category: str):
+    try:
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("""
+            SELECT id, company_name, short_description, postcode_area
+            FROM featured_ads
+            WHERE trade_category = %s AND status = 'active' AND end_date >= CURRENT_DATE
+            LIMIT 6
+        """, (trade_category,))
+        ads = cursor.fetchall()
+        cursor.close()
+        conn.close()
+        return {"success": True, "ads": ads}
+    except Exception as e:
+        print(f"Featured ads fetch error: {e}")
+        return {"success": True, "ads": []}
+
+# ====================== STATIC FILES (MUST BE LAST) ======================
+@app.get("/{full_path:path}")
+async def serve_static(full_path: str):
+    if full_path == "" or full_path == "/" or full_path.endswith('.html'):
+        try:
+            if full_path == "" or full_path == "/":
+                return FileResponse("frontend/index.html")
+            return FileResponse(f"frontend/{full_path}")
+        except:
+            pass
+    try:
+        return FileResponse(f"frontend/{full_path}")
+    except:
+        return FileResponse("frontend/index.html")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8080)))
