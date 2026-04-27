@@ -227,4 +227,127 @@
             div.innerHTML = (data.jobs && data.jobs.length) 
                 ? data.jobs.map(job => `
                     <div class="card">
-                        <h3>${job.trade_category} — ${job.job_type}</h3
+                        <h3>${job.trade_category} — ${job.job_type}</h3>
+                        <p>${job.description}</p>
+                        <div style="margin-top:10px;color:#166534;">
+                            Customer: ${job.customer_name || 'N/A'}<br>
+                            Phone: ${job.customer_phone || 'N/A'}
+                        </div>
+                    </div>
+                `).join('') 
+                : '<div class="empty">No managed jobs yet.</div>';
+        }
+
+        async function acceptLead(jobId) {
+            if (!confirm(`Accept this lead?`)) return;
+            try {
+                const res = await fetch('/api/tradesperson/accept-lead', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({job_id: jobId}),
+                    credentials: 'include'
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert(result.message || 'Lead accepted!');
+                    loadDashboard();
+                }
+            } catch (e) {
+                alert('Failed to accept lead');
+            }
+        }
+
+        async function purchaseAd() {
+            const btn = document.getElementById('purchaseBtn');
+            const successMsg = document.getElementById('successMessage');
+            const errorsDiv = document.getElementById('card-errors');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            errorsDiv.textContent = '';
+
+            try {
+                const tradeCategory = document.getElementById('adTradeCategory').value;
+                const description = document.getElementById('adDescription').value.trim() || 'Professional local trade services';
+
+                const res = await fetch('/api/featured-ad/purchase', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        trade_category: tradeCategory,
+                        short_description: description
+                    }),
+                    credentials: 'include'
+                });
+
+                const result = await res.json();
+
+                if (result.success && result.clientSecret) {
+                    const { error } = await stripe.confirmCardPayment(result.clientSecret, {
+                        payment_method: { card: cardElement }
+                    });
+
+                    if (error) {
+                        errorsDiv.textContent = error.message;
+                        btn.disabled = false;
+                        btn.textContent = 'Try Again';
+                        return;
+                    }
+
+                    successMsg.style.display = 'block';
+                    successMsg.innerHTML = `✅ Featured Ad for <strong>${tradeCategory}</strong> activated successfully!<br>It will appear on the homepage shortly.`;
+                    btn.style.display = 'none';
+                } else {
+                    alert('Purchase failed');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error: ' + err.message);
+            } finally {
+                if (btn.style.display !== 'none') {
+                    btn.disabled = false;
+                    btn.textContent = 'Purchase Featured Ad (£25/year)';
+                }
+            }
+        }
+
+        async function cancelSubscription() {
+            if (!confirm("Cancel your subscription? It will remain active until the end of the current billing period.")) return;
+
+            try {
+                const res = await fetch('/api/subscription/cancel', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert(result.message || 'Subscription cancelled at end of period');
+                    loadDashboard();
+                } else {
+                    alert('Failed to cancel subscription');
+                }
+            } catch (e) {
+                alert('Error cancelling subscription');
+            }
+        }
+
+        function signOut() {
+            document.cookie = "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = '/';
+        }
+
+        // Initialize Stripe
+        window.onload = async () => {
+            await loadDashboard();
+
+            stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi');
+
+            const elements = stripe.elements();
+            cardElement = elements.create('card', {
+                style: { base: { fontSize: '16px' } },
+                hidePostalCode: true
+            });
+            cardElement.mount('#card-element');
+        };
+    </script>
+</body>
+</html>
