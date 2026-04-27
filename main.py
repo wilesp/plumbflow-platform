@@ -120,158 +120,69 @@ async def create_subscription(request: Request):
         print(f"Subscription error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ====================== CANCEL SUBSCRIPTION ======================
-@app.post("/api/subscription/cancel")
-async def cancel_subscription(request: Request):
+# ====================== SIGN IN ======================
+@app.post("/api/auth/signin")
+async def simple_signin(request: Request):
     try:
-        session_token = request.cookies.get("session_token")
-        if not session_token:
-            raise HTTPException(status_code=401, detail="Not authenticated")
+        data = await request.json()
+        email = data.get('email', '').strip().lower()
 
         conn = db.get_connection()
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cursor.execute("""
-            SELECT t.stripe_subscription_id, t.subscription_tier 
-            FROM tradesperson_sessions s 
-            JOIN tradespeople t ON s.tradesperson_id = t.id 
-            WHERE s.session_token = %s AND s.expires_at > NOW()
-        """, (session_token,))
+        cursor.execute("SELECT id, trading_name FROM tradespeople WHERE LOWER(email) = %s", (email,))
         user = cursor.fetchone()
-        cursor.close()
-        conn.close()
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
 
-        if not user or not user["stripe_subscription_id"]:
-            raise HTTPException(status_code=400, detail="No active subscription found")
+        tradesperson_id = str(user['id'])
+        session_token = secrets.token_urlsafe(32)
 
-        # Cancel in Stripe
-        stripe.Subscription.modify(
-            user["stripe_subscription_id"],
-            cancel_at_period_end=True
-        )
-
-        # Update DB
-        conn = db.get_connection()
-        cursor = conn.cursor()
         cursor.execute("""
-            UPDATE tradespeople 
-            SET subscription_status = 'cancelled_at_period_end'
-            WHERE stripe_subscription_id = %s
-        """, (user["stripe_subscription_id"],))
+            INSERT INTO tradesperson_sessions (tradesperson_id, session_token, expires_at)
+            VALUES (%s, %s, NOW() + INTERVAL '30 days')
+        """, (tradesperson_id, session_token))
+
         conn.commit()
         cursor.close()
         conn.close()
 
-        return {"success": True, "message": "Subscription cancelled at end of current period"}
-
+        response = Response(content='{"success": true}', media_type="application/json")
+        response.set_cookie(key="session_token", value=session_token, max_age=30*24*60*60, httponly=True, samesite="lax")
+        return response
     except Exception as e:
-        print(f"Cancel subscription error: {e}")
+        print(f"Signin error: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
-# ====================== FEATURED AD PURCHASE (£25 with confirmation) ======================
-@app.post("/api/featured-ad/purchase")
-async def purchase_featured_ad(request: Request):
-    try:
-        data = await request.json()
-        trade_category = data.get("trade_category")
-        short_description = data.get("short_description", "Professional local trade services")
+# ====================== ME ======================
+@app.get("/api/tradesperson/me")
+async def get_current_tradesperson(request: Request):
+    session_token = request.cookies.get("session_token")
+    if not session_token:
+        raise HTTPException(status_code=401, detail="Not authenticated")
 
-        if not trade_category:
-            raise HTTPException(status_code=400, detail="Trade category required")
+    conn = db.get_connection()
+    cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+    cursor.execute("""
+        SELECT t.trading_name, t.subscription_tier, t.subscription_status 
+        FROM tradesperson_sessions s 
+        JOIN tradespeople t ON s.tradesperson_id = t.id 
+        WHERE s.session_token = %s AND s.expires_at > NOW()
+    """, (session_token,))
+    user = cursor.fetchone()
+    cursor.close()
+    conn.close()
 
-        session_token = request.cookies.get("session_token")
-        if not session_token:
-            raise HTTPException(status_code=401, detail="Not authenticated")
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
 
-        conn = db.get_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cursor.execute("""
-            SELECT t.id, t.trading_name, t.email 
-            FROM tradesperson_sessions s 
-            JOIN tradespeople t ON s.tradesperson_id = t.id 
-            WHERE s.session_token = %s AND s.expires_at > NOW()
-        """, (session_token,))
-        user = cursor.fetchone()
-        cursor.close()
-        conn.close()
+    return {
+        "success": True,
+        "trading_name": user.get("trading_name") or "Trader",
+        "subscription_tier": user.get("subscription_tier"),
+        "subscription_status": user.get("subscription_status")
+    }
 
-        if not user:
-            raise HTTPException(status_code=401, detail="Not authenticated")
-
-        # Create PaymentIntent £25
-        payment_intent = stripe.PaymentIntent.create(
-            amount=2500,
-            currency="gbp",
-            payment_method_types=["card"],
-            metadata={
-                "tradesperson_id": str(user["id"]),
-                "trade_category": trade_category,
-                "type": "featured_ad"
-            }
-        )
-
-        return {
-            "success": True,
-            "clientSecret": payment_intent.client_secret
-        }
-
-    except Exception as e:
-        print(f"Featured ad purchase error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ====================== CONFIRM FEATURED AD PAYMENT (called from frontend after confirmCardPayment) ======================
-@app.post("/api/featured-ad/confirm")
-async def confirm_featured_ad(request: Request):
-    try:
-        data = await request.json()
-        payment_intent_id = data.get("payment_intent_id")
-        trade_category = data.get("trade_category")
-        short_description = data.get("short_description", "Professional local trade services")
-
-        if not payment_intent_id:
-            raise HTTPException(status_code=400, detail="Payment intent ID required")
-
-        # Retrieve and confirm payment succeeded
-        payment_intent = stripe.PaymentIntent.retrieve(payment_intent_id)
-        if payment_intent.status != "succeeded":
-            raise HTTPException(status_code=400, detail="Payment not succeeded")
-
-        session_token = request.cookies.get("session_token")
-        conn = db.get_connection()
-        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-        cursor.execute("""
-            SELECT t.id, t.trading_name 
-            FROM tradesperson_sessions s 
-            JOIN tradespeople t ON s.tradesperson_id = t.id 
-            WHERE s.session_token = %s AND s.expires_at > NOW()
-        """, (session_token,))
-        user = cursor.fetchone()
-        cursor.close()
-        conn.close()
-
-        if not user:
-            raise HTTPException(status_code=401, detail="Not authenticated")
-
-        # Save as ACTIVE
-        conn = db.get_connection()
-        cursor = conn.cursor()
-        cursor.execute("""
-            INSERT INTO featured_ads (tradesperson_id, trade_category, company_name, short_description, 
-                                      postcode_area, status, start_date, end_date)
-            VALUES (%s, %s, %s, %s, %s, 'active', NOW(), NOW() + INTERVAL '1 year')
-        """, (user["id"], trade_category, user["trading_name"], short_description, None))
-        conn.commit()
-        cursor.close()
-        conn.close()
-
-        return {"success": True, "message": "Featured ad activated successfully"}
-
-    except Exception as e:
-        print(f"Confirm featured ad error: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
-
-# ====================== OTHER ENDPOINTS (pending-leads, managed-jobs, accept-lead, post-job, get featured ads) ======================
-# (unchanged from previous stable version - included for completeness)
-
+# ====================== PENDING LEADS ======================
 @app.get("/api/tradesperson/pending-leads")
 async def get_pending_leads(request: Request):
     session_token = request.cookies.get("session_token")
@@ -282,16 +193,24 @@ async def get_pending_leads(request: Request):
         cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
         cursor.execute("""
             SELECT j.id, j.trade_category, j.job_type, j.description, j.postcode, j.urgency, j.created_at
-            FROM pending_leads p JOIN jobs j ON p.job_id = j.id
-            WHERE p.plumber_id = (SELECT tradesperson_id FROM tradesperson_sessions WHERE session_token = %s AND expires_at > NOW())
+            FROM pending_leads p
+            JOIN jobs j ON p.job_id = j.id
+            WHERE p.plumber_id = (
+                SELECT tradesperson_id 
+                FROM tradesperson_sessions 
+                WHERE session_token = %s AND expires_at > NOW()
+            )
+            ORDER BY j.created_at DESC
         """, (session_token,))
         leads = cursor.fetchall()
         cursor.close()
         conn.close()
         return {"success": True, "leads": leads}
-    except:
+    except Exception as e:
+        print(f"Pending leads error: {e}")
         return {"success": True, "leads": []}
 
+# ====================== MANAGED JOBS ======================
 @app.get("/api/tradesperson/managed-jobs")
 async def get_managed_jobs(request: Request):
     session_token = request.cookies.get("session_token")
@@ -303,16 +222,24 @@ async def get_managed_jobs(request: Request):
         cursor.execute("""
             SELECT j.id, j.trade_category, j.job_type, j.description, j.postcode, j.urgency, j.created_at,
                    j.customer_name, j.customer_phone, j.customer_email, j.address, m.accepted_at, m.status
-            FROM managed_jobs m JOIN jobs j ON m.job_id = j.id
-            WHERE m.tradesperson_id = (SELECT tradesperson_id FROM tradesperson_sessions WHERE session_token = %s AND expires_at > NOW())
+            FROM managed_jobs m
+            JOIN jobs j ON m.job_id = j.id
+            WHERE m.tradesperson_id = (
+                SELECT tradesperson_id 
+                FROM tradesperson_sessions 
+                WHERE session_token = %s AND expires_at > NOW()
+            )
+            ORDER BY m.accepted_at DESC
         """, (session_token,))
         jobs = cursor.fetchall()
         cursor.close()
         conn.close()
         return {"success": True, "jobs": jobs}
-    except:
+    except Exception as e:
+        print(f"Managed jobs error: {e}")
         return {"success": True, "jobs": []}
 
+# ====================== ACCEPT LEAD ======================
 @app.post("/api/tradesperson/accept-lead")
 async def accept_lead(request: Request):
     try:
@@ -327,7 +254,11 @@ async def accept_lead(request: Request):
 
         conn = db.get_connection()
         cursor = conn.cursor()
-        cursor.execute("SELECT tradesperson_id::text as tradesperson_id FROM tradesperson_sessions WHERE session_token = %s AND expires_at > NOW()", (session_token,))
+        cursor.execute("""
+            SELECT tradesperson_id::text as tradesperson_id
+            FROM tradesperson_sessions 
+            WHERE session_token = %s AND expires_at > NOW()
+        """, (session_token,))
         session = cursor.fetchone()
         if not session:
             raise HTTPException(status_code=401, detail="Session expired")
@@ -335,7 +266,12 @@ async def accept_lead(request: Request):
         tradesperson_id = session['tradesperson_id']
 
         cursor.execute("DELETE FROM pending_leads WHERE job_id = %s AND plumber_id = %s", (job_id, tradesperson_id))
-        cursor.execute("INSERT INTO managed_jobs (job_id, tradesperson_id, status) VALUES (%s, %s, 'active') ON CONFLICT DO NOTHING", (job_id, tradesperson_id))
+        cursor.execute("""
+            INSERT INTO managed_jobs (job_id, tradesperson_id, status)
+            VALUES (%s, %s, 'active')
+            ON CONFLICT (job_id, tradesperson_id) DO NOTHING
+        """, (job_id, tradesperson_id))
+
         conn.commit()
         cursor.close()
         conn.close()
@@ -344,6 +280,7 @@ async def accept_lead(request: Request):
         print(f"Accept lead error: {e}")
         raise HTTPException(status_code=500, detail="Failed to accept lead")
 
+# ====================== POST JOB ======================
 @app.post("/api/customer/post-job")
 async def post_job(request: Request):
     try:
@@ -396,6 +333,55 @@ async def post_job(request: Request):
         print(f"Post job error: {e}")
         raise HTTPException(status_code=500, detail="Failed to submit job")
 
+# ====================== FEATURED AD PURCHASE ======================
+@app.post("/api/featured-ad/purchase")
+async def purchase_featured_ad(request: Request):
+    try:
+        data = await request.json()
+        trade_category = data.get("trade_category")
+        short_description = data.get("short_description", "Professional local trade services")
+
+        if not trade_category:
+            raise HTTPException(status_code=400, detail="Trade category required")
+
+        session_token = request.cookies.get("session_token")
+        if not session_token:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        conn = db.get_connection()
+        cursor = conn.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
+        cursor.execute("""
+            SELECT t.id, t.trading_name, t.email 
+            FROM tradesperson_sessions s 
+            JOIN tradespeople t ON s.tradesperson_id = t.id 
+            WHERE s.session_token = %s AND s.expires_at > NOW()
+        """, (session_token,))
+        user = cursor.fetchone()
+        cursor.close()
+        conn.close()
+
+        if not user:
+            raise HTTPException(status_code=401, detail="Not authenticated")
+
+        payment_intent = stripe.PaymentIntent.create(
+            amount=2500,
+            currency="gbp",
+            payment_method_types=["card"],
+            metadata={
+                "tradesperson_id": str(user["id"]),
+                "trade_category": trade_category,
+                "type": "featured_ad"
+            }
+        )
+
+        return {
+            "success": True,
+            "clientSecret": payment_intent.client_secret
+        }
+    except Exception as e:
+        print(f"Featured ad purchase error: {e}")
+        raise HTTPException(status_code=500, detail=str(e))
+
 # ====================== GET FEATURED ADS ======================
 @app.get("/api/featured-ads/{trade_category}")
 async def get_featured_ads(trade_category: str):
@@ -416,16 +402,20 @@ async def get_featured_ads(trade_category: str):
         print(f"Featured ads fetch error: {e}")
         return {"success": True, "ads": []}
 
-# ====================== STATIC FILES (MUST BE LAST) ======================
+# ====================== STATIC FILES — MUST BE THE VERY LAST ROUTE ======================
 @app.get("/{full_path:path}")
 async def serve_static(full_path: str):
+    # Allow API routes to pass through
+    if full_path.startswith("api/"):
+        raise HTTPException(status_code=404, detail="Not Found")
+    
     if full_path == "" or full_path == "/" or full_path.endswith('.html'):
         try:
             if full_path == "" or full_path == "/":
                 return FileResponse("frontend/index.html")
             return FileResponse(f"frontend/{full_path}")
         except:
-            pass
+            return FileResponse("frontend/index.html")
     try:
         return FileResponse(f"frontend/{full_path}")
     except:
