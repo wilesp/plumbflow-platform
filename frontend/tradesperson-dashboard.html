@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tradesperson Dashboard - Best Trade</title>
+    <script src="https://js.stripe.com/v3/"></script>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container { max-width: 1200px; margin: 40px auto; padding: 20px; }
+        .header {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .welcome { font-size: 1.8rem; color: #1e3a5f; }
+        .status { padding: 8px 16px; border-radius: 20px; font-weight: 600; }
+        .active { background: #d1fae5; color: #166534; }
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            margin-bottom: 20px;
+            color: #1e3a5f;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 10px;
+        }
+        .card {
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            background: #f8fafc;
+        }
+        .btn {
+            padding: 12px 24px;
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+        .btn-red { background: #ef4444; color: white; }
+        .btn-orange { background: #f59e0b; color: white; }
+        .empty {
+            text-align: center;
+            color: #64748b;
+            padding: 40px 20px;
+            font-style: italic;
+        }
+        .ad-form {
+            background: #f0f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            border: 2px dashed #1e3a5f;
+        }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: 600; }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+        }
+        #card-element {
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            background: white;
+        }
+        #card-errors { color: red; margin-top: 8px; }
+        .success-message {
+            color: #166534;
+            background: #d1fae5;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div>
+                <h1 class="welcome" id="welcomeText">Welcome back</h1>
+                <p id="planText">Loading plan...</p>
+            </div>
+            <button onclick="signOut()" class="btn">Sign Out</button>
+        </div>
+
+        <!-- Pending Leads -->
+        <div class="section">
+            <h2>Pending Leads</h2>
+            <div id="pendingLeads">Loading pending leads...</div>
+        </div>
+
+        <!-- Jobs You're Managing -->
+        <div class="section">
+            <h2>Jobs You're Managing</h2>
+            <div id="managedJobs">Loading managed jobs...</div>
+        </div>
+
+        <!-- Featured Advertising -->
+        <div class="section">
+            <h2>My Featured Advertising</h2>
+            <div id="adSection" class="ad-form">
+                <h3>Purchase Featured Ad</h3>
+                <p>Promote your business on the homepage (£25/year for Basic/Pro).</p>
+                
+                <div class="form-group">
+                    <label>Trade Category</label>
+                    <select id="adTradeCategory">
+                        <option value="plumber">Plumber</option>
+                        <option value="electrician">Electrician</option>
+                        <option value="gas-engineer">Gas Engineer</option>
+                        <option value="tiler">Tiler</option>
+                        <option value="roofer">Roofer</option>
+                        <option value="builder">Builder</option>
+                        <option value="carpenter">Carpenter</option>
+                        <option value="plasterer">Plasterer</option>
+                        <option value="painter-decorator">Painter & Decorator</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Short Description (max 80 chars)</label>
+                    <input type="text" id="adDescription" maxlength="80" 
+                           placeholder="e.g. Reliable local tiler with 15+ years experience">
+                </div>
+
+                <div id="cardSection">
+                    <label>Card Details (Test Mode - UK)</label>
+                    <div id="card-element"></div>
+                    <div id="card-errors" style="color:red; margin-top:8px;"></div>
+                </div>
+
+                <button onclick="purchaseAd()" id="purchaseBtn" class="btn">Purchase Featured Ad (£25/year)</button>
+                <div id="successMessage" class="success-message"></div>
+            </div>
+        </div>
+
+        <!-- Subscription & Ad Management -->
+        <div class="section">
+            <h2>Subscription & Ad Management</h2>
+            <div id="subscriptionSection" class="card">
+                <p id="subscriptionInfo">Loading details...</p>
+                <button onclick="cancelSubscription()" id="cancelTierBtn" class="btn btn-red" style="display:none;">Cancel Recurring Subscription</button>
+                <button onclick="cancelFeaturedAd()" id="cancelAdBtn" class="btn btn-orange" style="display:none;">Cancel Featured Ad</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let stripe, cardElement;
+
+        async function loadDashboard() {
+            try {
+                const meRes = await fetch('/api/tradesperson/me', { credentials: 'include' });
+                const meData = await meRes.json();
+                if (meData.success) {
+                    document.getElementById('welcomeText').textContent = `Welcome back, ${meData.trading_name}`;
+                    document.getElementById('planText').innerHTML = 
+                        `Plan: ${meData.subscription_tier.toUpperCase()} • Status: ${meData.subscription_status || 'Active'}`;
+
+                    const subSection = document.getElementById('subscriptionInfo');
+                    const cancelTierBtn = document.getElementById('cancelTierBtn');
+                    const cancelAdBtn = document.getElementById('cancelAdBtn');
+
+                    if (meData.subscription_tier === 'premium') {
+                        subSection.innerHTML = 'Premium (12-month one-off). No recurring charges.';
+                        cancelTierBtn.style.display = 'none';
+                    } else {
+                        subSection.innerHTML = `Current Plan: ${meData.subscription_tier.toUpperCase()} (recurring)`;
+                        cancelTierBtn.style.display = 'inline-block';
+                    }
+
+                    // Show cancel ad button if they have purchased one (for now we show it always after purchase - can be improved later)
+                    cancelAdBtn.style.display = 'inline-block';
+
+                    if (meData.subscription_tier === 'premium') {
+                        document.getElementById('cardSection').style.display = 'none';
+                        document.getElementById('purchaseBtn').textContent = 'Activate Free Featured Ad (1 Year)';
+                    }
+                }
+
+                await loadPendingLeads();
+                await loadManagedJobs();
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        // Load pending and managed (same as before)
+        async function loadPendingLeads() {
+            const res = await fetch('/api/tradesperson/pending-leads', { credentials: 'include' });
+            const data = await res.json();
+            const div = document.getElementById('pendingLeads');
+            div.innerHTML = (data.leads && data.leads.length) 
+                ? data.leads.map(lead => `
+                    <div class="card">
+                        <h3>${lead.trade_category} — ${lead.job_type}</h3>
+                        <p>${lead.description}</p>
+                        <button onclick="acceptLead('${lead.id}')" class="btn">Accept Lead</button>
+                    </div>
+                `).join('') 
+                : '<div class="empty">No pending leads yet.</div>';
+        }
+
+        async function loadManagedJobs() {
+            const res = await fetch('/api/tradesperson/managed-jobs', { credentials: 'include' });
+            const data = await res.json();
+            const div = document.getElementById('managedJobs');
+            div.innerHTML = (data.jobs && data.jobs.length) 
+                ? data.jobs.map(job => `
+                    <div class="card">
+                        <h3>${job.trade_category} — ${job.job_type}</h3>
+                        <p>${job.description}</p>
+                        <div style="margin-top:10px;color:#166534;">
+                            Customer: ${job.customer_name || 'N/A'}<br>
+                            Phone: ${job.customer_phone || 'N/A'}
+                        </div>
+                    </div>
+                `).join('') 
+                : '<div class="empty">No managed jobs yet.</div>';
+        }
+
+        async function acceptLead(jobId) {
+            if (!confirm(`Accept this lead?`)) return;
+            try {
+                const res = await fetch('/api/tradesperson/accept-lead', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({job_id: jobId}),
+                    credentials: 'include'
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert(result.message || 'Lead accepted!');
+                    loadDashboard();
+                }
+            } catch (e) {
+                alert('Failed to accept lead');
+            }
+        }
+
+        async function purchaseAd() {
+            const btn = document.getElementById('purchaseBtn');
+            const successMsg = document.getElementById('successMessage');
+            const errorsDiv = document.getElementById('card-errors');
+            btn.disabled = true;
+            btn.textContent = 'Processing...';
+            errorsDiv.textContent = '';
+
+            try {
+                const tradeCategory = document.getElementById('adTradeCategory').value;
+                const description = document.getElementById('adDescription').value.trim() || 'Professional local trade services';
+
+                const res = await fetch('/api/featured-ad/purchase', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        trade_category: tradeCategory,
+                        short_description: description
+                    }),
+                    credentials: 'include'
+                });
+
+                const result = await res.json();
+
+                if (result.success && result.clientSecret) {
+                    const { error } = await stripe.confirmCardPayment(result.clientSecret, {
+                        payment_method: { card: cardElement }
+                    });
+
+                    if (error) {
+                        errorsDiv.textContent = error.message;
+                        btn.disabled = false;
+                        btn.textContent = 'Try Again';
+                        return;
+                    }
+
+                    // Confirm on backend
+                    await fetch('/api/featured-ad/confirm', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            payment_intent_id: result.clientSecret.split('_secret_')[0],
+                            trade_category: tradeCategory,
+                            short_description: description
+                        }),
+                        credentials: 'include'
+                    });
+
+                    successMsg.style.display = 'block';
+                    successMsg.innerHTML = `✅ Featured Ad for <strong>${tradeCategory}</strong> activated successfully!<br>It will appear on the homepage shortly.`;
+                    btn.style.display = 'none';
+                } else {
+                    alert('Purchase failed');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('Error: ' + err.message);
+            } finally {
+                if (btn.style.display !== 'none') {
+                    btn.disabled = false;
+                    btn.textContent = 'Purchase Featured Ad (£25/year)';
+                }
+            }
+        }
+
+        async function cancelSubscription() {
+            if (!confirm("Cancel your recurring subscription? It will remain active until the end of the current billing period.")) return;
+
+            try {
+                const res = await fetch('/api/subscription/cancel', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert(result.message);
+                    loadDashboard();
+                } else {
+                    alert(result.message || 'Failed to cancel subscription');
+                }
+            } catch (e) {
+                alert('Error cancelling subscription');
+            }
+        }
+
+        async function cancelFeaturedAd() {
+            if (!confirm("Cancel your featured ad? It will be removed from the homepage immediately.")) return;
+
+            try {
+                const res = await fetch('/api/featured-ad/cancel', {
+                    method: 'POST',
+                    credentials: 'include'
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert(result.message);
+                    loadDashboard();
+                } else {
+                    alert(result.message || 'Failed to cancel featured ad');
+                }
+            } catch (e) {
+                alert('Error cancelling featured ad');
+            }
+        }
+
+        function signOut() {
+            document.cookie = "session_token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+            window.location.href = '/';
+        }
+
+        // Initialize Stripe
+        window.onload = async () => {
+            await loadDashboard();
+
+            stripe = Stripe('pk_test_51SxT8VIrb6iFFzVY9ANnw0qFooYs4gb12Tu5qPJvmzZgrceYqdmS3ldUH2QZFrN8MoHzsAxtin5uVfQlQARNPc5G00xuqSAWfi');
+
+            const elements = stripe.elements();
+            cardElement = elements.create('card', {
+                style: { base: { fontSize: '16px' } },
+                hidePostalCode: true
+            });
+            cardElement.mount('#card-element');
+        };
+    </script>
+</body>
+</html>
