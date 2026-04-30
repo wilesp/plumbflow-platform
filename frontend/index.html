@@ -13,8 +13,8 @@
             line-height: 1.6;
             color: #333;
         }
-
-        /* Navigation - kept exactly as your backup */
+        
+        /* Navigation */
         .navbar {
             background: white;
             box-shadow: 0 2px 8px rgba(0,0,0,0.08);
@@ -51,7 +51,7 @@
             align-items: center;
             justify-content: center;
         }
-
+        
         .nav-links {
             display: flex;
             gap: 5px;
@@ -81,12 +81,15 @@
             font-weight: 600;
         }
 
-        /* Hamburger & Mobile Menu */
+        /* Hamburger */
         .hamburger {
             display: none;
             flex-direction: column;
             cursor: pointer;
             gap: 5px;
+            padding: 5px;
+            background: none;
+            border: none;
         }
 
         .hamburger span {
@@ -97,6 +100,7 @@
             border-radius: 3px;
         }
 
+        /* Mobile */
         @media (max-width: 768px) {
             .hamburger { display: flex; }
             .nav-links {
@@ -113,7 +117,7 @@
             .nav-links.open { display: flex; }
         }
 
-        /* Hero */
+        /* Hero, Trust Bar, Services - kept from your backup */
         .hero {
             background: #1e3a5f;
             color: white;
@@ -132,20 +136,18 @@
             margin-bottom: 40px;
             opacity: 0.95;
         }
-
+        
         .btn {
             padding: 14px 32px;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
             font-size: 1.1rem;
-            margin: 10px;
         }
         
         .btn-primary { background: #ef4444; color: white; }
         .btn-outline { border: 2px solid white; color: white; }
 
-        /* Trust Bar */
         .trust-bar {
             background: white;
             padding: 30px;
@@ -161,7 +163,6 @@
             text-align: center;
         }
 
-        /* Services */
         .services-section {
             padding: 80px 30px;
             background: #f9fafb;
@@ -208,7 +209,7 @@
         }
         
         .service-content {
-            padding: 20px;
+            padding: 15px 20px;
             text-align: center;
         }
         
@@ -218,10 +219,10 @@
             color: #1e3a5f;
         }
 
-        /* Polished Search Bar */
+        /* Polished Search Bar - added here */
         .search-container {
             max-width: 720px;
-            margin: 60px auto;
+            margin: 60px auto 80px;
             padding: 0 20px;
             position: relative;
         }
@@ -250,48 +251,25 @@
             font-size: 1.6rem;
             color: #64748b;
         }
-
-        /* How It Works, Testimonials, CTA, Footer styles kept from your file */
-        .how-it-works, .testimonials-section, .cta-section, .footer {
-            padding: 80px 30px;
-        }
-        
-        .steps-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 40px;
-        }
-        
-        .step-card {
-            text-align: center;
-            padding: 30px;
-        }
-        
-        .step-number {
-            width: 60px;
-            height: 60px;
-            background: #1e3a5f;
-            color: white;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.8rem;
-            margin: 0 auto 20px;
-        }
     </style>
 </head>
 <body>
 
-    <!-- Navigation (kept your dropdown + mobile menu) -->
+    <!-- Navigation -->
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="logo">
-                <span class="logo-tick">✓</span>
+                <span class="logo-tick">
+                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="white"/>
+                    </svg>
+                </span>
                 BestTrade
             </a>
-            <button class="hamburger" id="hamburger">
-                <span></span><span></span><span></span>
+            <button class="hamburger" id="hamburger" aria-label="Menu">
+                <span></span>
+                <span></span>
+                <span></span>
             </button>
             <div class="nav-links" id="navLinks">
                 <a href="/" class="nav-link">Home</a>
@@ -301,7 +279,7 @@
             </div>
         </div>
     </nav>
-
+    
     <!-- Hero -->
     <section class="hero">
         <h1>UK's #1 Trade Marketplace</h1>
@@ -311,7 +289,7 @@
             <a href="/pricing.html" class="btn btn-outline">Join as Tradesperson</a>
         </div>
     </section>
-
+    
     <!-- Trust Bar -->
     <div class="trust-bar">
         <div class="trust-container">
@@ -325,7 +303,7 @@
             </div>
             <div class="trust-item">
                 <span class="trustpilot-stars">★★★★★</span>
-                <div class="trust-number" style="font-size:1.8rem;">4.8</div>
+                <div class="trust-number" style="font-size: 1.8rem;">4.8</div>
                 <div class="trust-label">Trustpilot Rating</div>
             </div>
             <div class="trust-item">
@@ -334,14 +312,13 @@
             </div>
         </div>
     </div>
-
-    <!-- Services + Search Bar -->
+    
+    <!-- Services -->
     <section class="services-section">
         <div class="section-header">
             <h2>All Trades in One Place</h2>
             <p>Click on a trade to see featured professionals who have paid to advertise</p>
         </div>
-        
         <div class="services-grid" id="servicesGrid">
             <!-- Populated by JavaScript -->
         </div>
@@ -351,10 +328,10 @@
             <div style="position: relative;">
                 <span class="search-icon">🔍</span>
                 <input type="text" id="search-input" class="search-bar" 
-                       placeholder="Can't find what you're looking for? Search for any trade...">
+                       placeholder="Can't find what you're looking for? Search for any trade service...">
             </div>
-            <p style="text-align:center; margin-top:12px; color:#64748b;">
-                e.g. Gas Engineer, Landscaper, Window Cleaner, Locksmith, etc.
+            <p style="text-align: center; margin-top: 12px; color: #64748b;">
+                e.g. Gas Engineer, Landscaper, Window Fitter, Cleaner, Locksmith...
             </p>
         </div>
     </section>
@@ -384,7 +361,7 @@
         </div>
     </section>
 
-    <!-- Testimonials -->
+    <!-- What People Say About Us -->
     <section class="testimonials-section">
         <div class="section-header">
             <h2>What People Say About Us</h2>
@@ -392,13 +369,16 @@
         </div>
         <div class="carousel-container">
             <div class="carousel-track" id="carouselTrack">
-                <!-- Your testimonials here -->
                 <div class="testimonial-card">
                     <div class="stars">★★★★★</div>
-                    <p>"Found a fantastic plumber within hours. Fixed my emergency leak the same day."</p>
+                    <p>"Found a fantastic plumber within hours. Fixed my emergency leak the same day. Couldn't be happier!"</p>
                     <strong>Sarah Johnson, Clapham</strong>
                 </div>
-                <!-- Add more as needed -->
+                <div class="testimonial-card">
+                    <div class="stars">★★★★★</div>
+                    <p>"As a roofer, I've got more leads in the last month than the whole previous year."</p>
+                    <strong>Mark Thompson, Roofer, Watford</strong>
+                </div>
             </div>
         </div>
     </section>
@@ -406,52 +386,4 @@
     <script>
         // Hamburger Menu
         const hamburger = document.getElementById('hamburger');
-        const navLinks = document.getElementById('navLinks');
-        hamburger.addEventListener('click', () => {
-            navLinks.classList.toggle('open');
-            hamburger.classList.toggle('open');
-        });
-
-        // Trade Cards
-        const trades = [
-            { icon: "🔧", name: "Plumbers", category: "plumber" },
-            { icon: "⚡", name: "Electricians", category: "electrician" },
-            { icon: "🏗️", name: "Builders", category: "builder" },
-            { icon: "🧱", name: "Tilers", category: "tiler" },
-            { icon: "🏠", name: "Roofers", category: "roofer" },
-            { icon: "🔨", name: "Carpenters", category: "carpenter" },
-            { icon: "🎨", name: "Painters", category: "painter" },
-            { icon: "🔥", name: "Heating Engineers", category: "heating" }
-        ];
-
-        async function renderServices() {
-            const grid = document.getElementById('servicesGrid');
-            grid.innerHTML = '';
-
-            for (let trade of trades) {
-                const card = document.createElement('div');
-                card.className = 'service-card';
-                card.innerHTML = `
-                    <div class="service-icon">${trade.icon}</div>
-                    <div class="service-content">
-                        <h3>${trade.name}</h3>
-                        <p>Find reliable local professionals</p>
-                    </div>
-                `;
-                card.onclick = () => window.location.href = `/trade-listing.html?category=${trade.category}`;
-                grid.appendChild(card);
-            }
-        }
-
-        // Simple search bar action
-        document.getElementById('search-input').addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') {
-                const query = e.target.value.trim();
-                if (query) alert(`Searching for "${query}"\n\n(This will be fully functional soon)`);
-            }
-        });
-
-        window.onload = renderServices;
-    </script>
-</body>
-</html>
+        const navLinks = document.getElementById('nav
