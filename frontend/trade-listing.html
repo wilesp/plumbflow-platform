@@ -3,73 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured Tradespeople - Best Trade</title>
-    <script src="https://js.stripe.com/v3/"></script>
+    <title>Featured - Best Trade</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            background: #f8fafc;
             color: #333;
             min-height: 100vh;
         }
         .container {
             max-width: 1200px;
             margin: 40px auto;
-            padding: 20px;
-        }
-        .header {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            text-align: center;
-            margin-bottom: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-        .header h1 {
-            color: #1e3a5f;
-            margin-bottom: 8px;
-        }
-        .section {
-            background: white;
-            border-radius: 12px;
-            padding: 30px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-        .ad-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
-        }
-        .ad-card {
-            background: #f8fafc;
-            border-radius: 12px;
-            padding: 24px;
-            border: 1px solid #e2e8f0;
-            transition: transform 0.2s;
-        }
-        .ad-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
-        }
-        .ad-card h3 {
-            color: #1e3a5f;
-            margin-bottom: 8px;
-        }
-        .ad-card p {
-            margin-bottom: 12px;
-            color: #475569;
-        }
-        .postcode {
-            font-weight: 600;
-            color: #1e3a5f;
-        }
-        .no-ads {
-            text-align: center;
-            padding: 60px 20px;
-            color: #64748b;
-            font-size: 1.1rem;
+            padding: 0 20px;
         }
         .back-btn {
             display: inline-block;
@@ -79,10 +25,51 @@
             color: white;
             text-decoration: none;
             border-radius: 8px;
-            font-weight: 500;
         }
-        .back-btn:hover {
-            background: #2c5282;
+        .header {
+            background: white;
+            padding: 40px 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin-bottom: 40px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        .header h1 {
+            color: #1e3a5f;
+            font-size: 2.8rem;
+        }
+        .ad-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+            gap: 25px;
+        }
+        .ad-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.2s;
+        }
+        .ad-card:hover {
+            transform: translateY(-5px);
+        }
+        .ad-card h3 {
+            color: #1e3a5f;
+            margin-bottom: 10px;
+        }
+        .ad-card p {
+            color: #475569;
+            margin-bottom: 15px;
+        }
+        .postcode {
+            font-weight: 600;
+            color: #1e3a5f;
+        }
+        .no-ads {
+            text-align: center;
+            padding: 80px 20px;
+            color: #64748b;
+            font-size: 1.2rem;
         }
     </style>
 </head>
@@ -92,22 +79,20 @@
 
         <div class="header">
             <h1 id="page-title">Featured Tradespeople</h1>
-            <p id="subtitle">Trusted local professionals who have paid to be featured</p>
+            <p id="subtitle">Trusted companies who have paid to be featured</p>
         </div>
 
-        <div class="section">
-            <div class="ad-grid" id="ads-container">
-                <!-- Ads will be loaded here by JavaScript -->
-            </div>
+        <div class="ad-grid" id="ad-grid">
+            <!-- Ads will be loaded here -->
         </div>
     </div>
 
     <script>
-        // Get category from URL (e.g. ?category=plumber)
+        // Get category from URL
         const urlParams = new URLSearchParams(window.location.search);
-        let category = urlParams.get('category') || 'plumber';
+        const category = urlParams.get('category') || 'plumber';
 
-        // Nice display names
+        // Nice titles
         const titleMap = {
             'plumber': 'Featured Plumbers',
             'electrician': 'Featured Electricians',
@@ -121,12 +106,12 @@
 
         document.getElementById('page-title').textContent = titleMap[category] || 'Featured Tradespeople';
 
-        async function loadFeaturedAds() {
+        async function loadAds() {
             try {
                 const res = await fetch(`/api/featured-ads/${category}`);
                 const data = await res.json();
 
-                const container = document.getElementById('ads-container');
+                const container = document.getElementById('ad-grid');
                 container.innerHTML = '';
 
                 if (!data.ads || data.ads.length === 0) {
@@ -143,24 +128,24 @@
                     const card = document.createElement('div');
                     card.className = 'ad-card';
                     card.innerHTML = `
-                        <h3>${ad.company_name || 'Professional Trader'}</h3>
-                        <p>${ad.short_description || 'Reliable and trusted local service.'}</p>
-                        ${ad.postcode_area ? `<p class="postcode">📍 ${ad.postcode_area}</p>` : ''}
+                        <h3>${ad.company_name || 'Professional Trade Company'}</h3>
+                        <p>${ad.short_description || 'Reliable and trusted local service provider.'}</p>
+                        ${ad.postcode_area ? `<p class="postcode">📍 Serving ${ad.postcode_area}</p>` : ''}
                     `;
                     container.appendChild(card);
                 });
+
             } catch (err) {
                 console.error(err);
-                document.getElementById('ads-container').innerHTML = `
+                document.getElementById('ad-grid').innerHTML = `
                     <div class="no-ads">
-                        <p>Unable to load featured ads at the moment. Please try again later.</p>
+                        <p>Sorry, we couldn't load the featured ads at the moment.</p>
                     </div>
                 `;
             }
         }
 
-        // Load ads when page opens
-        window.onload = loadFeaturedAds;
+        window.onload = loadAds;
     </script>
 </body>
 </html>
