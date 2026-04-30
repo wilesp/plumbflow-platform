@@ -3,101 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Featured [Trade] - Best Trade</title>
+    <title>Featured Tradespeople - Best Trade</title>
+    <script src="https://js.stripe.com/v3/"></script>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f8fafc;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
             color: #333;
+            min-height: 100vh;
         }
-        .container { max-width: 1200px; margin: 40px auto; padding: 20px; }
+        .container {
+            max-width: 1200px;
+            margin: 40px auto;
+            padding: 20px;
+        }
         .header {
-            background: #1e3a5f;
-            color: white;
-            padding: 40px 30px;
-            text-align: center;
-            border-radius: 12px;
-            margin-bottom: 40px;
-        }
-        .ad-card {
             background: white;
             border-radius: 12px;
-            padding: 25px;
-            margin-bottom: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .ad-name {
-            font-size: 1.4rem;
-            font-weight: 700;
+        .header h1 {
             color: #1e3a5f;
             margin-bottom: 8px;
         }
-        .ad-desc {
-            color: #475569;
-            line-height: 1.6;
-            margin-bottom: 12px;
+        .section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
         }
-        .ad-postcode {
+        .ad-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 20px;
+        }
+        .ad-card {
+            background: #f8fafc;
+            border-radius: 12px;
+            padding: 24px;
+            border: 1px solid #e2e8f0;
+            transition: transform 0.2s;
+        }
+        .ad-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .ad-card h3 {
+            color: #1e3a5f;
+            margin-bottom: 8px;
+        }
+        .ad-card p {
+            margin-bottom: 12px;
+            color: #475569;
+        }
+        .postcode {
+            font-weight: 600;
+            color: #1e3a5f;
+        }
+        .no-ads {
+            text-align: center;
+            padding: 60px 20px;
             color: #64748b;
-            font-size: 0.95rem;
+            font-size: 1.1rem;
+        }
+        .back-btn {
+            display: inline-block;
+            margin-bottom: 20px;
+            padding: 10px 20px;
+            background: #1e3a5f;
+            color: white;
+            text-decoration: none;
+            border-radius: 8px;
+            font-weight: 500;
+        }
+        .back-btn:hover {
+            background: #2c5282;
         }
     </style>
 </head>
 <body>
     <div class="container">
+        <a href="/" class="back-btn">← Back to Homepage</a>
+
         <div class="header">
-            <h1 id="pageTitle">Featured Tradespeople</h1>
-            <p id="pageSubtitle">Professionals who have paid to be featured</p>
+            <h1 id="page-title">Featured Tradespeople</h1>
+            <p id="subtitle">Trusted local professionals who have paid to be featured</p>
         </div>
 
-        <div id="adsContainer">
-            Loading featured professionals...
+        <div class="section">
+            <div class="ad-grid" id="ads-container">
+                <!-- Ads will be loaded here by JavaScript -->
+            </div>
         </div>
     </div>
 
     <script>
-        // Get category from URL
+        // Get category from URL (e.g. ?category=plumber)
         const urlParams = new URLSearchParams(window.location.search);
-        const category = urlParams.get('category') || 'tiler';
+        let category = urlParams.get('category') || 'plumber';
 
+        // Nice display names
         const titleMap = {
-            "plumber": "Featured Plumbers",
-            "electrician": "Featured Electricians",
-            "gas-engineer": "Featured Gas Engineers",
-            "tiler": "Featured Tilers",
-            "roofer": "Featured Roofers",
-            "builder": "Featured Builders",
-            "carpenter": "Featured Carpenters",
-            "plasterer": "Featured Plasterers",
-            "painter-decorator": "Featured Painters & Decorators"
+            'plumber': 'Featured Plumbers',
+            'electrician': 'Featured Electricians',
+            'builder': 'Featured Builders',
+            'tiler': 'Featured Tilers',
+            'roofer': 'Featured Roofers',
+            'carpenter': 'Featured Carpenters',
+            'painter': 'Featured Painters & Decorators',
+            'heating': 'Featured Heating Engineers'
         };
 
-        document.getElementById('pageTitle').textContent = titleMap[category] || "Featured Tradespeople";
+        document.getElementById('page-title').textContent = titleMap[category] || 'Featured Tradespeople';
 
-        async function loadAds() {
+        async function loadFeaturedAds() {
             try {
                 const res = await fetch(`/api/featured-ads/${category}`);
                 const data = await res.json();
 
-                const container = document.getElementById('adsContainer');
-                if (data.ads && data.ads.length > 0) {
-                    container.innerHTML = data.ads.map(ad => `
-                        <div class="ad-card">
-                            <div class="ad-name">${ad.company_name}</div>
-                            <div class="ad-desc">${ad.short_description}</div>
-                            <div class="ad-postcode">📍 ${ad.postcode_area || 'UK'}</div>
+                const container = document.getElementById('ads-container');
+                container.innerHTML = '';
+
+                if (!data.ads || data.ads.length === 0) {
+                    container.innerHTML = `
+                        <div class="no-ads">
+                            <h2>No featured ads yet in this category</h2>
+                            <p>Be the first to get featured! <a href="/tradesperson-dashboard.html">Go to your dashboard</a></p>
                         </div>
-                    `).join('');
-                } else {
-                    container.innerHTML = `<p style="text-align:center; color:#64748b; padding:60px;">No featured ${category}s at the moment.<br>Be the first to advertise!</p>`;
+                    `;
+                    return;
                 }
-            } catch (e) {
-                document.getElementById('adsContainer').innerHTML = `<p style="color:red;">Error loading ads. Please try again later.</p>`;
+
+                data.ads.forEach(ad => {
+                    const card = document.createElement('div');
+                    card.className = 'ad-card';
+                    card.innerHTML = `
+                        <h3>${ad.company_name || 'Professional Trader'}</h3>
+                        <p>${ad.short_description || 'Reliable and trusted local service.'}</p>
+                        ${ad.postcode_area ? `<p class="postcode">📍 ${ad.postcode_area}</p>` : ''}
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (err) {
+                console.error(err);
+                document.getElementById('ads-container').innerHTML = `
+                    <div class="no-ads">
+                        <p>Unable to load featured ads at the moment. Please try again later.</p>
+                    </div>
+                `;
             }
         }
 
-        window.onload = loadAds;
+        // Load ads when page opens
+        window.onload = loadFeaturedAds;
     </script>
 </body>
 </html>
