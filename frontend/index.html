@@ -100,7 +100,6 @@
             border-radius: 3px;
         }
 
-        /* Mobile */
         @media (max-width: 768px) {
             .hamburger { display: flex; }
             .nav-links {
@@ -117,7 +116,7 @@
             .nav-links.open { display: flex; }
         }
 
-        /* Hero, Trust Bar, Services - kept from your backup */
+        /* Hero */
         .hero {
             background: #1e3a5f;
             color: white;
@@ -148,6 +147,7 @@
         .btn-primary { background: #ef4444; color: white; }
         .btn-outline { border: 2px solid white; color: white; }
 
+        /* Trust Bar */
         .trust-bar {
             background: white;
             padding: 30px;
@@ -163,6 +163,7 @@
             text-align: center;
         }
 
+        /* Services */
         .services-section {
             padding: 80px 30px;
             background: #f9fafb;
@@ -217,39 +218,6 @@
             font-size: 1.5rem;
             margin-bottom: 12px;
             color: #1e3a5f;
-        }
-
-        /* Polished Search Bar - added here */
-        .search-container {
-            max-width: 720px;
-            margin: 60px auto 80px;
-            padding: 0 20px;
-            position: relative;
-        }
-        
-        .search-bar {
-            width: 100%;
-            padding: 18px 24px 18px 60px;
-            font-size: 1.1rem;
-            border: 2px solid #e2e8f0;
-            border-radius: 50px;
-            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
-            transition: all 0.3s;
-        }
-        
-        .search-bar:focus {
-            outline: none;
-            border-color: #1e3a5f;
-            box-shadow: 0 8px 25px rgba(30, 58, 95, 0.15);
-        }
-        
-        .search-icon {
-            position: absolute;
-            left: 28px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 1.6rem;
-            color: #64748b;
         }
     </style>
 </head>
@@ -322,68 +290,51 @@
         <div class="services-grid" id="servicesGrid">
             <!-- Populated by JavaScript -->
         </div>
-
-        <!-- Polished Search Bar -->
-        <div class="search-container">
-            <div style="position: relative;">
-                <span class="search-icon">🔍</span>
-                <input type="text" id="search-input" class="search-bar" 
-                       placeholder="Can't find what you're looking for? Search for any trade service...">
-            </div>
-            <p style="text-align: center; margin-top: 12px; color: #64748b;">
-                e.g. Gas Engineer, Landscaper, Window Fitter, Cleaner, Locksmith...
-            </p>
-        </div>
-    </section>
-
-    <!-- How It Works -->
-    <section class="how-it-works">
-        <div class="section-header">
-            <h2>How It Works</h2>
-            <p>Get your job done in three simple steps</p>
-        </div>
-        <div class="steps-grid">
-            <div class="step-card">
-                <div class="step-number">1</div>
-                <h3>Post Your Job</h3>
-                <p>Tell us what you need done. It's free and takes less than 2 minutes.</p>
-            </div>
-            <div class="step-card">
-                <div class="step-number">2</div>
-                <h3>Get Quotes</h3>
-                <p>Receive quotes from local verified tradespeople ready to help.</p>
-            </div>
-            <div class="step-card">
-                <div class="step-number">3</div>
-                <h3>Hire & Review</h3>
-                <p>Choose your tradesperson and leave a review when the job's done.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- What People Say About Us -->
-    <section class="testimonials-section">
-        <div class="section-header">
-            <h2>What People Say About Us</h2>
-            <p>Real reviews from homeowners and tradespeople</p>
-        </div>
-        <div class="carousel-container">
-            <div class="carousel-track" id="carouselTrack">
-                <div class="testimonial-card">
-                    <div class="stars">★★★★★</div>
-                    <p>"Found a fantastic plumber within hours. Fixed my emergency leak the same day. Couldn't be happier!"</p>
-                    <strong>Sarah Johnson, Clapham</strong>
-                </div>
-                <div class="testimonial-card">
-                    <div class="stars">★★★★★</div>
-                    <p>"As a roofer, I've got more leads in the last month than the whole previous year."</p>
-                    <strong>Mark Thompson, Roofer, Watford</strong>
-                </div>
-            </div>
-        </div>
     </section>
 
     <script>
         // Hamburger Menu
         const hamburger = document.getElementById('hamburger');
-        const navLinks = document.getElementById('nav
+        const navLinks = document.getElementById('navLinks');
+        hamburger.addEventListener('click', () => {
+            navLinks.classList.toggle('open');
+            hamburger.classList.toggle('open');
+        });
+
+        // Trade Cards
+        const trades = [
+            { icon: "🔧", name: "Plumbers", category: "plumber" },
+            { icon: "⚡", name: "Electricians", category: "electrician" },
+            { icon: "🏗️", name: "Builders", category: "builder" },
+            { icon: "🧱", name: "Tilers", category: "tiler" },
+            { icon: "🏠", name: "Roofers", category: "roofer" },
+            { icon: "🔨", name: "Carpenters", category: "carpenter" },
+            { icon: "🎨", name: "Painters", category: "painter" },
+            { icon: "🔥", name: "Heating Engineers", category: "heating" }
+        ];
+
+        function renderServices() {
+            const grid = document.getElementById('servicesGrid');
+            grid.innerHTML = '';
+
+            trades.forEach(trade => {
+                const card = document.createElement('div');
+                card.className = 'service-card';
+                card.innerHTML = `
+                    <div class="service-icon">${trade.icon}</div>
+                    <div class="service-content">
+                        <h3>${trade.name}</h3>
+                        <p>Find reliable local professionals</p>
+                    </div>
+                `;
+                card.onclick = () => {
+                    window.location.href = `/trade-listing.html?category=${trade.category}`;
+                };
+                grid.appendChild(card);
+            });
+        }
+
+        window.onload = renderServices;
+    </script>
+</body>
+</html>
