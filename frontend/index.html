@@ -81,15 +81,11 @@
             font-weight: 600;
         }
 
-        /* Hamburger */
         .hamburger {
             display: none;
             flex-direction: column;
             cursor: pointer;
             gap: 5px;
-            padding: 5px;
-            background: none;
-            border: none;
         }
 
         .hamburger span {
@@ -116,32 +112,33 @@
             .nav-links.open { display: flex; }
         }
 
-        /* Hero */
+        /* Hero - restored to full size */
         .hero {
             background: #1e3a5f;
             color: white;
-            padding: 110px 30px;
+            padding: 140px 30px 100px;
             text-align: center;
         }
         
         .hero h1 {
-            font-size: 3.5rem;
+            font-size: 3.8rem;
             margin-bottom: 20px;
             font-weight: 800;
         }
         
         .hero p {
-            font-size: 1.35rem;
+            font-size: 1.4rem;
             margin-bottom: 40px;
             opacity: 0.95;
         }
-        
+
         .btn {
-            padding: 14px 32px;
+            padding: 16px 36px;
             border-radius: 8px;
             text-decoration: none;
             font-weight: 600;
-            font-size: 1.1rem;
+            font-size: 1.15rem;
+            margin: 10px;
         }
         
         .btn-primary { background: #ef4444; color: white; }
@@ -210,7 +207,7 @@
         }
         
         .service-content {
-            padding: 15px 20px;
+            padding: 20px;
             text-align: center;
         }
         
@@ -227,14 +224,10 @@
     <nav class="navbar">
         <div class="nav-container">
             <a href="/" class="logo">
-                <span class="logo-tick">
-                    <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z" fill="white"/>
-                    </svg>
-                </span>
+                <span class="logo-tick">✓</span>
                 BestTrade
             </a>
-            <button class="hamburger" id="hamburger" aria-label="Menu">
+            <button class="hamburger" id="hamburger">
                 <span></span>
                 <span></span>
                 <span></span>
@@ -292,6 +285,31 @@
         </div>
     </section>
 
+    <!-- How It Works -->
+    <section class="how-it-works" style="padding: 80px 30px; background: white;">
+        <div class="section-header">
+            <h2>How It Works</h2>
+            <p>Get your job done in three simple steps</p>
+        </div>
+        <div class="steps-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 40px; max-width: 1200px; margin: 0 auto;">
+            <div class="step-card" style="text-align: center; padding: 30px;">
+                <div class="step-number" style="width: 60px; height: 60px; background: #1e3a5f; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 20px;">1</div>
+                <h3>Post Your Job</h3>
+                <p>Tell us what you need done. It's free and takes less than 2 minutes.</p>
+            </div>
+            <div class="step-card" style="text-align: center; padding: 30px;">
+                <div class="step-number" style="width: 60px; height: 60px; background: #1e3a5f; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 20px;">2</div>
+                <h3>Get Quotes</h3>
+                <p>Receive quotes from local verified tradespeople ready to help.</p>
+            </div>
+            <div class="step-card" style="text-align: center; padding: 30px;">
+                <div class="step-number" style="width: 60px; height: 60px; background: #1e3a5f; color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8rem; margin: 0 auto 20px;">3</div>
+                <h3>Hire & Review</h3>
+                <p>Choose your tradesperson and leave a review when the job's done.</p>
+            </div>
+        </div>
+    </section>
+
     <script>
         // Hamburger Menu
         const hamburger = document.getElementById('hamburger');
@@ -301,7 +319,7 @@
             hamburger.classList.toggle('open');
         });
 
-        // Trade Cards
+        // 8 Trade Tiles
         const trades = [
             { icon: "🔧", name: "Plumbers", category: "plumber" },
             { icon: "⚡", name: "Electricians", category: "electrician" },
@@ -327,9 +345,7 @@
                         <p>Find reliable local professionals</p>
                     </div>
                 `;
-                card.onclick = () => {
-                    window.location.href = `/trade-listing.html?category=${trade.category}`;
-                };
+                card.onclick = () => window.location.href = `/trade-listing.html?category=${trade.category}`;
                 grid.appendChild(card);
             });
         }
