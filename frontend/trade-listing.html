@@ -78,10 +78,10 @@
             text-align: center;
             padding: 100px 20px;
             color: #64748b;
-        }
-        .no-ads a {
-            color: #1e3a5f;
-            text-decoration: underline;
+            font-size: 1.2rem;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.08);
         }
     </style>
 </head>
@@ -95,7 +95,7 @@
         </div>
 
         <div class="ad-grid" id="ad-grid">
-            <!-- Ads loaded here by JavaScript -->
+            <!-- Ads will be loaded here -->
         </div>
     </div>
 
@@ -128,7 +128,7 @@
                     container.innerHTML = `
                         <div class="no-ads">
                             <h2>No featured ads yet in this category</h2>
-                            <p>Be the first to get featured! <a href="/tradesperson-dashboard.html">Go to your dashboard</a></p>
+                            <p>Check back later or browse other trades.</p>
                         </div>
                     `;
                     return;
@@ -140,7 +140,7 @@
                     card.innerHTML = `
                         <h3>${ad.company_name || 'Professional Trade Company'}</h3>
                         <p>${ad.short_description || 'Reliable and trusted local service provider.'}</p>
-                        ${ad.postcode_area ? `<p class="postcode">📍 Serving ${ad.postcode_area} and surrounding areas</p>` : ''}
+                        ${ad.postcode_area ? `<p class="postcode">📍 Serving ${ad.postcode_area}</p>` : ''}
                     `;
                     container.appendChild(card);
                 });
